@@ -1,0 +1,5 @@
+/raw/
+/experiments/
+.worktrees/
+__pycache__/
+*.pyc

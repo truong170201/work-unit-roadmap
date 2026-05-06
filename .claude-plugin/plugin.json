@@ -1,0 +1,12 @@
+{
+  "name": "wur",
+  "description": "AI Agent workflow skills for roadmap-driven development. Atomic Work Units, verification evidence, one verified commit per completed unit.",
+  "version": "2.0.0",
+  "author": {
+    "name": "truong170201"
+  },
+  "homepage": "https://github.com/truong170201/work-unit-roadmap",
+  "repository": "https://github.com/truong170201/work-unit-roadmap",
+  "license": "MIT",
+  "keywords": ["workflow", "roadmap", "work-unit", "git", "agent", "skills", "worktree"]
+}

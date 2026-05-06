@@ -1,0 +1,24 @@
+{
+  "name": "work-unit-roadmap",
+  "id": "work-unit-roadmap",
+  "owner": {
+    "name": "truong170201"
+  },
+  "metadata": {
+    "description": "AI Agent workflow skills for roadmap-driven development.",
+    "version": "2.0.0"
+  },
+  "plugins": [
+    {
+      "name": "wur",
+      "source": "./",
+      "description": "Atomic Work Units, verification evidence, one verified commit per completed unit.",
+      "version": "2.0.0",
+      "author": {
+        "name": "truong170201"
+      },
+      "keywords": ["workflow", "roadmap", "work-unit", "git", "agent", "skills"],
+      "category": "workflow"
+    }
+  ]
+}

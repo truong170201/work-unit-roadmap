@@ -1,0 +1,51 @@
+version: 1
+
+node_types:
+  phase:
+    maps_from:
+      type: phase
+  fix-round:
+    maps_from:
+      type: fix-round
+  research:
+    maps_from:
+      type: research
+  decision:
+    maps_from:
+      type: decision
+  note:
+    maps_from:
+      type: note
+  report:
+    maps_from:
+      type: report
+
+predicates:
+  mentions:
+    subject_types: ["*"]
+    object_types: ["*"]
+    requires_evidence: false
+  depends_on:
+    subject_types: [phase, fix-round, research, note, decision]
+    object_types: [phase]
+    requires_evidence: false
+  parent:
+    subject_types: [fix-round]
+    object_types: [phase]
+    requires_evidence: false
+  verifies:
+    subject_types: [report]
+    object_types: [phase, fix-round]
+    requires_evidence: false
+  informs:
+    subject_types: [research, note, decision]
+    object_types: [phase, decision, report, note]
+    requires_evidence: false
+
+status_values:
+  - planned
+  - active
+  - done
+  - blocked
+  - deferred
+  - aborted
