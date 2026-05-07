@@ -48,9 +48,9 @@ You MUST complete these in order:
 5. **Implement one WU** — exactly one goal, bounded scope, no unrelated changes
 6. **Verify** — run the verification command(s) from the WU. Must pass.
 7. **Inspect diff** — `git diff --stat`, review changes for scope creep
-8. **Update roadmap** — mark WU `done` in the phase file, add commit hash, update ALL.md commit index, append to log.md if applicable
+8. **Update roadmap** — move the WU to `ready-for-review`, add commit hash, update ALL.md commit index, append to log.md if applicable
 9. **Commit** — one commit per WU, containing **both** implementation files and roadmap updates together: `WU-P{n}-{unit}: {short description}`
-10. **Report** — what changed, what was verified, what remains, next safe step
+10. **Report** — what changed, what was verified, what remains, and whether the client should review, continue, or explicitly run `/wur:done`
 
 ## Minimal Enforcement Model
 
@@ -66,6 +66,8 @@ WUR does not need a planner. It needs a gatekeeper.
 4. `/wur:done` must stop if any related fix round is still `active`.
 5. `/wur:done` requires `test_status = pass` or `test_status = waived` with a non-empty reason.
 6. A WU commit must include both implementation changes and roadmap updates together.
+7. `/wur:done` may run only when the current user request explicitly invokes `/wur:done`. Passing tests or finished fixes only make a phase ready for client closeout; they do not authorize closeout.
+8. Agents may move WUs to `ready-for-review`. Only the client may accept or mark WUs `done`.
 
 ### Allowed waives
 
@@ -100,6 +102,8 @@ These thoughts mean STOP — you're rationalizing:
 | "I'll commit the code now, roadmap in a separate commit" | No. One commit = implementation + roadmap update together. Separate roadmap commits pollute git log. |
 | "One commit for two WUs is fine" | One WU = one commit. Always. |
 | "The test failed but it's probably fine" | Blocked. Do not mark done. Fix or split new WU. |
+| "Tests pass, so I can run `/wur:done`" | No. Report readiness and wait for the client to send `/wur:done`. |
+| "The WU is verified, so it is done" | No. Mark `ready-for-review`; `done` is client-confirmed. |
 | "I'll just add one more feature" | Scope creep. New WU in next phase. |
 | "I'll just use the main branch for this" | Every phase has a dedicated worktree. Create it. |
 | "I'll git checkout to switch feature branches" | No. Use a worktree. The main repo stays on the default branch. |
@@ -115,15 +119,23 @@ Every phase has: goal, success criteria, exit gate, out of scope, dependencies, 
 
 Every Work Unit has: ID, goal, acceptance criteria, scope, dependencies, parent (fix WUs only), verification, status, commit reference.
 
+**WU lifecycle**:
+
+```text
+planned -> active -> ready-for-review -> accepted -> done
+```
+
+Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. Clients own `accepted` and `done`. After implementation, verification, roadmap update, and commit, the agent reports evidence and moves the WU to `ready-for-review`. Do not mark a WU `done` because tests passed.
+
 **Splitting rule** — split before coding if a WU: has >1 goal, touches unrelated modules, mixes feature + refactor, mixes behavior + formatting, needs >1 independent verification, or is too large to revert independently.
 
-**Fix WUs** — created during `/wur:test`. Stored in a **separate file** `agents/roadmap/FIX_P{n}_{slug}.md` — never appended to `PHASE_{n}.md`. Each fix WU carries a `Parent WU` field. The phase file's Fix Rounds table links to the FIX file. Live on `fix/phase-{n}-{slug}` branch in a dedicated worktree.
+**Fix WUs** — created during `/wur:test`. Stored in one phase fix ledger: `agents/roadmap/PHASE_{n}_FIX.md`. Do not create a new markdown file for every bug batch. Each fix round is a section/table row in that ledger, and each fix WU carries a `Parent WU` field. The phase file's Fix Rounds table links to anchors in the ledger. Legacy `agents/roadmap/FIX_P{n}_{slug}.md` files remain readable but are not the preferred shape for new work. Fix work lives on `fix/phase-{n}-{slug}` branch in a dedicated worktree.
 
 **Tiny WUs** — for roadmap maintenance, doc updates. Prefix `WU-TW-{number}`. Same flow: implement → verify → commit → update ALL.md.
 
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, no worktree, and no ALL.md update required.
 
-**Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, fix round close, phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
+**Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
 
 ### ALL.md Commit Index — mandatory archival
 
@@ -185,7 +197,7 @@ If `agents/SCHEMA.md` is missing the `schema_version` frontmatter (e.g. the work
 
 ### Verification
 
-Run the verification command. Record the result. If it fails: do not commit, fix or split new WU. Never mark `done` without passing verification.
+Run the verification command. Record the result. If it fails: do not commit, fix or split new WU. Passing verification only permits `ready-for-review`; never mark `done` without client confirmation.
 
 ### Wiki & Derived Graph
 
@@ -194,7 +206,7 @@ The `agents/` folder IS the project wiki — roadmap, research, decisions, and d
 ```text
 agents/
   project/         PHILOSOPHY.md · USAGE.md
-  roadmap/         ALL.md · PHASE_*.md · FIX_*.md · log.md
+  roadmap/         ALL.md · PHASE_*.md · PHASE_*_FIX.md · legacy FIX_*.md · log.md
   research/        ingested sources and analysis
   docs/            ADRs, durable notes, synthesis
   reports/         verification and completion reports
@@ -235,7 +247,7 @@ Full procedures in `commands/<command>.md` (phase) and `commands/wiki/<command>.
 - Fix-round merge (administrative): `WU-P{n}-fix: merge fix/phase-{n}-{slug}`
 - Phase abort (administrative): `WU-P{n}-abort: abandon phase {n} ({mode})`
 
-**Rule**: Only `/wur:done` from the client triggers merge + closeout. `/wur:abort` discards a phase without merging — never use it as a shortcut to skip closeout.
+**Rule**: Only `/wur:done` from the current client request triggers merge + closeout. An agent must not run `/wur:done` on its own after fixing, testing, or seeing a clean roadmap. It must report readiness and wait for the client to send `/wur:done`. `/wur:abort` discards a phase without merging — never use it as a shortcut to skip closeout.
 
 ## Multi-Agent Protocol
 

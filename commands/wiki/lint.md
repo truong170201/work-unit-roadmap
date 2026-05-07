@@ -25,11 +25,11 @@ Lint the wiki using the `wur-guidelines` skill.
    - **Tag warnings** (not blocking):
      - Unknown tags not found in the predefined vocabulary (`api`, `auth`, `data`, `infra`, `ui`, `security`, `performance`, `breaking-change`, `migration`, `risky`, `spike`, `research`, `external`, `archived`) and not declared in `agents/SCHEMA.md` under `## Project Tags`
    - **Phase file size**:
-     - warn if any `PHASE_*.md` or `FIX_*.md` exceeds 400 lines
+     - warn if any `PHASE_*.md`, `PHASE_*_FIX.md`, or legacy `FIX_*.md` exceeds 400 lines
      - error if exceeds 800 lines — propose moving the Completion Log section to `agents/reports/PHASE_{n}-completion-log.md` and replacing it with a single link
    - **index.md coverage gaps** — for every graph page not listed in `agents/index.md`:
      - auto-generate the missing entry (do not ask; add directly to proposal)
-     - group by section: PHASE_*/FIX_* → `## Roadmap`, research/ → `## Research`, docs/ → `## Docs`, reports/ → `## Reports`
+     - group by section: PHASE_*/PHASE_*_FIX/legacy FIX_* → `## Roadmap`, research/ → `## Research`, docs/ → `## Docs`, reports/ → `## Reports`
      - present as a single consolidated diff for user approval
 3. Semantic pass — read recently-updated pages and highly-linked hubs:
    - Contradictions between pages

@@ -15,7 +15,7 @@ If `agents/` does not exist, stop — run `/wur:init` first.
 
 1. Count pages by category:
    - phases (`agents/roadmap/PHASE_*.md`)
-   - fix rounds (`agents/roadmap/FIX_*.md`)
+   - fix rounds (`agents/roadmap/PHASE_*_FIX.md`, plus legacy `FIX_*.md`)
    - research pages
    - docs pages (`decision` and `note`)
    - reports

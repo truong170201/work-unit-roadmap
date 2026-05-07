@@ -20,7 +20,8 @@ Outputs (written to <agents_dir>/graph/ by default, or --out)
 Node types
 ----------
     phase       roadmap/PHASE_*.md
-    fix-round   roadmap/FIX_*.md
+    fix-round   roadmap/PHASE_*_FIX.md   (current consolidated fix ledger)
+    fix-round   roadmap/FIX_*.md         (legacy)
     research    research/*.md
     decision    docs/*.md   (frontmatter type: decision)
     note        docs/*.md   (frontmatter type: note, or default for docs/)
@@ -69,8 +70,9 @@ except ImportError:  # pragma: no cover
 
 GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     # (glob_pattern relative to agents_dir, default node_type)
+    ("roadmap/PHASE_*_FIX.md", "fix-round"),
     ("roadmap/PHASE_*.md", "phase"),
-    ("roadmap/FIX_*.md", "fix-round"),
+    ("roadmap/FIX_*.md", "fix-round"),  # legacy compatibility
     ("research/*.md", "research"),
     ("docs/*.md", "note"),  # refined per-file by frontmatter type:
     ("reports/*.md", "report"),

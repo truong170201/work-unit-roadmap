@@ -11,7 +11,7 @@ Checks:
   6. Orphan pages (no inbound wikilinks) — warning
   7. Stale graph artifacts (last_extracted.md vs latest mtime) — warning
   8. Edge integrity (every edge subject/object must be a known node ID)
-  9. Missing test_status in PHASE_*.md
+  9. Missing test_status in PHASE_*.md phase files
  10. Oversized pages (>400 lines warn, >800 lines error)
 
 Usage:
@@ -49,8 +49,9 @@ TAG_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+?)(?:[|#][^\]]*)?\]\]")
 
 GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
+    ("roadmap/PHASE_*_FIX.md", "fix-round"),
     ("roadmap/PHASE_*.md", "phase"),
-    ("roadmap/FIX_*.md", "fix-round"),
+    ("roadmap/FIX_*.md", "fix-round"),  # legacy compatibility
     ("research/*.md", "research"),
     ("docs/*.md", "note"),
     ("reports/*.md", "report"),
@@ -187,7 +188,7 @@ def check_test_status(
     linter: Linter, rel: str, path: Path, fm: dict[str, Any] | None
 ) -> None:
     """Check 9: PHASE_*.md must have test_status field."""
-    if not path.name.startswith("PHASE_"):
+    if not path.name.startswith("PHASE_") or path.name.endswith("_FIX.md"):
         return
     if fm is None or "test_status" not in fm:
         linter.error(rel, "PHASE file missing frontmatter field 'test_status'")

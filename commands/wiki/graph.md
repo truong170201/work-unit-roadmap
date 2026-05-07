@@ -33,7 +33,8 @@ Supported actions:
 1. Read `agents/SCHEMA.md`, `agents/index.md`, and `agents/graph/ontology.yaml`.
 2. Walk graph pages under `agents/`:
    - `agents/roadmap/PHASE_*.md`
-   - `agents/roadmap/FIX_*.md`
+   - `agents/roadmap/PHASE_*_FIX.md`
+   - `agents/roadmap/FIX_*.md` (legacy)
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`

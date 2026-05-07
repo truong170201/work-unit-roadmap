@@ -156,7 +156,8 @@ Project context is resolved in this order:
 
    ## Operating Rules
    - Work in Work Units only. One WU = one commit.
-   - Fix WUs live in their own `FIX_P{n}_{slug}.md` — never appended to the phase file.
+   - Fix WUs live in `PHASE_{n}_FIX.md` — one consolidated fix ledger per phase, not one file per bug batch.
+   - WU status lifecycle: `planned -> active -> ready-for-review -> accepted -> done`; agents stop at `ready-for-review` unless the client confirms.
    - Append to `log.md` on every phase open, fix round open, and phase close.
    - Small task, verify, commit. Repeat.
    ```
@@ -189,7 +190,8 @@ Project context is resolved in this order:
    | Type | Location | Description |
    |---|---|---|
    | `phase` | `agents/roadmap/PHASE_*.md` | One execution phase |
-   | `fix-round` | `agents/roadmap/FIX_*.md` | Bug fix batch for a phase |
+   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Consolidated fix ledger for a phase |
+   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file, readable but not preferred for new work |
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
@@ -198,10 +200,17 @@ Project context is resolved in this order:
    ## Status Values
    `planned` · `active` · `done` · `blocked` · `deferred` · `aborted`
 
+   ## Work Unit Status Lifecycle
+   `planned -> active -> ready-for-review -> accepted -> done`
+
+   Agents may set `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`.
+   Only the client may set `accepted` or `done`.
+
    ## Graph Scope
    Graph pages (must have frontmatter):
    - `agents/roadmap/PHASE_*.md`
-   - `agents/roadmap/FIX_*.md`
+   - `agents/roadmap/PHASE_*_FIX.md`
+   - `agents/roadmap/FIX_*.md` (legacy)
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`

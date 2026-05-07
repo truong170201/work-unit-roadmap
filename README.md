@@ -1,6 +1,6 @@
 # Work Unit Roadmap — a Claude Code Plugin
 
-Turn any coding agent into a disciplined senior engineer: atomic Work Units, isolated git branches, one verified commit per completed task, and a recoverable project history.
+Turn any coding agent into a disciplined senior engineer: atomic Work Units, isolated git branches, verified review checkpoints, and a recoverable project history.
 
 ```text
 Small task, verify, commit. Repeat.
@@ -35,7 +35,7 @@ Without discipline, an AI agent will:
 - Switch branches with `git checkout` instead of worktrees
 - Update the roadmap in a separate commit after the fact
 - Append fix WUs to the same file as planned WUs until the phase file has 50 rows
-- Mark Work Units done without running verification
+- Mark Work Units done without client review
 
 WUR prevents all of this through three composable skills and thirteen command procedures. You decide *what* to build; WUR enforces *how* to track, isolate, and commit it.
 
@@ -52,9 +52,11 @@ WUR has already solved the organization problem. The remaining problem is contro
 1. **No workspace re-init by accident.** `/wur:init` must stop if `agents/` already exists, unless the user is intentionally resetting it.
 2. **No phase execution before `/wur:init`.** If `agents/` does not exist, `/wur:start` must stop.
 3. **No implementation outside a worktree.** Code/test/config changes must happen in `.worktrees/phase-{n}` or `.worktrees/fix-{n}-{slug}`.
-4. **No phase close while fix rounds are active.** `/wur:done` must stop if any related `FIX_P{n}_*.md` remains `active`.
+4. **No phase close while fix rounds are active.** `/wur:done` must stop if any related fix round in `PHASE_{n}_FIX.md` remains `active`.
 5. **No phase close without test status.** `/wur:done` requires `test_status = pass` or `test_status = waived` with a reason.
 6. **No implementation commit without roadmap state.** Code and roadmap updates belong in the same WU commit.
+7. **No self-close.** Agents must not run `/wur:done` unless the current client request explicitly invokes `/wur:done`.
+8. **No self-accepted WUs.** Agents move WUs to `ready-for-review`; only the client can accept or close them as `done`.
 
 ### Allowed waives
 
@@ -208,13 +210,13 @@ This creates a dedicated fix branch and worktree:
 
 - `.worktrees/fix-1-empty-input`
 - branch `fix/phase-1-empty-input`
-- `agents/roadmap/FIX_P1_empty-input.md`
+- `agents/roadmap/PHASE_1_FIX.md`
 - a Fix Rounds row in `PHASE_1.md`
 - a fix entry in `agents/index.md`
 - `fix-open` in `agents/roadmap/log.md`
 - a Tiny WU commit for the fix-round setup
 
-Fix WUs live in the FIX file — never appended to the phase file.
+Fix WUs live in the phase fix ledger — one `PHASE_{n}_FIX.md` file per phase, not one markdown file per bug batch.
 
 ### 6. Close the phase
 
@@ -225,6 +227,7 @@ Fix WUs live in the FIX file — never appended to the phase file.
 
 `/wur:done` is the phase close transaction. It:
 
+- runs only when the current client request explicitly invokes `/wur:done`
 - verifies fix rounds are closed
 - merges `feature/phase-1` into `main` with `git merge --no-ff`
 - updates phase frontmatter (`status: done`, `closed: {today}`)
@@ -243,10 +246,10 @@ Fix WUs live in the FIX file — never appended to the phase file.
 | `/wur:upgrade` | main repo | After pulling a newer WUR plugin version, or once on a legacy `agents/` | 1) Detects `schema_version`; backfills to `1` if missing. 2) Creates a git backup tag. 3) Creates missing folders/files with canonical templates. 4) Migrates existing files to schema compliance: adds missing SCHEMA.md sections, adds frontmatter (`type`, `status`, `tags`) to graph pages, patches ALL.md missing sections, updates index.md coverage. 5) Verifies all wikilinks, frontmatter, and index coverage. 6) Commits one Tiny WU and deletes backup tag if verification passes; preserves backup tag if verification fails. | Treats current state as raw input; refuses if workspace declares a newer schema than the plugin knows; one Tiny WU commit; appends `schema-upgrade` to log |
 | `/wur:wiki:upgrade` | main repo | After `/wur:init`, when you want graph/wiki features | Adds graph-layer files and conventions: `agents/graph/ontology.yaml`, `README.md`, `.gitignore`, link/edge rules | No worktree; no execution branch; wiki-only upgrade; does not bump `schema_version` |
 | `/wur:start {n}` | main repo → then `.worktrees/phase-{n}` | Start execution for phase `n` | Creates `feature/phase-{n}` and `.worktrees/phase-{n}`, scaffolds `PHASE_{n}.md`, updates `ALL.md`, `index.md`, and `log.md` | Blocks if another phase is already active; commits phase setup as a Tiny WU; appends `phase-open` |
-| `/wur:test fail: ...` | phase worktree → fix worktree | Open a fix round after tests fail | Creates `fix/phase-{n}-{slug}`, `.worktrees/fix-{n}-{slug}`, `FIX_P{n}_{slug}.md`, updates phase Fix Rounds, `ALL.md`, `index.md`, `test_status`, and `log.md` | Requires an active phase; commits fix-round setup as a Tiny WU; appends `fix-open`; later appends `fix-close` |
-| `/wur:test pass` | phase worktree or main repo after test run | Record that tests passed and phase is ready to close | Updates phase `test_status: pass` and clears waive reason | Requires an active phase; no merge; prompts `/wur:done` |
-| `/wur:test waive: <reason>` | phase worktree or main repo | Record that closeout is allowed without a clean pass | Updates phase `test_status: waived` and stores the waive reason | Requires an active phase; no merge; prompts `/wur:done` but leaves an explicit trace |
-| `/wur:done` | main repo + phase worktree as needed | Close a verified phase after approval | Merges phase branch into default branch, updates phase status/frontmatter, updates `ALL.md`, `index.md`, and `log.md`, removes worktrees | Blocks if an active WU remains; requires `test_status = pass` or `waived`; creates phase-close commit and appends `phase-close` |
+| `/wur:test fail: ...` | phase worktree → fix worktree | Open or append a fix round after tests fail | Creates `fix/phase-{n}-{slug}`, `.worktrees/fix-{n}-{slug}`, and the consolidated `PHASE_{n}_FIX.md` ledger; updates phase Fix Rounds, `ALL.md`, `index.md`, `test_status`, and `log.md` | Requires an active phase; commits fix-round setup as a Tiny WU; appends `fix-open`; fix WUs stop at `ready-for-review` |
+| `/wur:test pass` | phase worktree or main repo after test run | Record that tests passed and phase is ready for client closeout | Updates phase `test_status: pass` and clears waive reason | Requires an active phase; no merge; asks the client to send `/wur:done` |
+| `/wur:test waive: <reason>` | phase worktree or main repo | Record that closeout readiness is waived without a clean pass | Updates phase `test_status: waived` and stores the waive reason | Requires an active phase; no merge; asks the client to send `/wur:done` and leaves an explicit trace |
+| `/wur:done` | main repo + phase worktree as needed | Close a verified phase after explicit client command | Merges phase branch into default branch, updates phase status/frontmatter, updates `ALL.md`, `index.md`, and `log.md`, removes worktrees | Blocks if the current request did not invoke `/wur:done`; blocks if an active WU remains; requires `test_status = pass` or `waived`; creates phase-close commit and appends `phase-close` |
 | `/wur:abort {n}` | main repo + phase worktree | Abandon a phase started by mistake | Force-removes phase + fix worktrees, deletes feature/fix branches without merging, marks phase `aborted` in roadmap, records reason in `log.md` | Refuses if `feature/phase-{n}` has commits not in `$base` unless explicitly confirmed; never reaches the default branch |
 | `/wur:status` | anywhere | Get the current execution snapshot | Reads current branch/worktree state, `ALL.md`, phase test state, fix rounds, blockers, and recent `log.md` | Read-only; acts as the read model of enforcement state |
 | `/wur:wiki:add {src}` | main repo | Ingest external knowledge into the project wiki | Stores source in `agents/raw/`, writes research into `agents/research/`, updates linked docs/pages, updates `agents/index.md`, appends to roadmap log | No worktree; wiki-only mutation; suggests `/wur:wiki:graph extract` if graph artifacts are now stale |
@@ -295,7 +298,7 @@ flowchart LR
     subgraph AW["agents/ canonical wiki"]
         A["agents/"]
         P["project/<br/>PHILOSOPHY.md<br/>USAGE.md"]
-        R["roadmap/<br/>ALL.md<br/>PHASE_*.md<br/>FIX_*.md<br/>log.md"]
+        R["roadmap/<br/>ALL.md<br/>PHASE_*.md<br/>PHASE_*_FIX.md<br/>log.md"]
         K["research / docs / reports / references / raw"]
         X["SCHEMA.md<br/>index.md"]
 
@@ -395,7 +398,7 @@ This is the core model:
 - the enforcement layer is **read-only** with respect to `agents/`: it validates against the wiki but never writes to it. Only commands and Work Units mutate the wiki
 - `/wur:init` is state setup — it bootstraps `agents/` and refuses to overwrite an existing workspace, but is not gated by the enforcement layer the way execution commands are
 - `/wur:status` is the read model of enforcement state, not just a git snapshot
-- merge is gated through `/wur:done`; branches do not flow to `main` directly
+- merge is gated through an explicit client `/wur:done`; branches do not flow to `main` directly
 - fix rounds feed back into phase state and must be resolved before closeout
 - `/wur:abort` is the only legitimate exit path that does *not* merge; it has three modes (`hard` / `soft` / `waived`) so an operator can stop without lying to the roadmap
 
@@ -427,9 +430,9 @@ Work loop inside .worktrees/phase-{n}:
 
 bugs found → /wur:test fail
   └─ git worktree add .worktrees/fix-{n}-{slug} -b fix/phase-{n}-{slug}
-  └─ creates FIX_P{n}_{slug}.md with frontmatter + parent wikilink
+  └─ creates or appends PHASE_{n}_FIX.md with frontmatter + parent wikilink
   └─ updates phase Fix Rounds, index.md, log.md
-  └─ commits setup, then fix WUs, then closes fix round
+  └─ commits setup, then fix WUs to ready-for-review; client decides closeout
 
 /wur:wiki:add
   └─ adds research knowledge to agents/

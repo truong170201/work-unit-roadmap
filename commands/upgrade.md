@@ -175,7 +175,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | Type | Location | Description |
    |---|---|---|
    | `phase` | `agents/roadmap/PHASE_*.md` | One execution phase |
-   | `fix-round` | `agents/roadmap/FIX_*.md` | Bug fix batch for a phase |
+   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Consolidated fix ledger for a phase |
+   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file, readable but not preferred for new work |
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
@@ -184,10 +185,17 @@ If any step would break one of these, abort the migration and surface a `## Manu
    ## Status Values
    `planned` · `active` · `done` · `blocked` · `deferred` · `aborted`
 
+   ## Work Unit Status Lifecycle
+   `planned -> active -> ready-for-review -> accepted -> done`
+
+   Agents may set `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`.
+   Only the client may set `accepted` or `done`.
+
    ## Graph Scope
    Graph pages (must have frontmatter):
    - `agents/roadmap/PHASE_*.md`
-   - `agents/roadmap/FIX_*.md`
+   - `agents/roadmap/PHASE_*_FIX.md`
+   - `agents/roadmap/FIX_*.md` (legacy)
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`
@@ -332,13 +340,13 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    - Ensure `## Project` section exists with entries for `PHILOSOPHY` and `USAGE`.
    - Ensure `## Roadmap` section exists with entries for `ALL` and `log`.
-   - For every graph page found under `agents/` (`PHASE_*.md`, `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`), check if it appears in `index.md`. If not, append it under the correct section:
-     - `PHASE_*.md` / `FIX_*.md` → `## Roadmap`
+   - For every graph page found under `agents/` (`PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`), check if it appears in `index.md`. If not, append it under the correct section:
+     - `PHASE_*.md` / `PHASE_*_FIX.md` / legacy `FIX_*.md` → `## Roadmap`
      - `research/*.md` → `## Research` (create section if absent)
      - `docs/*.md` → `## Docs` (create section if absent)
      - `reports/*.md` → `## Reports` (create section if absent)
 
-   ### Graph pages: `PHASE_*.md`, `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`
+   ### Graph pages: `PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`
 
    For each graph page, read the file and check for YAML frontmatter (file must start with `---`).
 
@@ -346,8 +354,9 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    | Path pattern | `type` | `status` default |
    |---|---|---|
+   | `roadmap/PHASE_*_FIX.md` | `fix-round` | read from file body or `active` |
    | `roadmap/PHASE_*.md` | `phase` | read from file body (`Status:` field) or `planned` |
-   | `roadmap/FIX_*.md` | `fix-round` | read from file body or `active` |
+   | `roadmap/FIX_*.md` | `fix-round` | legacy; read from file body or `active` |
    | `research/*.md` | `research` | `done` |
    | `docs/*.md` | `note` | `done` |
    | `reports/*.md` | `report` | `done` |

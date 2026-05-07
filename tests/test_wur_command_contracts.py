@@ -17,6 +17,11 @@ class WurCommandContractTestCase(unittest.TestCase):
             with self.subTest(snippet=snippet):
                 self.assertIn(snippet, text)
 
+    def assert_contains_none(self, text: str, snippets: list[str]) -> None:
+        for snippet in snippets:
+            with self.subTest(snippet=snippet):
+                self.assertNotIn(snippet, text)
+
     def test_init_contract_installs_and_verifies_enforcement(self) -> None:
         text = read_command("init.md")
         self.assert_contains_all(
@@ -51,6 +56,7 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Verify clean baseline: run tests",
                 "type: phase",
                 "test_status: not-run",
+                "planned -> active -> ready-for-review -> accepted -> done",
                 "git commit -m \"WU-TW-{k}: init phase {n} roadmap\"",
             ],
         )
@@ -65,12 +71,20 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "If `$ARGUMENTS` is empty or unrecognized, stop",
                 "test_status: failing",
                 "git worktree add .worktrees/fix-{n}-{slug}",
-                "Create `agents/roadmap/FIX_P{n}_{slug}.md`",
-                "do NOT append fix WUs to `PHASE_{n}.md`",
+                "Create or reuse `agents/roadmap/PHASE_{n}_FIX.md`",
+                "Do not create a new fix-round file per bug batch",
+                "Fix WU status moves to `ready-for-review`",
                 "test_status: pass",
                 "test_status: waived",
                 "test_waive_reason: {reason from $ARGUMENTS}",
                 "Never mark a phase done without `/wur:done`",
+            ],
+        )
+        self.assert_contains_none(
+            text,
+            [
+                "Create `agents/roadmap/FIX_P{n}_{slug}.md`",
+                "When all fix WUs are done",
             ],
         )
 
@@ -79,6 +93,8 @@ class WurCommandContractTestCase(unittest.TestCase):
         self.assert_contains_all(
             text,
             [
+                "This command may run only when the current user request explicitly invokes `/wur:done`",
+                "If the agent merely believes the phase is ready, stop",
                 "Active Work Unit` must be `none`",
                 "allow `test_status: pass`",
                 "allow `test_status: waived` only if `test_waive_reason` is non-empty",
@@ -87,6 +103,7 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "run the tests again on the merged result",
                 "git worktree remove .worktrees/phase-{n}",
                 "git branch -d feature/phase-{n}",
+                "client-confirmed `done`",
                 "mark the phase row `done`",
                 "Commit Index table in `agents/roadmap/ALL.md` exceeds 30 rows",
                 "git commit -m \"WU-P{n}-close: mark phase {n} done\"",

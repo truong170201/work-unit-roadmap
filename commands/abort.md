@@ -70,7 +70,7 @@ Rules:
 
 8. Update `agents/index.md`: change phase entry `status: active` → `status: aborted`.
 
-9. For every `agents/roadmap/FIX_P{n}_*.md`, set frontmatter `status: aborted` and `closed: {today}`. Update their entries in `agents/index.md` similarly.
+9. For `agents/roadmap/PHASE_{n}_FIX.md` and any legacy `agents/roadmap/FIX_P{n}_*.md`, set frontmatter `status: aborted` and `closed: {today}`. Update their entries in `agents/index.md` similarly.
 
 10. Append to `agents/roadmap/log.md`:
 

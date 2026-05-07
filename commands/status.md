@@ -28,10 +28,10 @@ Phase:       2 — Local Study Workflow Depth (active)
 Active WU:   WU-P02-005 — Audio stack migration
 Last done:   WU-P02-004 — PDF annotation storage hardening
 Test status: pass  (or: waived — device unavailable)
-Fix rounds:  none  (or: FIX_P2_device-r1 — active, 3/5 done)
+Fix rounds:  none  (or: PHASE_2_FIX — device-r1 active, 3/5 ready-for-review)
 Blockers:    none  (or: active WU still open)
 Uncommitted: 2 files modified (src/hooks/useAudio.ts, ...)
 Recent log:
   2026-05-03 | phase-open  | PHASE_2 started — branch: feature/phase-2
-  2026-05-04 | fix-open    | FIX_P2_device-r1 — 4 bugs
+  2026-05-04 | fix-open    | PHASE_2_FIX — device-r1: 4 bugs
 ```

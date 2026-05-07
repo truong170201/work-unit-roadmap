@@ -68,7 +68,7 @@ This ensures deterministic, reproducible results.
 | 6 | Orphan pages (no inbound wikilinks) | WARN |
 | 7 | Stale graph artifacts (`last_extracted.md` older than latest change) | WARN |
 | 8 | Edge integrity — every edge subject/object must be a known node ID | ERROR |
-| 9 | Missing `test_status` field in PHASE_*.md | ERROR |
+| 9 | Missing `test_status` field in PHASE_*.md phase files (not PHASE_*_FIX.md ledgers) | ERROR |
 | 10 | Oversized pages (>400 lines warn, >800 lines error) | WARN/ERROR |
 
 ## Query commands (wur_graph_query.py)

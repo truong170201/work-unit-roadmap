@@ -28,7 +28,8 @@ If `agents/` does not exist, stop — run `/wur:init` first.
 
    Graph pages (must have frontmatter):
    - `agents/roadmap/PHASE_*.md`
-   - `agents/roadmap/FIX_*.md`
+   - `agents/roadmap/PHASE_*_FIX.md`
+   - `agents/roadmap/FIX_*.md` (legacy)
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`
@@ -46,7 +47,7 @@ If `agents/` does not exist, stop — run `/wur:init` first.
    ## Canonical Wikilink Syntax
    Use path-style wikilinks rooted at `agents/`, for example:
    - `[[roadmap/PHASE_1]]`
-   - `[[roadmap/FIX_P1_device-r1]]`
+   - `[[roadmap/PHASE_1_FIX]]`
    - `[[project/PHILOSOPHY]]`
    - `[[docs/ADR_001]]`
 

@@ -42,8 +42,9 @@ except ImportError:
 
 # Same glob patterns as wur_graph_extract.py / wur_graph_lint.py
 GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
+    ("roadmap/PHASE_*_FIX.md", "fix-round"),
     ("roadmap/PHASE_*.md", "phase"),
-    ("roadmap/FIX_*.md", "fix-round"),
+    ("roadmap/FIX_*.md", "fix-round"),  # legacy compatibility
     ("research/*.md", "research"),
     ("docs/*.md", "note"),  # may be overridden to "decision" by frontmatter
     ("reports/*.md", "report"),

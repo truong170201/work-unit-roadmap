@@ -64,8 +64,12 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
    | ID | Goal | Acceptance Criteria | Scope | Dependencies | Verification | Status | Commit |
    |---|---|---|---|---|---|---|---|
 
+   Status lifecycle: planned -> active -> ready-for-review -> accepted -> done.
+   The agent may move a WU through `ready-for-review` after implementation, verification, roadmap update, and commit.
+   Only the client may move a WU to `accepted` or `done`.
+
    ## Fix Rounds
-   _Fix rounds are tracked in separate files. Links appear here as rounds are opened._
+   _Fix rounds are consolidated in `PHASE_{n}_FIX.md`. Links appear here as rounds are opened._
 
    | Round | File | Branch | Status |
    |---|---|---|---|

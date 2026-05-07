@@ -211,6 +211,49 @@ class WurGraphScriptsTestCase(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("missing frontmatter field 'test_status'", result.stdout)
 
+    def test_phase_fix_ledger_is_supported_without_test_status_noise(self) -> None:
+        legacy = self.agents_dir / "roadmap" / "FIX_P2_device-r1.md"
+        legacy.unlink()
+
+        for rel in ("roadmap/ALL.md", "roadmap/PHASE_2.md", "index.md"):
+            path = self.agents_dir / rel
+            text = path.read_text(encoding="utf-8")
+            text = text.replace("FIX_P2_device-r1", "PHASE_2_FIX")
+            text = text.replace("FIX_P2_device-r1.md", "PHASE_2_FIX.md")
+            path.write_text(text, encoding="utf-8")
+
+        (self.agents_dir / "roadmap" / "PHASE_2_FIX.md").write_text(
+            """---
+type: fix-round
+phase: 2
+status: done
+tags: [ui]
+parent: "[[roadmap/PHASE_2]]"
+opened: 2026-05-01
+closed: 2026-05-02
+---
+
+# PHASE_2_FIX: Fix Ledger
+
+Consolidated fixes for [[roadmap/PHASE_2]].
+""",
+            encoding="utf-8",
+        )
+
+        self.assertEqual(self.run_script(EXTRACT).returncode, 0)
+        nodes = [
+            json.loads(line)
+            for line in (self.agents_dir / "graph" / "nodes.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        ]
+        self.assertIn("roadmap/PHASE_2_FIX", {node["id"] for node in nodes})
+
+        lint = self.run_script(LINT)
+        self.assertEqual(lint.returncode, 0, msg=lint.stdout + lint.stderr)
+        self.assertNotIn("PHASE_2_FIX.md: PHASE file missing", lint.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

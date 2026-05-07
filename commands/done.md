@@ -5,6 +5,10 @@ argument-hint: ""
 
 Close the active phase using the `wur-guidelines` skill.
 
+This command may run only when the current user request explicitly invokes `/wur:done`.
+If the agent merely believes the phase is ready, stop, report the readiness evidence, and ask the client to send `/wur:done`.
+Do not infer closeout permission from passing tests, finished fixes, clean diffs, or a previous conversation.
+
 1. Read `agents/roadmap/ALL.md` — extract the default branch (`$base`), confirm the active phase and its number `{n}`, and enforce the roadmap gate:
    - there must be an active phase
    - `Active Work Unit` must be `none`
@@ -13,7 +17,9 @@ Close the active phase using the `wur-guidelines` skill.
    - allow `test_status: pass`
    - allow `test_status: waived` only if `test_waive_reason` is non-empty
    - otherwise stop — phase close is not allowed yet
-3. For each open `FIX_P{n}_{slug}.md`, verify its Fix Rounds row in `PHASE_{n}.md` is `done`. If a `fix/phase-{n}-*` worktree has unmerged commits, merge it into the phase branch first:
+3. Read `agents/roadmap/PHASE_{n}_FIX.md` if it exists. Legacy workspaces may also have `agents/roadmap/FIX_P{n}_*.md`; read them for compatibility but do not create new legacy files.
+   For each open fix round in the fix ledger, verify its Fix Rounds row in `PHASE_{n}.md` is not `active`.
+   If a `fix/phase-{n}-*` worktree has unmerged commits, merge it into the phase branch first:
 
    ```bash
    cd .worktrees/phase-{n}
@@ -49,7 +55,8 @@ Close the active phase using the `wur-guidelines` skill.
 
 7. Update `agents/roadmap/PHASE_{n}.md`:
    - Update frontmatter: `status: done`, `closed: {today}`
-   - For any WUs not yet `done`, mark them `deferred` with a brief reason or keep as `blocked` if unresolved. Do NOT mark unverified WUs as `done`.
+   - Move client-approved WUs to client-confirmed `done`.
+   - For any WUs not yet `accepted` or `done`, mark them `deferred` with a brief reason or keep as `blocked` if unresolved. Do NOT mark unreviewed or unverified WUs as `done`.
    - Fill the exit gate verification log.
    - Update the corresponding line in `agents/index.md`: change `status: active` → `status: done`.
 8. Update `agents/roadmap/ALL.md`: mark the phase row `done`, record the merge commit, clear active WU, set next phase as active if planned.
