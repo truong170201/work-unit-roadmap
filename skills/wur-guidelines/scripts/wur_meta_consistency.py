@@ -57,6 +57,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
     test_md = repo_root / "commands" / "test.md"
     upgrade_md = repo_root / "commands" / "upgrade.md"
     wiki_add_md = repo_root / "commands" / "wiki" / "add.md"
+    wiki_ima_md = repo_root / "commands" / "wiki" / "ima.md"
     wiki_graph_md = repo_root / "commands" / "wiki" / "graph.md"
     wiki_upgrade_md = repo_root / "commands" / "wiki" / "upgrade.md"
     skill_md = repo_root / "skills" / "wur-guidelines" / "SKILL.md"
@@ -173,6 +174,20 @@ def run_checks(repo_root: Path) -> list[Finding]:
                 wiki_add_md.relative_to(repo_root).as_posix(),
             )
         )
+    ima_text = _text(wiki_ima_md)
+    for snippet in (
+        "| {today} | wiki-ima |",
+        "Only update roadmap files when the user explicitly requests roadmap updates",
+        "Do not mark any Work Unit `active`, `accepted`, or `done`",
+    ):
+        if snippet not in ima_text:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:wiki:ima` missing contract snippet `{snippet}`",
+                    wiki_ima_md.relative_to(repo_root).as_posix(),
+                )
+            )
     if "WU-P{n}-fix:" not in _text(skill_md) or "WU-P{n}-abort:" not in _text(skill_md):
         findings.append(
             Finding(

@@ -44,6 +44,7 @@ class PluginManifestTestCase(unittest.TestCase):
             "status.md",
             "wiki/upgrade.md",
             "wiki/add.md",
+            "wiki/ima.md",
             "wiki/ask.md",
             "wiki/lint.md",
             "wiki/stats.md",

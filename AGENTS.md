@@ -10,7 +10,7 @@ All live under `skills/`:
 - **`wur-guidelines`** — core workflow. Phases, Work Units, verification, one commit per WU.
 - **`using-git-worktrees`** — isolated implementation under `.worktrees/`.
 
-## Commands (13)
+## Commands (14)
 
 Phase command procedures live under `commands/`, wiki command procedures under `commands/wiki/`.
 
@@ -26,6 +26,7 @@ Claude Code exposes them as `/wur:*` and `/wur:wiki:*`. Other clients are not bu
 /wur:status                # current phase/WU/worktree summary
 /wur:wiki:upgrade          # add/upgrade graph layer on agents/
 /wur:wiki:add {src}        # ingest a source into agents/research/
+/wur:wiki:ima {idea}       # Idea-to-MVP wiki enrichment; optional roadmap planning updates
 /wur:wiki:ask {q}          # query agents/ wiki with citations
 /wur:wiki:lint             # structural + semantic health check on agents/
 /wur:wiki:stats            # size, status, and graph health for agents/
@@ -53,6 +54,6 @@ Small task, verify, commit. Repeat.
 
 **Wiki only (no implementation):**
 1. Invoke `using-wur` → `wur-guidelines`.
-2. Run `/wur:wiki:upgrade` when available, or ask for the equivalent WUR wiki action, then use add/ask/lint/stats/graph as needed. No worktree required.
+2. Run `/wur:wiki:upgrade` when available, or ask for the equivalent WUR wiki action, then use add/ima/ask/lint/stats/graph as needed. No worktree required.
 
 If any skill file is missing, stop and report it before proceeding.

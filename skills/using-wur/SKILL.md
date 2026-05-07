@@ -79,6 +79,7 @@ Everything else (creating phase files, running commands, wiki operations) is dri
 "Start phase 2" → `wur-guidelines` → `/wur:start 2` → `using-git-worktrees`.
 "Fix a bug" → `wur-guidelines` → `/wur:test` → `using-git-worktrees` for fix branch.
 "Ingest a paper" → `wur-guidelines` → `/wur:wiki:add`.
+"Turn this idea into MVP context" → `wur-guidelines` → `/wur:wiki:ima`.
 
 ## Skill Types
 

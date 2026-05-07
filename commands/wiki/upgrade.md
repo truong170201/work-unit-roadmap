@@ -5,7 +5,7 @@ argument-hint: ""
 
 Upgrade the existing `agents/` wiki with graph-layer support.
 
-The `agents/` folder already exists after `/wur:init`. This command does **not** create a second wiki. It adds optional graph-aware files and normalizes conventions so `/wur:wiki:add`, `/wur:wiki:ask`, `/wur:wiki:lint`, `/wur:wiki:stats`, and `/wur:wiki:graph` can work coherently.
+The `agents/` folder already exists after `/wur:init`. This command does **not** create a second wiki. It adds optional graph-aware files and normalizes conventions so `/wur:wiki:add`, `/wur:wiki:ima`, `/wur:wiki:ask`, `/wur:wiki:lint`, `/wur:wiki:stats`, and `/wur:wiki:graph` can work coherently.
 
 If `agents/` does not exist, stop — run `/wur:init` first.
 

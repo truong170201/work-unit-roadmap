@@ -133,7 +133,7 @@ Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. C
 
 **Tiny WUs** — for roadmap maintenance, doc updates. Prefix `WU-TW-{number}`. Same flow: implement → verify → commit → update ALL.md.
 
-**Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, no worktree, and no ALL.md update required.
+**Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
 **Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
 
@@ -224,6 +224,7 @@ Graph pages use YAML frontmatter with `type`, `status`, `tags` (required — see
 Wiki operations:
 - **upgrade** (`/wur:wiki:upgrade`) — add graph-layer files and conventions
 - **ingest** (`/wur:wiki:add`) — add knowledge into `agents/research/`
+- **idea-to-MVP analysis** (`/wur:wiki:ima`) — enrich the wiki from a prompt, feedback, or idea; optionally update roadmap plans when explicitly requested
 - **query** (`/wur:wiki:ask`) — index-first, graph-aware when derived artifacts exist
 - **lint** (`/wur:wiki:lint`) — structural/semantic checks, plus graph-aware checks when the graph layer exists
 - **stats** (`/wur:wiki:stats`) — size, status, and graph health dashboard
@@ -237,7 +238,7 @@ Full procedures in `commands/<command>.md` (phase) and `commands/wiki/<command>.
 /wur:init                                               # one-time project bootstrap
 /wur:upgrade                                            # migrate agents/ between WUR plugin versions
 /wur:start {n}  /wur:done  /wur:abort {n}  /wur:test  /wur:status
-/wur:wiki:upgrade  /wur:wiki:add {src}  /wur:wiki:ask {q}  /wur:wiki:lint  /wur:wiki:stats  /wur:wiki:graph {action}
+/wur:wiki:upgrade  /wur:wiki:add {src}  /wur:wiki:ima {idea}  /wur:wiki:ask {q}  /wur:wiki:lint  /wur:wiki:stats  /wur:wiki:graph {action}
 ```
 
 **Commit format:**

@@ -163,6 +163,31 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
 
+    def test_ima_contract_enriches_wiki_and_gates_roadmap_execution_state(self) -> None:
+        text = read_command("wiki/ima.md")
+        self.assert_contains_all(
+            text,
+            [
+                "Idea-to-MVP analysis",
+                "If `agents/` does not exist, stop",
+                "Do not silently run `/wur:init`",
+                "Treat `$ARGUMENTS` as raw idea/context",
+                "INTAKE",
+                "DISCOVER",
+                "DEFINE",
+                "DECIDE",
+                "ROADMAP",
+                "Only update roadmap files when the user explicitly requests roadmap updates",
+                "`--update-roadmap`",
+                "`--phase {n}`",
+                "Planning changes may create or revise `planned` Work Units",
+                "Do not mark any Work Unit `active`, `accepted`, or `done`",
+                "Do not run `/wur:start`, `/wur:test`, `/wur:done`, or `/wur:abort`",
+                "| {today} | wiki-ima |",
+                "suggest running `/wur:wiki:graph extract`",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

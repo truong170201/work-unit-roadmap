@@ -37,7 +37,7 @@ Without discipline, an AI agent will:
 - Append fix WUs to the same file as planned WUs until the phase file has 50 rows
 - Mark Work Units done without client review
 
-WUR prevents all of this through three composable skills and thirteen command procedures. You decide *what* to build; WUR enforces *how* to track, isolate, and commit it.
+WUR prevents all of this through three composable skills and fourteen command procedures. You decide *what* to build; WUR enforces *how* to track, isolate, and commit it.
 
 ## Control model
 
@@ -166,7 +166,15 @@ Then run `/wur:wiki:graph extract` to compile the derived graph artifacts:
 
 If you care about visual project state — what is open, closed, blocked, what depends on what — run `/wur:wiki:upgrade` early, then `/wur:wiki:graph extract` when you want derived artifacts.
 
-### 3. Start execution for a phase
+### 3. Optional: enrich the wiki from an idea
+
+```text
+/wur:wiki:ima "Older warehouse operators need a faster picking flow with fewer screen taps."
+```
+
+IMA is Idea-to-MVP analysis for prompts, feedback, and rough project context. It runs from the main repo, writes durable knowledge into `agents/raw/`, `agents/research/`, `agents/docs/`, `agents/index.md`, and `agents/roadmap/log.md`, then reports roadmap implications. If the client explicitly requests roadmap changes with `--update-roadmap` or clear natural language, it may update `ALL.md` or a phase file, but new or revised Work Units stay `planned`; IMA never starts work, marks WUs done, closes phases, or touches application code.
+
+### 4. Start execution for a phase
 
 ```text
 /wur:start 1
@@ -183,7 +191,7 @@ This is the moment execution leaves the main repo and enters a worktree:
 - updates `agents/index.md`
 - commits the setup as a Tiny WU on the feature branch
 
-### 4. Work loop — one Work Unit at a time
+### 5. Work loop — one Work Unit at a time
 
 Inside `.worktrees/phase-1` only:
 
@@ -200,7 +208,7 @@ git commit -m "WU-P01-003: add login validation"
 
 Roadmap update and implementation are one commit — never two.
 
-### 5. If testing finds bugs, open a fix round
+### 6. If testing finds bugs, open a fix round
 
 ```text
 /wur:test fail: short-circuit on empty input
@@ -218,7 +226,7 @@ This creates a dedicated fix branch and worktree:
 
 Fix WUs live in the phase fix ledger — one `PHASE_{n}_FIX.md` file per phase, not one markdown file per bug batch.
 
-### 6. Close the phase
+### 7. Close the phase
 
 ```text
 /wur:test pass
@@ -253,6 +261,7 @@ Fix WUs live in the phase fix ledger — one `PHASE_{n}_FIX.md` file per phase, 
 | `/wur:abort {n}` | main repo + phase worktree | Abandon a phase started by mistake | Force-removes phase + fix worktrees, deletes feature/fix branches without merging, marks phase `aborted` in roadmap, records reason in `log.md` | Refuses if `feature/phase-{n}` has commits not in `$base` unless explicitly confirmed; never reaches the default branch |
 | `/wur:status` | anywhere | Get the current execution snapshot | Reads current branch/worktree state, `ALL.md`, phase test state, fix rounds, blockers, and recent `log.md` | Read-only; acts as the read model of enforcement state |
 | `/wur:wiki:add {src}` | main repo | Ingest external knowledge into the project wiki | Stores source in `agents/raw/`, writes research into `agents/research/`, updates linked docs/pages, updates `agents/index.md`, appends to roadmap log | No worktree; wiki-only mutation; suggests `/wur:wiki:graph extract` if graph artifacts are now stale |
+| `/wur:wiki:ima {idea}` | main repo | Turn a prompt, feedback, or rough idea into richer project knowledge | Stores raw input, writes IMA research/docs material, updates `agents/index.md` and `log.md`; with explicit `--update-roadmap` or clear user request, may update `ALL.md` or a phase file | No worktree; planning-only mutation; roadmap changes create or revise `planned` WUs and never advance execution state |
 | `/wur:wiki:ask {q}` | main repo | Query the `agents/` wiki | Reads `agents/SCHEMA.md`, `agents/index.md`, follows `[[wikilinks]]`, and can use graph artifacts for relational navigation when present | Read-only unless you explicitly ask to file synthesis back |
 | `/wur:wiki:lint` | main repo | Audit the wiki for structural/semantic issues | Checks `agents/` for broken links, missing frontmatter on graph pages, stale active pages, and graph consistency when the graph layer exists | Proposed edits only; appends `wiki-lint` to `agents/roadmap/log.md` |
 | `/wur:wiki:stats` | main repo | Get a dashboard for the wiki and graph layer | Counts phases, fix rounds, research/docs/reports, status distribution, orphan pages, and graph freshness | Read-only |
@@ -313,6 +322,7 @@ flowchart LR
     subgraph WL["Wiki + graph layer"]
         UPG["/wur:wiki:upgrade"]
         ADD["/wur:wiki:add"]
+        IMA["/wur:wiki:ima"]
         ASK["/wur:wiki:ask"]
         LINT["/wur:wiki:lint"]
         STATS["/wur:wiki:stats"]
@@ -328,6 +338,7 @@ flowchart LR
 
     WK --> UPG
     WK --> ADD
+    WK --> IMA
     WK --> ASK
     WK --> LINT
     WK --> STATS
@@ -335,6 +346,7 @@ flowchart LR
 
     UPG --> GL
     ADD --> A
+    IMA --> A
     ASK --> A
     LINT --> A
     STATS --> A
@@ -439,6 +451,12 @@ bugs found → /wur:test fail
   └─ updates research/docs/index/log without touching worktrees
   └─ suggests /wur:wiki:graph extract when derived graph artifacts become stale
 
+/wur:wiki:ima
+  └─ runs Idea-to-MVP analysis on a prompt, feedback, or rough project context
+  └─ writes raw/research/docs knowledge without touching worktrees
+  └─ may update ALL.md or PHASE_{n}.md only when roadmap updates are explicitly requested
+  └─ creates or revises planned WUs only; never advances active/accepted/done state
+
 /wur:wiki:graph extract
   └─ derives nodes.jsonl, edges.jsonl (tracked) from canonical agents/ pages
   └─ derives graph.sqlite (gitignored) for fast typed-edge queries
@@ -477,7 +495,7 @@ work-unit-roadmap/
   commands/                      # Phase lifecycle + workspace command procedures
     init.md   upgrade.md   start.md   done.md   abort.md   test.md   status.md
     wiki/                        # Wiki command procedures
-      upgrade.md   add.md   ask.md   lint.md   stats.md   graph.md
+      upgrade.md   add.md   ima.md   ask.md   lint.md   stats.md   graph.md
   tests/
     fixtures/agents_clean/       # Clean WUR workspace used by script tests
     test_wur_graph_scripts.py    # End-to-end extractor/lint/query/stats tests
