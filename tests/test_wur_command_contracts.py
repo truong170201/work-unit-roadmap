@@ -169,17 +169,19 @@ class WurCommandContractTestCase(unittest.TestCase):
             text,
             [
                 "Idea-to-MVP analysis",
+                "argument-hint: \"<idea-or-context>\"",
                 "If `agents/` does not exist, stop",
                 "Do not silently run `/wur:init`",
                 "Treat `$ARGUMENTS` as raw idea/context",
+                "Do not require flags",
+                "Infer roadmap intent from natural language",
+                "Infer phase focus from natural language",
                 "INTAKE",
                 "DISCOVER",
                 "DEFINE",
                 "DECIDE",
                 "ROADMAP",
-                "Only update roadmap files when the user explicitly requests roadmap updates",
-                "`--update-roadmap`",
-                "`--phase {n}`",
+                "Only update roadmap files when the user intent calls for roadmap planning changes",
                 "Planning changes may create or revise `planned` Work Units",
                 "Do not mark any Work Unit `active`, `accepted`, or `done`",
                 "Do not run `/wur:start`, `/wur:test`, `/wur:done`, or `/wur:abort`",
@@ -187,6 +189,7 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "suggest running `/wur:wiki:graph extract`",
             ],
         )
+        self.assert_contains_none(text, ["--update-roadmap", "--phase {n}"])
 
 
 if __name__ == "__main__":

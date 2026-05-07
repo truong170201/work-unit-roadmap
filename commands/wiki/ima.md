@@ -1,6 +1,6 @@
 ---
 description: Idea-to-MVP analysis for enriching the agents/ wiki and, when requested, updating roadmap plans.
-argument-hint: "[--update-roadmap] [--phase {n}] <idea-or-context>"
+argument-hint: "<idea-or-context>"
 ---
 
 Run Idea-to-MVP analysis against the existing `agents/` wiki using the `wur-guidelines` skill.
@@ -18,13 +18,15 @@ Source: $ARGUMENTS
 - Do not run `/wur:start`, `/wur:test`, `/wur:done`, or `/wur:abort`.
 - Do not mark any Work Unit `active`, `accepted`, or `done`.
 - Planning changes may create or revise `planned` Work Units only.
-- Only update roadmap files when the user explicitly requests roadmap updates, either by passing `--update-roadmap` or by asking in natural language to update/rework the roadmap.
-- If `--phase {n}` is present, focus roadmap analysis on `agents/roadmap/PHASE_{n}.md` and its fix ledger. If the phase or ledger does not exist, report that plainly and continue with wiki-only analysis unless roadmap update was explicitly requested.
+- Do not require flags. `/wur:wiki:ima <idea-or-context>` is the full command shape.
+- Infer roadmap intent from natural language. Phrases such as "update roadmap", "adjust the plan", "add this feature", "change scope", "rework MVP", or "phase/WU should include..." mean roadmap planning changes are in scope.
+- Infer phase focus from natural language. Phrases such as "phase 2", "PHASE_2", "current phase", or a named phase file mean read and focus that phase and its fix ledger when present.
+- Only update roadmap files when the user intent calls for roadmap planning changes. If the prompt is only research/idea capture, leave roadmap files unchanged and report suggested roadmap updates.
 
 ## Procedure
 
 1. Read `agents/SCHEMA.md`, `agents/index.md`, `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, and `agents/roadmap/ALL.md`.
-2. If `--phase {n}` is present, also read `agents/roadmap/PHASE_{n}.md`, `agents/roadmap/PHASE_{n}_FIX.md` if present, and the relevant recent `agents/roadmap/log.md` entries.
+2. Infer whether `$ARGUMENTS` points to a specific phase, current phase, roadmap, WU, or feature scope. If it does, read the relevant `agents/roadmap/PHASE_{n}.md`, `agents/roadmap/PHASE_{n}_FIX.md` if present, and recent `agents/roadmap/log.md` entries.
 3. Save the prompt or supplied context into `agents/raw/` with a slugified filename unless it already exists as a file path. Preserve the original wording as raw input.
 4. Run the IMA stations:
 
@@ -59,8 +61,8 @@ Source: $ARGUMENTS
    ```
 
 6. Create or update focused docs pages in `agents/docs/` only when the idea yields durable concepts, decisions, or constraints worth reusing. Do not create one page per thought.
-7. If roadmap update is **not** explicitly requested, leave roadmap files unchanged. In the report, list proposed roadmap edits under "Suggested roadmap updates".
-8. If roadmap update **is** explicitly requested:
+7. If roadmap planning changes are **not** implied by the user's natural-language intent, leave roadmap files unchanged. In the report, list proposed roadmap edits under "Suggested roadmap updates".
+8. If roadmap planning changes **are** implied by the user's natural-language intent:
    - Update `agents/roadmap/ALL.md` and/or `agents/roadmap/PHASE_{n}.md` surgically.
    - Keep existing active execution state intact.
    - New or revised WUs must be `planned`.

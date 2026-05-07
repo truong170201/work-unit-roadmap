@@ -177,7 +177,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
     ima_text = _text(wiki_ima_md)
     for snippet in (
         "| {today} | wiki-ima |",
-        "Only update roadmap files when the user explicitly requests roadmap updates",
+        "Only update roadmap files when the user intent calls for roadmap planning changes",
+        "Do not require flags",
         "Do not mark any Work Unit `active`, `accepted`, or `done`",
     ):
         if snippet not in ima_text:
