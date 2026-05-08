@@ -137,6 +137,10 @@ Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. C
 
 Specialists are runtime optional: if the client supports subagents, the coordinator may dispatch the matching role; otherwise it reads the specialist file and applies that role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated before it affects roadmap state: one recommendation is not one Work Unit. Recommendations become acceptance criteria, risks, rejected suggestions, or planned WUs only when they are material and fit the active scope. Do not mark WUs `active`, `accepted`, or `done`, close phases, or bypass worktrees from a specialist role.
 
+**Coverage Matrix** — every clear domain should have a department coverage map before specialist roles are trusted. Coverage categories are checklists, not mandatory files: one specialist can cover multiple categories in a small project, but missing critical coverage must be recorded as a `coverage gap` instead of silently ignored.
+
+For game projects, check coverage for game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Platform-specific expertise means the relevant runtime such as Unity, Godot, Unreal, Roblox, mobile, web, console, multiplayer, shader, or toolchain work. If context is enough, create the matching project-specific role cards; if not, ask one focused question or record the coverage gap. Do not create generic specialist placeholders.
+
 Every implementation-facing specialist should include **Technology Judgment**:
 - Prefer TypeScript for non-trivial web/app code.
 - Consider Vite + React first for common frontend web apps.

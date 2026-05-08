@@ -62,24 +62,25 @@ Source: $ARGUMENTS
    ```
 
 7. Create or update focused docs pages in `agents/docs/` only when the idea yields durable concepts, decisions, or constraints worth reusing. Do not create one page per thought.
-8. Coordinator consolidates specialist output before planning changes. Rule: one specialist recommendation does not equal one Work Unit; consolidate into risks, acceptance criteria, rejected suggestions, or `planned` WUs only when material.
-9. If the idea changes UI, UX, brand feel, content presentation, game feel, or user-facing workflow assumptions, create or update `agents/project/DESIGN.md` before roadmap edits. Preserve any user-supplied `DESIGN.md` as the Design Contract; if direction is unclear, record open questions instead of inventing certainty.
-10. If the idea changes software platform, UI layer, runtime, backend, database, or game/app engine assumptions, create or update `agents/project/TECH_STACK.md` before roadmap edits. Use the WUR Default Stack Suggestions as recommendations, preserve existing stack unless there is a concrete reason to change it, and record overrides instead of silently switching tools.
-11. If roadmap planning changes are **not** implied by the user's natural-language intent, leave roadmap files unchanged. In the report, list proposed roadmap edits under "Suggested roadmap updates".
-12. If roadmap planning changes **are** implied by the user's natural-language intent:
+8. Re-check the Specialist Coverage Matrix when the idea changes domain, project type, game genre, engine/runtime, production scope, or required expertise. Record missing critical capability as a `coverage gap`; create focused project-specific roles only when the context is clear.
+9. Coordinator consolidates specialist output before planning changes. Rule: one specialist recommendation does not equal one Work Unit; consolidate into risks, acceptance criteria, rejected suggestions, or `planned` WUs only when material.
+10. If the idea changes UI, UX, brand feel, content presentation, game feel, or user-facing workflow assumptions, create or update `agents/project/DESIGN.md` before roadmap edits. Preserve any user-supplied `DESIGN.md` as the Design Contract; if direction is unclear, record open questions instead of inventing certainty.
+11. If the idea changes software platform, UI layer, runtime, backend, database, or game/app engine assumptions, create or update `agents/project/TECH_STACK.md` before roadmap edits. Use the WUR Default Stack Suggestions as recommendations, preserve existing stack unless there is a concrete reason to change it, and record overrides instead of silently switching tools.
+12. If roadmap planning changes are **not** implied by the user's natural-language intent, leave roadmap files unchanged. In the report, list proposed roadmap edits under "Suggested roadmap updates".
+13. If roadmap planning changes **are** implied by the user's natural-language intent:
    - Update `agents/roadmap/ALL.md` and/or `agents/roadmap/PHASE_{n}.md` surgically.
    - Keep existing active execution state intact.
    - New or revised WUs must be `planned`.
    - If the requested change conflicts with an active WU, record the conflict and mark it as needing client decision instead of silently changing the active WU.
-13. Update `agents/index.md` with any new research/docs/project pages.
-14. Append one line to `agents/roadmap/log.md`:
+14. Update `agents/index.md` with any new research/docs/project pages.
+15. Append one line to `agents/roadmap/log.md`:
 
    ```markdown
    | {today} | wiki-ima | {slug} analyzed; roadmap update: {yes/no} |
    ```
 
-15. If `agents/graph/ontology.yaml` exists, mention that the derived graph is now stale and suggest running `/wur:wiki:graph extract`.
-16. Report: raw source stored, pages created/updated, roadmap files changed or suggested, design contract changes, tech stack changes, specialist roles used, contradictions found, open questions, and next safe command.
+16. If `agents/graph/ontology.yaml` exists, mention that the derived graph is now stale and suggest running `/wur:wiki:graph extract`.
+17. Report: raw source stored, pages created/updated, roadmap files changed or suggested, design contract changes, tech stack changes, specialist roles used, coverage gaps, contradictions found, open questions, and next safe command.
 
 ## Guardrails
 

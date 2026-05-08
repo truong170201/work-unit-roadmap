@@ -212,6 +212,9 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "`agents/specialists/`",
         "Coordinator owns final planning and execution decisions",
         "one recommendation is not one Work Unit",
+        "Coverage Matrix",
+        "coverage gap",
+        "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
         "Technology Judgment",
         "`agents/project/DESIGN.md`",
         "software/dev projects should create or maintain",
@@ -245,6 +248,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Create or update `agents/project/TECH_STACK.md`",
         "Default Stack Suggestions",
         "Tailwind CSS + shadcn/ui",
+        "Coverage categories are checklists, not mandatory files",
+        "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
     ):
         if snippet not in init_text:
             findings.append(
@@ -254,6 +259,14 @@ def run_checks(repo_root: Path) -> list[Finding]:
                     init_md.relative_to(repo_root).as_posix(),
                 )
             )
+    if "Re-check the Specialist Coverage Matrix" not in ima_text:
+        findings.append(
+            Finding(
+                "ERROR",
+                "`/wur:wiki:ima` must re-check specialist coverage when context changes",
+                wiki_ima_md.relative_to(repo_root).as_posix(),
+            )
+        )
     if "WU-P{n}-fix:" not in _text(skill_md) or "WU-P{n}-abort:" not in _text(skill_md):
         findings.append(
             Finding(

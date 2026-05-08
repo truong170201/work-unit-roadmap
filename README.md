@@ -16,6 +16,8 @@ The `agents/` folder is the unified project wiki: roadmap, research, decisions, 
 
 Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster. Specialists are advisory unless explicitly assigned a WU: runtime subagents may be used when available, otherwise the coordinator applies the role locally. Coordinator owns final planning and execution decisions, and specialist output must be consolidated because one recommendation is not one Work Unit.
 
+Department pages include a Coverage Matrix so the agent can catch missing expertise before planning. For game projects this means checking game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise without turning each category into a mandatory separate file.
+
 Software projects should also keep `agents/project/DESIGN.md` and `agents/project/TECH_STACK.md`. `DESIGN.md` is the AI-readable Design Contract: visual theme, color roles, typography, component styling, layout, responsive behavior, and do/don't guardrails. A client can copy a `DESIGN.md` from a design reference into the project, or WUR can draft/update one from init/IMA context. `TECH_STACK.md` records the selected stack, default suggestion used or rejected, override reasons, and verification commands. Defaults are recommendations, not mandates. For common React web UI, WUR prefers TypeScript plus Tailwind CSS + shadcn/ui; for mobile it prefers Expo + TypeScript + NativeWind; for browser games it prefers Vite + TypeScript with Phaser or Three.js depending on 2D/3D needs.
 
 The result: a git history where every commit is cherry-pickable, every bug is bisectable, and any session can be recovered from first principles by reading `agents/roadmap/ALL.md` and `git log`.
@@ -528,13 +530,14 @@ Use this as the practical definition of a production-ready WUR wiki layer for a 
 - [ ] `python -m unittest discover -s tests -v` passes locally
 - [ ] `agents/index.md` covers every graph page (`## Roadmap`, `## Research`, `## Docs`, `## Reports`, `## Departments`, `## Specialists`)
 - [ ] Specialist output is consolidated: one recommendation is not one Work Unit
+- [ ] Department pages include a Coverage Matrix and record any critical `coverage gap`
 - [ ] Implementation-facing specialists include Technology Judgment and record material stack choices
 - [ ] `agents/project/DESIGN.md` records the Design Contract for software/dev projects, with visual/product UX detail when user-facing choices matter
 - [ ] `agents/project/TECH_STACK.md` records selected stack, default-stack overrides, and verification commands when software stack choices matter
 - [ ] `agents/roadmap/ALL.md` Commit Index is archived once it exceeds 30 rows
 - [ ] `agents/roadmap/log.md` remains append-only and merge conflicts preserve entries from both sides
 
-If all sixteen are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
+If all seventeen are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
 
 ## Other platforms
 
