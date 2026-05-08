@@ -40,6 +40,10 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Write each hook file with the exact content",
                 "Verify the install (do not skip)",
                 "Hooks without verification are theater",
+                "Detect project departments and specialists",
+                "Do not create generic specialist placeholders",
+                "Technology Judgment",
+                "specialist recommendations do not automatically become Work Units",
                 "git commit -m \"WU-TW-000: bootstrap agents/ workspace\"",
             ],
         )
@@ -176,6 +180,9 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Do not require flags",
                 "Infer roadmap intent from natural language",
                 "Infer phase focus from natural language",
+                "Read `agents/departments/` and `agents/specialists/` when present",
+                "Coordinator consolidates specialist output",
+                "one specialist recommendation does not equal one Work Unit",
                 "INTAKE",
                 "DISCOVER",
                 "DEFINE",
@@ -190,6 +197,31 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
         self.assert_contains_none(text, ["--update-roadmap", "--phase {n}"])
+
+    def test_specialist_registry_contract_prevents_roadmap_bloat(self) -> None:
+        skill = (ROOT / "skills" / "wur-guidelines" / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        self.assert_contains_all(
+            skill,
+            [
+                "Specialist Registry",
+                "`agents/departments/`",
+                "`agents/specialists/`",
+                "project-specific",
+                "runtime optional",
+                "Coordinator owns final planning and execution decisions",
+                "Specialist output must be consolidated",
+                "one recommendation is not one Work Unit",
+                "Technology Judgment",
+                "Prefer TypeScript for non-trivial web/app code",
+                "Consider Vite + React first for common frontend web apps",
+                "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
+                "Defaults are recommendations, not mandates",
+                "Record material stack choices",
+                "Do not mark WUs `active`, `accepted`, or `done`",
+            ],
+        )
 
 
 if __name__ == "__main__":

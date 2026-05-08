@@ -254,6 +254,55 @@ Consolidated fixes for [[roadmap/PHASE_2]].
         self.assertEqual(lint.returncode, 0, msg=lint.stdout + lint.stderr)
         self.assertNotIn("PHASE_2_FIX.md: PHASE file missing", lint.stdout)
 
+    def test_specialist_pages_are_first_class_graph_pages(self) -> None:
+        specialists = self.agents_dir / "specialists" / "engineering"
+        specialists.mkdir(parents=True)
+        (specialists / "frontend-architect.md").write_text(
+            """---
+type: specialist
+status: active
+department: engineering
+role: frontend-architect
+runtime: optional
+tags: [ui]
+informs: ["[[roadmap/PHASE_2]]"]
+---
+
+# Frontend Architect
+
+Technology Judgment:
+- Prefer TypeScript for non-trivial web/app code.
+- Consider Vite + React first for common frontend web apps.
+
+Boundaries:
+- Do not mark WUs active, accepted, or done.
+""",
+            encoding="utf-8",
+        )
+
+        index = self.agents_dir / "index.md"
+        index.write_text(
+            index.read_text(encoding="utf-8")
+            + "\n## Specialists\n- [[specialists/engineering/frontend-architect]]\n",
+            encoding="utf-8",
+        )
+
+        self.assertEqual(self.run_script(EXTRACT).returncode, 0)
+        nodes = [
+            json.loads(line)
+            for line in (self.agents_dir / "graph" / "nodes.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        ]
+        self.assertIn(
+            "specialists/engineering/frontend-architect",
+            {node["id"] for node in nodes},
+        )
+
+        lint = self.run_script(LINT)
+        self.assertEqual(lint.returncode, 0, msg=lint.stdout + lint.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

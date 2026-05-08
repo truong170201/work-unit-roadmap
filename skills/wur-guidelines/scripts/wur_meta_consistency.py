@@ -179,6 +179,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "| {today} | wiki-ima |",
         "Only update roadmap files when the user intent calls for roadmap planning changes",
         "Do not require flags",
+        "Read `agents/departments/` and `agents/specialists/` when present",
+        "one specialist recommendation does not equal one Work Unit",
         "Do not mark any Work Unit `active`, `accepted`, or `done`",
     ):
         if snippet not in ima_text:
@@ -187,6 +189,25 @@ def run_checks(repo_root: Path) -> list[Finding]:
                     "ERROR",
                     f"`/wur:wiki:ima` missing contract snippet `{snippet}`",
                     wiki_ima_md.relative_to(repo_root).as_posix(),
+                )
+            )
+    skill_text = _text(skill_md)
+    for snippet in (
+        "Specialist Registry",
+        "`agents/departments/`",
+        "`agents/specialists/`",
+        "Coordinator owns final planning and execution decisions",
+        "one recommendation is not one Work Unit",
+        "Technology Judgment",
+        "Prefer TypeScript for non-trivial web/app code",
+        "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
+    ):
+        if snippet not in skill_text:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"SKILL.md missing specialist contract snippet `{snippet}`",
+                    skill_md.relative_to(repo_root).as_posix(),
                 )
             )
     if "WU-P{n}-fix:" not in _text(skill_md) or "WU-P{n}-abort:" not in _text(skill_md):
@@ -223,6 +244,24 @@ def run_checks(repo_root: Path) -> list[Finding]:
                     "ERROR",
                     f"lint VALID_STATUSES missing `{required}`",
                     lint_py.relative_to(repo_root).as_posix(),
+                )
+            )
+
+    for required_type in ("department", "specialist"):
+        if required_type not in set(getattr(lint, "VALID_TYPES")):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"lint VALID_TYPES missing `{required_type}`",
+                    lint_py.relative_to(repo_root).as_posix(),
+                )
+            )
+        if required_type not in ontology_text:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"ontology template missing `{required_type}`",
+                    wiki_upgrade_md.relative_to(repo_root).as_posix(),
                 )
             )
         if required not in ontology_text:

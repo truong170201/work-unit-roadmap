@@ -104,6 +104,8 @@ Project context is resolved in this order:
      roadmap/
        ALL.md           ← master index: phases, status, commit log, navigation hub
        log.md           ← append-only session/activity journal (never overwrite)
+     departments/       ← project-specific capability map (empty unless domain is clear)
+     specialists/       ← project-specific role cards (empty unless domain is clear)
      docs/              ← durable notes, ADRs, synthesis (empty)
      research/          ← ingested external sources, analysis (empty)
      reports/           ← verification reports, completion reports (empty)
@@ -123,6 +125,14 @@ Project context is resolved in this order:
    - How to run tests, lint, build
    - Commit message conventions
    - Any project-specific guardrails
+
+   Detect project departments and specialists from `$ARGUMENTS`, README/package metadata, existing docs, and current conversation:
+   - Create `agents/departments/` and `agents/specialists/` folders.
+   - If the domain is clear, add only useful project-specific department pages and specialist role cards.
+   - If the domain is unclear, ask one focused question before creating roles.
+   - Do not create generic specialist placeholders.
+   - specialist recommendations do not automatically become Work Units; the coordinator consolidates them into risks, acceptance criteria, rejected suggestions, or `planned` WUs only when material.
+   - Implementation-facing specialists must include a `## Technology Judgment` section. Prefer modern mainstream defaults, such as TypeScript for non-trivial web/app code and Vite + React for common frontend web apps, while treating explicit user constraints, existing stack, runtime limits, team familiarity, and verification ability as overrides.
 
 11. Fill `agents/roadmap/ALL.md` with:
 
@@ -196,6 +206,8 @@ Project context is resolved in this order:
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
    | `report` | `agents/reports/*.md` | Verification or completion report |
+   | `department` | `agents/departments/*.md` | Project-specific capability area |
+   | `specialist` | `agents/specialists/**/*.md` | Project-specific expert role card |
 
    ## Status Values
    `planned` · `active` · `done` · `blocked` · `deferred` · `aborted`
@@ -214,6 +226,8 @@ Project context is resolved in this order:
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`
+   - `agents/departments/*.md`
+   - `agents/specialists/**/*.md`
 
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
@@ -229,6 +243,28 @@ Project context is resolved in this order:
    - `type` — one of the page types above
    - `status` — one of the status values above
    - `tags` — YAML list of lowercase kebab-case strings, even if empty (`tags: []`)
+
+   ## Specialist Registry
+   `agents/departments/` and `agents/specialists/` describe project-specific expertise. They are advisory unless explicitly assigned a WU. Runtime subagents are optional; if unavailable, the coordinator applies the role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated: one recommendation is not one Work Unit.
+
+   Specialist frontmatter:
+   ```yaml
+   type: specialist
+   status: active
+   department: engineering
+   role: frontend-architect
+   runtime: optional
+   tags: [ui]
+   ```
+
+   Specialist body must include:
+   - `## Use When`
+   - `## Inputs`
+   - `## Outputs`
+   - `## Boundaries`
+   - `## Technology Judgment` for implementation-facing roles
+
+   Technology Judgment defaults are recommendations, not mandates. Prefer TypeScript for non-trivial web/app code, consider Vite + React first for common frontend web apps, consider Bun when compatible, and avoid plain HTML/CSS/JS for app-scale work unless explicitly requested or clearly tiny/static.
 
    ## Graph Conventions
    - `depends_on: ["[[roadmap/PHASE_1]]"]` — phase dependency
@@ -307,6 +343,10 @@ Project context is resolved in this order:
    ## Roadmap
    - [[roadmap/ALL]] — master dashboard: phases, status, commit index
    - [[roadmap/log]] — append-only activity journal
+
+   ## Departments
+
+   ## Specialists
    ```
 
 12. Commit the workspace bootstrap:

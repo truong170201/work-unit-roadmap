@@ -17,7 +17,7 @@ This is the **schema migration** path. It is distinct from `/wur:wiki:upgrade` (
 | `schema_version` is older than plugin's latest | Plan migrations stepwise (1→2, 2→3, …). Confirm with user. Run. Commit each step as a Tiny WU. |
 | `schema_version` is newer than plugin's latest | Refuse. Plugin is too old for this workspace. |
 
-The plugin's **latest schema** for this version of WUR is **`1`** (the original `wiki` layout — `agents/{project,roadmap,docs,research,reports,references,raw,graph}` with the conventions in `agents/SCHEMA.md`).
+The plugin's **latest schema** for this version of WUR is **`1`** (the `wiki` layout — `agents/{project,roadmap,departments,specialists,docs,research,reports,references,raw,graph}` with the conventions in `agents/SCHEMA.md`).
 
 ## Invariants (must hold across every migration)
 
@@ -143,6 +143,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    agents/docs/
    agents/research/
    agents/reports/
+   agents/departments/
+   agents/specialists/
    agents/references/
    agents/raw/
    agents/project/
@@ -181,6 +183,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
    | `report` | `agents/reports/*.md` | Verification or completion report |
+   | `department` | `agents/departments/*.md` | Project-specific capability area |
+   | `specialist` | `agents/specialists/**/*.md` | Project-specific expert role card |
 
    ## Status Values
    `planned` · `active` · `done` · `blocked` · `deferred` · `aborted`
@@ -199,6 +203,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`
+   - `agents/departments/*.md`
+   - `agents/specialists/**/*.md`
 
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
@@ -340,13 +346,15 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    - Ensure `## Project` section exists with entries for `PHILOSOPHY` and `USAGE`.
    - Ensure `## Roadmap` section exists with entries for `ALL` and `log`.
-   - For every graph page found under `agents/` (`PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`), check if it appears in `index.md`. If not, append it under the correct section:
+   - For every graph page found under `agents/` (`PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`, `departments/*.md`, `specialists/**/*.md`), check if it appears in `index.md`. If not, append it under the correct section:
      - `PHASE_*.md` / `PHASE_*_FIX.md` / legacy `FIX_*.md` → `## Roadmap`
      - `research/*.md` → `## Research` (create section if absent)
      - `docs/*.md` → `## Docs` (create section if absent)
      - `reports/*.md` → `## Reports` (create section if absent)
+     - `departments/*.md` → `## Departments` (create section if absent)
+     - `specialists/**/*.md` → `## Specialists` (create section if absent)
 
-   ### Graph pages: `PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`
+   ### Graph pages: `PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`, `departments/*.md`, `specialists/**/*.md`
 
    For each graph page, read the file and check for YAML frontmatter (file must start with `---`).
 
@@ -360,6 +368,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `research/*.md` | `research` | `done` |
    | `docs/*.md` | `note` | `done` |
    | `reports/*.md` | `report` | `done` |
+   | `departments/*.md` | `department` | `active` |
+   | `specialists/**/*.md` | `specialist` | `active` |
 
    Prepend — use the appropriate template for the path:
 

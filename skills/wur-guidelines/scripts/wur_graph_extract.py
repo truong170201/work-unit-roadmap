@@ -76,6 +76,8 @@ GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     ("research/*.md", "research"),
     ("docs/*.md", "note"),  # refined per-file by frontmatter type:
     ("reports/*.md", "report"),
+    ("departments/*.md", "department"),
+    ("specialists/**/*.md", "specialist"),
 ]
 
 # Files/dirs to never include, relative to agents_dir root

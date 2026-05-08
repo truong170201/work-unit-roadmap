@@ -33,6 +33,8 @@ If `agents/` does not exist, stop — run `/wur:init` first.
    - `agents/research/*.md`
    - `agents/docs/*.md`
    - `agents/reports/*.md`
+   - `agents/departments/*.md`
+   - `agents/specialists/**/*.md`
 
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
@@ -86,6 +88,12 @@ If `agents/` does not exist, stop — run `/wur:init` first.
      report:
        maps_from:
          type: report
+     department:
+       maps_from:
+         type: department
+     specialist:
+       maps_from:
+         type: specialist
 
    # Predicates allowed in typed edges.
    # Implicit predicates are emitted by the extractor automatically.
@@ -116,10 +124,10 @@ If `agents/` does not exist, stop — run `/wur:init` first.
        requires_evidence: false
        description: "Report verifies a phase or fix round."
      informs:
-       subject_types: [research, note, decision]
-       object_types: [phase, decision, report, note]
+       subject_types: [research, note, decision, department, specialist]
+       object_types: [phase, decision, report, note, department, specialist]
        requires_evidence: false
-       description: "Research, notes, or decisions inform another graph page."
+       description: "Research, notes, decisions, departments, or specialists inform another graph page."
 
      # --- Project predicates (add domain-specific ones here) ---
      # example:

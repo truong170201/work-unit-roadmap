@@ -14,6 +14,8 @@ Work Unit Roadmap enforces a different pattern. Every change is scoped to one **
 
 The `agents/` folder is the unified project wiki: roadmap, research, decisions, and docs in one place. Every page has YAML frontmatter (`type`, `status`, `tags`) and `[[wikilinks]]` that connect phases, fix rounds, decisions, and research. Open `agents/` in Obsidian for instant graph view — see what's done, what's active, what's blocked. Fix rounds live in their own files, separate from the phase file.
 
+Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster. Specialists are advisory unless explicitly assigned a WU: runtime subagents may be used when available, otherwise the coordinator applies the role locally. Coordinator owns final planning and execution decisions, and specialist output must be consolidated because one recommendation is not one Work Unit.
+
 The result: a git history where every commit is cherry-pickable, every bug is bisectable, and any session can be recovered from first principles by reading `agents/roadmap/ALL.md` and `git log`.
 
 ## Scope boundary
@@ -138,6 +140,7 @@ This creates the base `agents/` workspace:
 - `agents/roadmap/ALL.md` and `agents/roadmap/log.md`
 - `agents/SCHEMA.md` and `agents/index.md`
 - `agents/raw/`, `research/`, `docs/`, `reports/`, `references/`
+- optional `agents/departments/` and `agents/specialists/` when project context is clear
 
 The argument is optional project context. The agent should use it as a supplement, then derive the project objective from existing `agents/` files, obvious project files, or the current conversation. If none of those contain enough context, it must ask for a one-sentence project description before creating `agents/`; WUR should not bootstrap a placeholder-only project wiki.
 
@@ -173,6 +176,8 @@ If you care about visual project state — what is open, closed, blocked, what d
 ```
 
 IMA is Idea-to-MVP analysis for prompts, feedback, and rough project context. It runs from the main repo, writes durable knowledge into `agents/raw/`, `agents/research/`, `agents/docs/`, `agents/index.md`, and `agents/roadmap/log.md`, then reports roadmap implications. The user only types natural language after the command; if that language asks to update roadmap, adjust a phase, add a feature, or rework MVP scope, IMA may update `ALL.md` or a phase file. New or revised Work Units stay `planned`; IMA never starts work, marks WUs done, closes phases, or touches application code.
+
+When `agents/specialists/` exists, IMA reads relevant roles first. Specialist advice is folded into risks, acceptance criteria, rejected suggestions, or planned WUs only when material; it does not spawn one WU per comment.
 
 ### 4. Start execution for a phase
 
@@ -308,11 +313,13 @@ flowchart LR
         A["agents/"]
         P["project/<br/>PHILOSOPHY.md<br/>USAGE.md"]
         R["roadmap/<br/>ALL.md<br/>PHASE_*.md<br/>PHASE_*_FIX.md<br/>log.md"]
+        SP["departments / specialists"]
         K["research / docs / reports / references / raw"]
         X["SCHEMA.md<br/>index.md"]
 
         A --> P
         A --> R
+        A --> SP
         A --> K
         A --> X
     end
@@ -420,6 +427,7 @@ This is the core model:
 /wur:init
   └─ creates agents/ as the base project wiki
   └─ resolves optional user context plus existing project context
+  └─ creates project-specific departments/specialists only when domain is clear
   └─ writes PHILOSOPHY.md, USAGE.md, ALL.md, log.md, SCHEMA.md, index.md
 
 /wur:wiki:upgrade
@@ -453,6 +461,7 @@ bugs found → /wur:test fail
 
 /wur:wiki:ima
   └─ runs Idea-to-MVP analysis on a prompt, feedback, or rough project context
+  └─ reads relevant specialist roles when agents/specialists/ exists
   └─ writes raw/research/docs knowledge without touching worktrees
   └─ may update ALL.md or PHASE_{n}.md only when roadmap updates are explicitly requested
   └─ creates or revises planned WUs only; never advances active/accepted/done state
@@ -515,11 +524,13 @@ Use this as the practical definition of a production-ready WUR wiki layer for a 
 - [ ] `python skills/wur-guidelines/scripts/wur_wiki_stats.py agents/` shows no broken links and no missing frontmatter
 - [ ] `python skills/wur-guidelines/scripts/wur_meta_consistency.py .` returns **0 issues**
 - [ ] `python -m unittest discover -s tests -v` passes locally
-- [ ] `agents/index.md` covers every graph page (`## Roadmap`, `## Research`, `## Docs`, `## Reports`)
+- [ ] `agents/index.md` covers every graph page (`## Roadmap`, `## Research`, `## Docs`, `## Reports`, `## Departments`, `## Specialists`)
+- [ ] Specialist output is consolidated: one recommendation is not one Work Unit
+- [ ] Implementation-facing specialists include Technology Judgment and record material stack choices
 - [ ] `agents/roadmap/ALL.md` Commit Index is archived once it exceeds 30 rows
 - [ ] `agents/roadmap/log.md` remains append-only and merge conflicts preserve entries from both sides
 
-If all eleven are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
+If all fourteen are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
 
 ## Other platforms
 

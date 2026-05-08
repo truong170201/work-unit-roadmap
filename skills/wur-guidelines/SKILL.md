@@ -133,6 +133,18 @@ Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. C
 
 **Tiny WUs** — for roadmap maintenance, doc updates. Prefix `WU-TW-{number}`. Same flow: implement → verify → commit → update ALL.md.
 
+**Specialist Registry** — `agents/departments/` and `agents/specialists/` are project-specific wiki knowledge that describe which expert roles this project can use. They are not a fixed roster shipped by WUR. Create or revise them from project context during `/wur:init`, `/wur:wiki:ima`, or normal wiki maintenance when the domain is clear; if the domain is unclear, ask one focused question instead of creating generic placeholders.
+
+Specialists are runtime optional: if the client supports subagents, the coordinator may dispatch the matching role; otherwise it reads the specialist file and applies that role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated before it affects roadmap state: one recommendation is not one Work Unit. Recommendations become acceptance criteria, risks, rejected suggestions, or planned WUs only when they are material and fit the active scope. Do not mark WUs `active`, `accepted`, or `done`, close phases, or bypass worktrees from a specialist role.
+
+Every implementation-facing specialist should include **Technology Judgment**:
+- Prefer TypeScript for non-trivial web/app code.
+- Consider Vite + React first for common frontend web apps.
+- Consider Bun for new JavaScript/TypeScript projects when dependencies, deployment, and team constraints allow it.
+- Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested, existing project context requires it, or the scope is a tiny static artifact.
+- Defaults are recommendations, not mandates: explicit user instructions, existing stack, runtime constraints, ecosystem maturity, team familiarity, and verification ability override defaults.
+- Record material stack choices in `agents/docs/` as a decision before execution.
+
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
 **Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
@@ -183,7 +195,7 @@ schema_version: 1
 ---
 ```
 
-The first published layout (the `wiki` layout) is **schema `1`**. When a future WUR plugin ships a new schema, it adds a migration script under `skills/wur-guidelines/references/migrations/v{from}-to-v{to}.md` and bumps the plugin's latest schema number.
+The `wiki` layout is **schema `1`**. Additive folders such as `agents/departments/` and `agents/specialists/` are schema-1 compatible because they remain wiki knowledge, not execution infrastructure. When a future WUR plugin ships a breaking schema, it adds a migration script under `skills/wur-guidelines/references/migrations/v{from}-to-v{to}.md` and bumps the plugin's latest schema number.
 
 Rules:
 
@@ -207,6 +219,8 @@ The `agents/` folder IS the project wiki — roadmap, research, decisions, and d
 agents/
   project/         PHILOSOPHY.md · USAGE.md
   roadmap/         ALL.md · PHASE_*.md · PHASE_*_FIX.md · legacy FIX_*.md · log.md
+  departments/     project-specific capability map
+  specialists/     role cards used for advisory/review/implementation judgment
   research/        ingested sources and analysis
   docs/            ADRs, durable notes, synthesis
   reports/         verification and completion reports

@@ -43,7 +43,16 @@ except ImportError:
 # Constants
 # ---------------------------------------------------------------------------
 
-VALID_TYPES = {"phase", "fix-round", "research", "decision", "note", "report"}
+VALID_TYPES = {
+    "phase",
+    "fix-round",
+    "research",
+    "decision",
+    "note",
+    "report",
+    "department",
+    "specialist",
+}
 VALID_STATUSES = {"planned", "active", "done", "blocked", "deferred", "aborted"}
 TAG_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+?)(?:[|#][^\]]*)?\]\]")
@@ -55,6 +64,8 @@ GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     ("research/*.md", "research"),
     ("docs/*.md", "note"),
     ("reports/*.md", "report"),
+    ("departments/*.md", "department"),
+    ("specialists/**/*.md", "specialist"),
 ]
 
 # ---------------------------------------------------------------------------

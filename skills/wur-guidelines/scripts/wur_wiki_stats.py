@@ -48,6 +48,8 @@ GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     ("research/*.md", "research"),
     ("docs/*.md", "note"),  # may be overridden to "decision" by frontmatter
     ("reports/*.md", "report"),
+    ("departments/*.md", "department"),
+    ("specialists/**/*.md", "specialist"),
 ]
 
 WIKILINK_RE = re.compile(r"\[\[([^\[\]|#]+?)(?:[|#][^\[\]]*)?\]\]")
