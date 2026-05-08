@@ -6,7 +6,7 @@ argument-hint: "<phase-number>"
 Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-worktrees` to create the worktree.
 
 1. If `agents/` does not exist, stop and instruct the user to run `/wur:init` first.
-2. Read `agents/project/PHILOSOPHY.md` and `agents/project/USAGE.md` if not already read this session.
+2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
 3. Read `agents/roadmap/ALL.md` — extract the default branch, confirm the target phase is planned, confirm no blocker exists, and enforce the phase gate:
    - if another phase is already `active`, stop — finish or close that phase first
    - if `PHASE_{n}` is already the active phase and its worktree exists, stop — resume it instead of re-starting

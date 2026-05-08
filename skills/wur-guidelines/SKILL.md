@@ -163,6 +163,20 @@ Every implementation-facing specialist should include **Technology Judgment**:
 
 Choose the smallest stack that fits the product and verification environment. Prefer existing project stack over defaults unless it is clearly unsuitable.
 
+**Design Contract** — software/dev projects with any UI, UX, brand, game feel, content presentation, or user-facing workflow should create or maintain `agents/project/DESIGN.md`. It is the AI-readable product/design system that implementation must follow; `TECH_STACK.md` says what to build with, `DESIGN.md` says how it should look, feel, and behave. A client may copy a `DESIGN.md` from another source into the project, or `/wur:init` and `/wur:wiki:ima` may draft/update one from project context.
+
+Keep `DESIGN.md` concise but actionable. Use these sections:
+- `## Visual Theme & Atmosphere`
+- `## Color Palette & Roles`
+- `## Typography Rules`
+- `## Component Styling`
+- `## Layout Principles`
+- `## Responsive Behavior`
+- `## Do's and Don'ts`
+- `## Agent Prompt Guide`
+
+If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
+
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
 **Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
@@ -235,7 +249,7 @@ The `agents/` folder IS the project wiki — roadmap, research, decisions, and d
 
 ```text
 agents/
-  project/         PHILOSOPHY.md · USAGE.md · TECH_STACK.md
+  project/         PHILOSOPHY.md · USAGE.md · DESIGN.md · TECH_STACK.md
   roadmap/         ALL.md · PHASE_*.md · PHASE_*_FIX.md · legacy FIX_*.md · log.md
   departments/     project-specific capability map
   specialists/     role cards used for advisory/review/implementation judgment
@@ -301,4 +315,4 @@ Skip this section for single-agent projects. Adopt when a second agent joins.
 - Preserve project history. Leave the roadmap understandable and the working tree clean.
 - Never fake completion, skip verification, skip roadmap updates, or bury unrelated changes.
 
-The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/TECH_STACK.md` when present, `agents/roadmap/ALL.md`, the active phase file, inspect recent commits, and understand exactly what happened and what should happen next.
+The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, `agents/project/TECH_STACK.md` when present, `agents/roadmap/ALL.md`, the active phase file, inspect recent commits, and understand exactly what happened and what should happen next.

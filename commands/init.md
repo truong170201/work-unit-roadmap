@@ -101,6 +101,7 @@ Project context is resolved in this order:
      project/
        PHILOSOPHY.md    ← project principles, constraints, non-goals
        USAGE.md         ← how to use the agent in this project (conventions, commands)
+       DESIGN.md        ← user-facing design contract for dev projects
        TECH_STACK.md    ← selected stack, default suggestions, overrides, verification
      roadmap/
        ALL.md           ← master index: phases, status, commit log, navigation hub
@@ -126,6 +127,41 @@ Project context is resolved in this order:
    - How to run tests, lint, build
    - Commit message conventions
    - Any project-specific guardrails
+
+   Create or update `agents/project/DESIGN.md` for software/dev projects with UI, UX, brand, content presentation, game feel, or user-facing workflows:
+   - Treat it as the **Design Contract** that implementation must follow.
+   - If the user supplied or copied a `DESIGN.md`, preserve it as the source of truth and summarize only missing project-specific constraints.
+   - If no design source exists, draft a concise project-specific design contract from `$ARGUMENTS`, README/package metadata, existing docs, and current conversation.
+   - If the visual/product direction is unclear, record known constraints and open questions instead of inventing a brand.
+   - Do not create Work Units from every design note; convert design guidance into acceptance criteria, risks, or `planned` WUs only when material.
+
+   ```markdown
+   # Design
+
+   ## Visual Theme & Atmosphere
+   {mood, density, product feel, non-goals, known references}
+
+   ## Color Palette & Roles
+   {semantic colors and intended use; unknowns allowed}
+
+   ## Typography Rules
+   {font choices, hierarchy, scale, readability constraints}
+
+   ## Component Styling
+   {buttons, cards, inputs, navigation, states}
+
+   ## Layout Principles
+   {spacing, grid, page rhythm, information density}
+
+   ## Responsive Behavior
+   {breakpoints, touch targets, collapsing behavior}
+
+   ## Do's and Don'ts
+   {guardrails to prevent visual drift}
+
+   ## Agent Prompt Guide
+   {short implementation prompts or reminders future agents can reuse}
+   ```
 
    Create or update `agents/project/TECH_STACK.md` for software projects:
    - Capture the detected/current stack if one exists.
@@ -270,6 +306,7 @@ Project context is resolved in this order:
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
    - `agents/project/USAGE.md`
+   - `agents/project/DESIGN.md`
    - `agents/project/TECH_STACK.md`
    - `agents/roadmap/ALL.md`
    - `agents/roadmap/log.md`
@@ -378,6 +415,7 @@ Project context is resolved in this order:
    ## Project
    - [[project/PHILOSOPHY]] — project mission, principles, non-goals
    - [[project/USAGE]] — how to run, test, build, verify
+   - [[project/DESIGN]] — user-facing design contract
    - [[project/TECH_STACK]] — selected software stack, defaults, overrides, verification
 
    ## Roadmap

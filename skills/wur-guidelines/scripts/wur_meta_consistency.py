@@ -166,6 +166,16 @@ def run_checks(repo_root: Path) -> list[Finding]:
                 test_md.relative_to(repo_root).as_posix(),
             )
         )
+    start_md = repo_root / "commands" / "start.md"
+    for snippet in ("agents/project/DESIGN.md", "agents/project/TECH_STACK.md"):
+        if snippet not in _text(start_md):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:start` must read `{snippet}` when present",
+                    start_md.relative_to(repo_root).as_posix(),
+                )
+            )
     if "| {today} | wiki-add |" not in _text(wiki_add_md):
         findings.append(
             Finding(
@@ -179,6 +189,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "| {today} | wiki-ima |",
         "Only update roadmap files when the user intent calls for roadmap planning changes",
         "Do not require flags",
+        "Read `agents/project/DESIGN.md` when present",
         "Read `agents/project/TECH_STACK.md` when present",
         "Read `agents/departments/` and `agents/specialists/` when present",
         "one specialist recommendation does not equal one Work Unit",
@@ -200,6 +211,10 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Coordinator owns final planning and execution decisions",
         "one recommendation is not one Work Unit",
         "Technology Judgment",
+        "`agents/project/DESIGN.md`",
+        "Design Contract",
+        "Visual Theme & Atmosphere",
+        "Component Styling",
         "`agents/project/TECH_STACK.md`",
         "Default Stack Suggestions",
         "Tailwind CSS + shadcn/ui",
@@ -219,6 +234,10 @@ def run_checks(repo_root: Path) -> list[Finding]:
             )
     init_text = _text(init_md)
     for snippet in (
+        "Create or update `agents/project/DESIGN.md`",
+        "Design Contract",
+        "Visual Theme & Atmosphere",
+        "Component Styling",
         "Create or update `agents/project/TECH_STACK.md`",
         "Default Stack Suggestions",
         "Tailwind CSS + shadcn/ui",
