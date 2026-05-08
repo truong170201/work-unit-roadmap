@@ -56,6 +56,48 @@ VALID_TYPES = {
 VALID_STATUSES = {"planned", "active", "done", "blocked", "deferred", "aborted"}
 TAG_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 WIKILINK_RE = re.compile(r"\[\[([^\]|#]+?)(?:[|#][^\]]*)?\]\]")
+DEFAULT_PREDEFINED_TAGS = {
+    "api",
+    "auth",
+    "data",
+    "infra",
+    "ui",
+    "security",
+    "performance",
+    "breaking-change",
+    "migration",
+    "risky",
+    "spike",
+    "research",
+    "external",
+    "archived",
+    "state-planned",
+    "state-active",
+    "state-ready-review",
+    "state-accepted",
+    "state-done",
+    "state-blocked",
+    "state-deferred",
+    "state-aborted",
+    "needs-review",
+    "needs-client",
+    "open-question",
+    "contradiction",
+    "decision-conflict",
+    "coverage-gap",
+    "test-failing",
+    "test-waived",
+    "graph-stale",
+    "risk",
+    "phase",
+    "work-unit",
+    "fix-round",
+    "decision",
+    "report",
+    "specialist",
+    "design",
+    "tech-stack",
+}
 
 GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     ("roadmap/PHASE_*_FIX.md", "fix-round"),
@@ -157,12 +199,31 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any] | None, str]:
     return fm, body
 
 
+def load_known_tags(agents_dir: Path) -> set[str]:
+    """Return built-in tags plus custom tags declared under SCHEMA.md ## Project Tags."""
+    known = set(DEFAULT_PREDEFINED_TAGS)
+    schema = agents_dir / "SCHEMA.md"
+    if not schema.exists():
+        return known
+
+    text = schema.read_text(encoding="utf-8-sig")
+    match = re.search(r"(?ms)^## Project Tags\s*(.*?)(?=^## |\Z)", text)
+    if not match:
+        return known
+
+    for tag in re.findall(r"`([a-z][a-z0-9-]*)`", match.group(1)):
+        known.add(tag)
+    return known
+
+
 # ---------------------------------------------------------------------------
 # Individual checks
 # ---------------------------------------------------------------------------
 
 
-def check_frontmatter(linter: Linter, rel: str, fm: dict[str, Any] | None) -> None:
+def check_frontmatter(
+    linter: Linter, rel: str, fm: dict[str, Any] | None, known_tags: set[str]
+) -> None:
     """Checks 1–4: required fields, valid type/status, tag format."""
     if fm is None:
         linter.error(rel, "cannot parse frontmatter (invalid YAML)")
@@ -193,6 +254,11 @@ def check_frontmatter(linter: Linter, rel: str, fm: dict[str, Any] | None) -> No
             for tag in tags:
                 if not isinstance(tag, str) or not TAG_RE.match(tag):
                     linter.error(rel, f"tag '{tag}' does not match ^[a-z][a-z0-9-]*$")
+                elif tag not in known_tags:
+                    linter.warn(
+                        rel,
+                        f"unknown tag '{tag}' — add to ## Project Tags in SCHEMA.md or use a predefined tag",
+                    )
 
 
 def check_test_status(
@@ -411,6 +477,7 @@ def run_lint(agents_dir: Path) -> Linter:
 
     pages = collect_graph_pages(agents_dir)
     slug_to_path = build_slug_index(pages, agents_dir)
+    known_tags = load_known_tags(agents_dir)
 
     # Inbound link counter: slug (lowercase, no ext) → count
     inbound: dict[str, int] = {
@@ -432,7 +499,7 @@ def run_lint(agents_dir: Path) -> Linter:
 
         fm, body = parse_frontmatter(text)
 
-        check_frontmatter(linter, rel, fm)
+        check_frontmatter(linter, rel, fm, known_tags)
         if fm is not None:
             check_test_status(linter, rel, page, fm)
 

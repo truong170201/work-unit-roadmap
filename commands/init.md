@@ -401,6 +401,38 @@ Project context is resolved in this order:
    | `external` | Ingested from external URL or file |
    | `archived` | Source is no longer maintained |
 
+   **Operational visibility tags** — temporary observation signals for Obsidian and graph filtering. Tags are observation signals; status fields remain authoritative.
+   | Tag | Meaning |
+   |---|---|
+   | `state-planned` | Page represents planned work or knowledge |
+   | `state-active` | Page is currently in active attention |
+   | `state-ready-review` | Work is ready for client or human review |
+   | `state-accepted` | Client accepted the WU or decision |
+   | `state-done` | Page represents completed work or resolved knowledge |
+   | `state-blocked` | Work is blocked |
+   | `state-deferred` | Work is intentionally deferred |
+   | `state-aborted` | Work was abandoned |
+   | `needs-review` | Needs human or specialist review |
+   | `needs-client` | Needs client decision or confirmation |
+   | `open-question` | Contains an unresolved question |
+   | `contradiction` | Contains or tracks a contradiction |
+   | `decision-conflict` | Competing decisions must be resolved |
+   | `coverage-gap` | Critical specialist/domain coverage is missing |
+   | `test-failing` | Verification is failing |
+   | `test-waived` | Verification was waived with a recorded reason |
+   | `graph-stale` | Derived graph artifacts need refresh |
+   | `risk` | Needs extra risk attention |
+   | `phase` | Phase page |
+   | `work-unit` | Work Unit content or WU-specific page |
+   | `fix-round` | Fix ledger or fix-round content |
+   | `decision` | Decision content |
+   | `report` | Verification or completion report |
+   | `specialist` | Specialist role content |
+   | `design` | Design contract or design-related content |
+   | `tech-stack` | Technology stack content |
+
+   Remove attention tags such as `needs-review`, `open-question`, `contradiction`, `coverage-gap`, `test-failing`, and `graph-stale` when the issue is resolved. Keep the authoritative state in `status`, `test_status`, phase tables, and roadmap files.
+
    Custom project-specific tags are allowed. They must be lowercase kebab-case and documented in this file under a `## Project Tags` section.
 
    ### Lint rules (checked by `/wur:wiki:lint`)

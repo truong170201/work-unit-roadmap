@@ -23,7 +23,8 @@ Lint the wiki using the `wur-guidelines` skill.
      - `tags:` field is a scalar instead of a list
      - Any tag does not match `^[a-z][a-z0-9-]*$` (uppercase, spaces, or special chars)
    - **Tag warnings** (not blocking):
-     - Unknown tags not found in the predefined vocabulary (`api`, `auth`, `data`, `infra`, `ui`, `security`, `performance`, `breaking-change`, `migration`, `risky`, `spike`, `research`, `external`, `archived`) and not declared in `agents/SCHEMA.md` under `## Project Tags`
+     - Unknown tags not found in the predefined vocabulary (`api`, `auth`, `data`, `infra`, `ui`, `security`, `performance`, `breaking-change`, `migration`, `risky`, `spike`, `research`, `external`, `archived`, `state-active`, `needs-review`, `open-question`, `contradiction`, `coverage-gap`, `test-failing`, `graph-stale`) and not declared in `agents/SCHEMA.md` under `## Project Tags`
+     - Stale attention tags such as `needs-review`, `open-question`, `contradiction`, `coverage-gap`, `test-failing`, or `graph-stale` that no longer match the page body or roadmap state
    - **Phase file size**:
      - warn if any `PHASE_*.md`, `PHASE_*_FIX.md`, or legacy `FIX_*.md` exceeds 400 lines
      - error if exceeds 800 lines — propose moving the Completion Log section to `agents/reports/PHASE_{n}-completion-log.md` and replacing it with a single link

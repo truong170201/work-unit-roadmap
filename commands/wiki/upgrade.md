@@ -168,6 +168,33 @@ If `agents/` does not exist, stop — run `/wur:init` first.
      source:
        - external
        - archived
+     operational:
+       - state-planned
+       - state-active
+       - state-ready-review
+       - state-accepted
+       - state-done
+       - state-blocked
+       - state-deferred
+       - state-aborted
+       - needs-review
+       - needs-client
+       - open-question
+       - contradiction
+       - decision-conflict
+       - coverage-gap
+       - test-failing
+       - test-waived
+       - graph-stale
+       - risk
+       - phase
+       - work-unit
+       - fix-round
+       - decision
+       - report
+       - specialist
+       - design
+       - tech-stack
 
    tag_rules:
      format: "^[a-z][a-z0-9-]*$"

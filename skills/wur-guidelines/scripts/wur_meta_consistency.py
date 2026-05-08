@@ -229,6 +229,14 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Expo + TypeScript + NativeWind",
         "Vite + TypeScript + Phaser",
         "Vite + TypeScript + Three.js",
+        "Operational visibility tags",
+        "state-active",
+        "needs-review",
+        "open-question",
+        "contradiction",
+        "coverage-gap",
+        "test-failing",
+        "Tags are observation signals; status fields remain authoritative",
         "Prefer TypeScript for non-trivial web/app code",
         "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
     ):
@@ -254,6 +262,14 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration",
         "Domain examples are illustrative, not exhaustive",
         "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
+        "Operational visibility tags",
+        "state-active",
+        "needs-review",
+        "open-question",
+        "contradiction",
+        "coverage-gap",
+        "test-failing",
+        "Tags are observation signals; status fields remain authoritative",
     ):
         if snippet not in init_text:
             findings.append(

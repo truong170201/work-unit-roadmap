@@ -134,6 +134,29 @@ class WurGraphScriptsTestCase(unittest.TestCase):
         self.assertIn("frontmatter 'tags' must be a YAML list", result.stdout)
         self.assertIn("broken wikilink [[missing/page]]", result.stdout)
 
+    def test_lint_allows_operational_visibility_tags(self) -> None:
+        phase2 = self.agents_dir / "roadmap" / "PHASE_2.md"
+        text = phase2.read_text(encoding="utf-8")
+        text = text.replace(
+            "tags: [api]",
+            "tags: [state-active, needs-review, test-failing, graph-stale, ui]",
+        )
+        phase2.write_text(text, encoding="utf-8")
+
+        result = self.run_script(LINT)
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        self.assertNotIn("unknown tag", result.stdout)
+
+    def test_lint_warns_on_unknown_tags(self) -> None:
+        phase2 = self.agents_dir / "roadmap" / "PHASE_2.md"
+        text = phase2.read_text(encoding="utf-8")
+        text = text.replace("tags: [api]", "tags: [mystery-status]")
+        phase2.write_text(text, encoding="utf-8")
+
+        result = self.run_script(LINT)
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        self.assertIn("unknown tag 'mystery-status'", result.stdout)
+
     def test_lint_detects_invalid_values_and_bad_extracted_edge(self) -> None:
         self.assertEqual(self.run_script(EXTRACT).returncode, 0)
 

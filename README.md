@@ -12,7 +12,7 @@ Most AI coding sessions produce a large changeset the human can't revert cleanly
 
 Work Unit Roadmap enforces a different pattern. Every change is scoped to one **Work Unit** — a small, bounded, verifiable goal. Each WU gets one git commit containing both the implementation and the roadmap update. Phases run on dedicated git branches via `git worktree`, merging into `main` only after human approval.
 
-The `agents/` folder is the unified project wiki: roadmap, research, decisions, and docs in one place. Graph pages use YAML frontmatter (`type`, `status`, `tags`) and `[[wikilinks]]` that connect phases, fix rounds, decisions, and research; project system pages may stay plain markdown. Open `agents/` in Obsidian for instant graph view — see what's done, what's active, what's blocked. Fix rounds live in their own files, separate from the phase file.
+The `agents/` folder is the unified project wiki: roadmap, research, decisions, and docs in one place. Graph pages use YAML frontmatter (`type`, `status`, `tags`) and `[[wikilinks]]` that connect phases, fix rounds, decisions, and research; project system pages may stay plain markdown. Open `agents/` in Obsidian for instant graph view — see what's done, what's active, what's blocked. Operational visibility tags such as `state-active`, `needs-review`, `open-question`, `contradiction`, `coverage-gap`, `test-failing`, and `graph-stale` make live attention areas filterable without replacing authoritative status fields. Fix rounds live in their own files, separate from the phase file.
 
 Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster. Specialists are advisory unless explicitly assigned a WU: runtime subagents may be used when available, otherwise the coordinator applies the role locally. Coordinator owns final planning and execution decisions, and specialist output must be consolidated because one recommendation is not one Work Unit.
 
@@ -160,7 +160,7 @@ This does **not** create a second wiki. It upgrades the existing `agents/` wiki 
 
 - `agents/graph/ontology.yaml` — typed node + predicate contract with `maps_from` and `subject/object_types`
 - `agents/graph/README.md` and `agents/graph/.gitignore`
-- graph conventions for `type`, `status`, `tags`, `parent`, `depends_on`, `verifies`, `informs`
+- graph conventions for `type`, `status`, `tags`, `parent`, `depends_on`, `verifies`, `informs`, and operational visibility tags
 - canonical path-style wikilink rules such as `[[roadmap/PHASE_1]]`
 
 Then run `/wur:wiki:graph extract` to compile the derived graph artifacts:
@@ -520,7 +520,7 @@ work-unit-roadmap/
 Use this as the practical definition of a production-ready WUR wiki layer for a dev project:
 
 - [ ] `/wur:init` hook smoke test passes
-- [ ] `agents/SCHEMA.md` contains `type`, `status`, `tags`, tag conventions, and status `aborted`
+- [ ] `agents/SCHEMA.md` contains `type`, `status`, `tags`, tag conventions, operational visibility tags, and status `aborted`
 - [ ] `/wur:upgrade` has been run on any legacy workspace and logs `schema-upgrade`
 - [ ] `/wur:wiki:upgrade` has been run when graph features are needed
 - [ ] `python skills/wur-guidelines/scripts/wur_graph_lint.py agents/` returns **0 errors**

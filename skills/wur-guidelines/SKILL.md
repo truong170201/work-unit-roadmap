@@ -181,6 +181,10 @@ Keep `DESIGN.md` concise but actionable. Use these sections:
 
 If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Backend/API/CLI-only projects still use `DESIGN.md` for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
 
+**Operational visibility tags** — tags are the Obsidian-facing attention layer for the project second brain. Tags are observation signals; status fields remain authoritative. A page may use `status: active` plus tags such as `state-active`, `needs-review`, or `test-failing` so humans can filter the graph quickly without changing workflow state.
+
+Use state tags to mirror visible lifecycle when helpful: `state-planned`, `state-active`, `state-ready-review`, `state-accepted`, `state-done`, `state-blocked`, `state-deferred`, `state-aborted`. Use attention tags only while an issue is live: `needs-review`, `needs-client`, `open-question`, `contradiction`, `decision-conflict`, `coverage-gap`, `test-failing`, `test-waived`, `graph-stale`, `risk`. Use work-shape tags when they improve browsing: `phase`, `work-unit`, `fix-round`, `decision`, `report`, `specialist`, `design`, `tech-stack`. Remove attention tags when the issue is resolved; do not keep stale warning tags for history.
+
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
 **Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
