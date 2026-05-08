@@ -157,6 +157,19 @@ class WurGraphScriptsTestCase(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
         self.assertIn("unknown tag 'mystery-status'", result.stdout)
 
+    def test_lint_warns_when_done_page_keeps_live_attention_tag(self) -> None:
+        phase1 = self.agents_dir / "roadmap" / "PHASE_1.md"
+        text = phase1.read_text(encoding="utf-8")
+        text = text.replace("tags: [infra]", "tags: [state-done, needs-review]")
+        phase1.write_text(text, encoding="utf-8")
+
+        result = self.run_script(LINT)
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        self.assertIn(
+            "resolved page still carries live attention tag 'needs-review'",
+            result.stdout,
+        )
+
     def test_lint_detects_invalid_values_and_bad_extracted_edge(self) -> None:
         self.assertEqual(self.run_script(EXTRACT).returncode, 0)
 

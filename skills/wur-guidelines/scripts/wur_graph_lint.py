@@ -98,6 +98,16 @@ DEFAULT_PREDEFINED_TAGS = {
     "design",
     "tech-stack",
 }
+LIVE_ATTENTION_TAGS = {
+    "needs-review",
+    "needs-client",
+    "open-question",
+    "contradiction",
+    "decision-conflict",
+    "coverage-gap",
+    "test-failing",
+    "graph-stale",
+}
 
 GRAPH_PAGE_PATTERNS: list[tuple[str, str]] = [
     ("roadmap/PHASE_*_FIX.md", "fix-round"),
@@ -258,6 +268,12 @@ def check_frontmatter(
                     linter.warn(
                         rel,
                         f"unknown tag '{tag}' — add to ## Project Tags in SCHEMA.md or use a predefined tag",
+                    )
+            if fm.get("status") == "done":
+                for tag in sorted(set(tags) & LIVE_ATTENTION_TAGS):
+                    linter.warn(
+                        rel,
+                        f"resolved page still carries live attention tag '{tag}'",
                     )
 
 
