@@ -214,6 +214,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "one recommendation is not one Work Unit",
         "Coverage Matrix",
         "coverage gap",
+        "domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration",
+        "Domain examples are illustrative, not exhaustive",
         "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
         "Technology Judgment",
         "`agents/project/DESIGN.md`",
@@ -249,6 +251,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Default Stack Suggestions",
         "Tailwind CSS + shadcn/ui",
         "Coverage categories are checklists, not mandatory files",
+        "domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration",
+        "Domain examples are illustrative, not exhaustive",
         "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
     ):
         if snippet not in init_text:

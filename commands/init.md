@@ -207,7 +207,8 @@ Project context is resolved in this order:
    - If the domain is unclear, ask one focused question before creating roles.
    - Do not create generic specialist placeholders.
    - Add a `## Coverage Matrix` section to each department page. Coverage categories are checklists, not mandatory files: one specialist can cover multiple categories in a small project, but missing critical coverage must be recorded as a `coverage gap`.
-   - For game projects, check coverage for game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Platform-specific means Unity, Godot, Unreal, Roblox, mobile, web, console, multiplayer, shader, tooling, or other runtime-specific knowledge when relevant.
+   - Start from these default coverage categories: domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration.
+   - Domain examples are illustrative, not exhaustive. For game projects, check coverage for game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Platform-specific means Unity, Godot, Unreal, Roblox, mobile, web, console, multiplayer, shader, tooling, or other runtime-specific knowledge when relevant.
    - specialist recommendations do not automatically become Work Units; the coordinator consolidates them into risks, acceptance criteria, rejected suggestions, or `planned` WUs only when material.
    - Implementation-facing specialists must include a `## Technology Judgment` section. Prefer modern mainstream defaults, such as TypeScript for non-trivial web/app code, Vite + React for common frontend web apps, Tailwind CSS + shadcn/ui for common React web UI, and Bun when compatible, while treating explicit user constraints, existing stack, runtime limits, team familiarity, and verification ability as overrides.
 
@@ -326,7 +327,7 @@ Project context is resolved in this order:
    ## Specialist Registry
    `agents/departments/` and `agents/specialists/` describe project-specific expertise. They are advisory unless explicitly assigned a WU. Runtime subagents are optional; if unavailable, the coordinator applies the role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated: one recommendation is not one Work Unit.
 
-   Department pages must include `## Coverage Matrix`. Coverage categories are checklists, not mandatory files. For game projects, check game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Record any missing critical capability as a `coverage gap`.
+   Department pages must include `## Coverage Matrix`. Coverage categories are checklists, not mandatory files. Start from domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration. Domain examples are illustrative, not exhaustive. For game projects, check game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Record any missing critical capability as a `coverage gap`.
 
    Specialist frontmatter:
    ```yaml
