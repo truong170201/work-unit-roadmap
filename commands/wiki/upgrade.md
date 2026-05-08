@@ -39,6 +39,7 @@ If `agents/` does not exist, stop — run `/wur:init` first.
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
    - `agents/project/USAGE.md`
+   - `agents/project/TECH_STACK.md`
    - `agents/roadmap/ALL.md`
    - `agents/roadmap/log.md`
    - `agents/SCHEMA.md`
@@ -51,6 +52,7 @@ If `agents/` does not exist, stop — run `/wur:init` first.
    - `[[roadmap/PHASE_1]]`
    - `[[roadmap/PHASE_1_FIX]]`
    - `[[project/PHILOSOPHY]]`
+   - `[[project/TECH_STACK]]`
    - `[[docs/ADR_001]]`
 
    Do not use basename-only links like `[[PHASE_1]]`.

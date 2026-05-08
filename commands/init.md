@@ -101,6 +101,7 @@ Project context is resolved in this order:
      project/
        PHILOSOPHY.md    ← project principles, constraints, non-goals
        USAGE.md         ← how to use the agent in this project (conventions, commands)
+       TECH_STACK.md    ← selected stack, default suggestions, overrides, verification
      roadmap/
        ALL.md           ← master index: phases, status, commit log, navigation hub
        log.md           ← append-only session/activity journal (never overwrite)
@@ -126,13 +127,50 @@ Project context is resolved in this order:
    - Commit message conventions
    - Any project-specific guardrails
 
+   Create or update `agents/project/TECH_STACK.md` for software projects:
+   - Capture the detected/current stack if one exists.
+   - If no stack exists yet, choose from **Default Stack Suggestions** based on project type.
+   - Treat defaults as recommendations, not mandates. Existing stack, explicit user instructions, deployment/runtime constraints, ecosystem maturity, team familiarity, and verification ability override defaults.
+   - If project type is unclear, record `Unknown` and ask one focused question before choosing.
+   - Record why the chosen stack is appropriate and how to verify it locally.
+
+   ```markdown
+   # Tech Stack
+
+   ## Selected Stack
+   - Project type: {spa/dashboard/seo/static/mobile/ai/game/other/unknown}
+   - Frontend/UI: {chosen stack or unknown}
+   - Backend/API: {chosen stack or none/unknown}
+   - Database/storage: {chosen stack or none/unknown}
+   - Runtime/package manager: {chosen runtime or unknown}
+
+   ## Decision
+   - Why this stack fits:
+   - Overrides from defaults:
+   - Verification commands:
+
+   ## Default Stack Suggestions
+   | Project type | Suggested default | Backend / data default |
+   |---|---|---|
+   | SPA / dashboard / CRM | Vite + React + TypeScript + Tailwind CSS + shadcn/ui + React Router | Supabase, or Node/Bun + PostgreSQL |
+   | SEO / marketing / blog | Next.js App Router + TypeScript + Tailwind CSS + shadcn/ui | Next.js API routes + Prisma + PostgreSQL when needed |
+   | Static site / docs | Astro + TypeScript + Tailwind CSS, plus Starlight for docs-heavy sites | None by default |
+   | Lightweight web app | Vite + Svelte/SvelteKit + TypeScript + Tailwind CSS + shadcn-svelte | SvelteKit backend or PocketBase |
+   | Fullstack type-safe | Next.js App Router + TypeScript + tRPC + Tailwind CSS + shadcn/ui + Prisma | PostgreSQL |
+   | Realtime app | Vite/Next.js + React + TypeScript + Tailwind CSS + shadcn/ui + WebSocket/Socket.io | Node/Bun + Redis + PostgreSQL |
+   | Mobile app | Expo + TypeScript + NativeWind + Tamagui or React Native Paper | Supabase or Firebase |
+   | AI app | Next.js or Vite + React + TypeScript + Tailwind CSS + shadcn/ui + OpenAI/Vercel AI SDK | Next.js API routes; LangChain only when useful |
+   | Web game 2D | Vite + TypeScript + Phaser | Optional Node/Bun service |
+   | Web game 3D | Vite + TypeScript + Three.js or React Three Fiber | Optional Node/Bun service |
+   ```
+
    Detect project departments and specialists from `$ARGUMENTS`, README/package metadata, existing docs, and current conversation:
    - Create `agents/departments/` and `agents/specialists/` folders.
    - If the domain is clear, add only useful project-specific department pages and specialist role cards.
    - If the domain is unclear, ask one focused question before creating roles.
    - Do not create generic specialist placeholders.
    - specialist recommendations do not automatically become Work Units; the coordinator consolidates them into risks, acceptance criteria, rejected suggestions, or `planned` WUs only when material.
-   - Implementation-facing specialists must include a `## Technology Judgment` section. Prefer modern mainstream defaults, such as TypeScript for non-trivial web/app code and Vite + React for common frontend web apps, while treating explicit user constraints, existing stack, runtime limits, team familiarity, and verification ability as overrides.
+   - Implementation-facing specialists must include a `## Technology Judgment` section. Prefer modern mainstream defaults, such as TypeScript for non-trivial web/app code, Vite + React for common frontend web apps, Tailwind CSS + shadcn/ui for common React web UI, and Bun when compatible, while treating explicit user constraints, existing stack, runtime limits, team familiarity, and verification ability as overrides.
 
 11. Fill `agents/roadmap/ALL.md` with:
 
@@ -232,6 +270,7 @@ Project context is resolved in this order:
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
    - `agents/project/USAGE.md`
+   - `agents/project/TECH_STACK.md`
    - `agents/roadmap/ALL.md`
    - `agents/roadmap/log.md`
    - `agents/SCHEMA.md`
@@ -264,7 +303,7 @@ Project context is resolved in this order:
    - `## Boundaries`
    - `## Technology Judgment` for implementation-facing roles
 
-   Technology Judgment defaults are recommendations, not mandates. Prefer TypeScript for non-trivial web/app code, consider Vite + React first for common frontend web apps, consider Bun when compatible, and avoid plain HTML/CSS/JS for app-scale work unless explicitly requested or clearly tiny/static.
+   Technology Judgment defaults are recommendations, not mandates. Prefer TypeScript for non-trivial web/app code, consider Vite + React first for common frontend web apps, consider Tailwind CSS + shadcn/ui for common React web UI, consider Bun when compatible, and avoid plain HTML/CSS/JS for app-scale work unless explicitly requested or clearly tiny/static. Create or update `agents/project/TECH_STACK.md` before execution when stack choices matter.
 
    ## Graph Conventions
    - `depends_on: ["[[roadmap/PHASE_1]]"]` — phase dependency
@@ -339,6 +378,7 @@ Project context is resolved in this order:
    ## Project
    - [[project/PHILOSOPHY]] — project mission, principles, non-goals
    - [[project/USAGE]] — how to run, test, build, verify
+   - [[project/TECH_STACK]] — selected software stack, defaults, overrides, verification
 
    ## Roadmap
    - [[roadmap/ALL]] — master dashboard: phases, status, commit index

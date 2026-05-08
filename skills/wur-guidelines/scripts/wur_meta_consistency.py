@@ -179,6 +179,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "| {today} | wiki-ima |",
         "Only update roadmap files when the user intent calls for roadmap planning changes",
         "Do not require flags",
+        "Read `agents/project/TECH_STACK.md` when present",
         "Read `agents/departments/` and `agents/specialists/` when present",
         "one specialist recommendation does not equal one Work Unit",
         "Do not mark any Work Unit `active`, `accepted`, or `done`",
@@ -199,6 +200,12 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Coordinator owns final planning and execution decisions",
         "one recommendation is not one Work Unit",
         "Technology Judgment",
+        "`agents/project/TECH_STACK.md`",
+        "Default Stack Suggestions",
+        "Tailwind CSS + shadcn/ui",
+        "Expo + TypeScript + NativeWind",
+        "Vite + TypeScript + Phaser",
+        "Vite + TypeScript + Three.js",
         "Prefer TypeScript for non-trivial web/app code",
         "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
     ):
@@ -208,6 +215,20 @@ def run_checks(repo_root: Path) -> list[Finding]:
                     "ERROR",
                     f"SKILL.md missing specialist contract snippet `{snippet}`",
                     skill_md.relative_to(repo_root).as_posix(),
+                )
+            )
+    init_text = _text(init_md)
+    for snippet in (
+        "Create or update `agents/project/TECH_STACK.md`",
+        "Default Stack Suggestions",
+        "Tailwind CSS + shadcn/ui",
+    ):
+        if snippet not in init_text:
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:init` missing tech stack contract snippet `{snippet}`",
+                    init_md.relative_to(repo_root).as_posix(),
                 )
             )
     if "WU-P{n}-fix:" not in _text(skill_md) or "WU-P{n}-abort:" not in _text(skill_md):

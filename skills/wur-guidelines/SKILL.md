@@ -143,7 +143,25 @@ Every implementation-facing specialist should include **Technology Judgment**:
 - Consider Bun for new JavaScript/TypeScript projects when dependencies, deployment, and team constraints allow it.
 - Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested, existing project context requires it, or the scope is a tiny static artifact.
 - Defaults are recommendations, not mandates: explicit user instructions, existing stack, runtime constraints, ecosystem maturity, team familiarity, and verification ability override defaults.
-- Record material stack choices in `agents/docs/` as a decision before execution.
+- Create or maintain `agents/project/TECH_STACK.md` for software projects. It records the current stack, selected default, reasons, overrides, and verification commands. If the stack is unknown, record the uncertainty and ask one focused question; do not invent certainty.
+- Record material stack choices in `agents/project/TECH_STACK.md` first, and use `agents/docs/` only for durable ADR-level decisions.
+
+**Default Stack Suggestions** are planning defaults, not mandates:
+
+| Project type | Default stack | Backend / data default | Use when |
+|---|---|---|---|
+| SPA / dashboard / CRM | Vite + React + TypeScript + Tailwind CSS + shadcn/ui + React Router | Supabase, or Node/Bun + PostgreSQL | Dense app UI, internal tools, admin surfaces |
+| SEO / marketing / blog | Next.js App Router + TypeScript + Tailwind CSS + shadcn/ui | Next.js API routes + Prisma + PostgreSQL when needed | SEO, routing, content, server rendering |
+| Static site / docs | Astro + TypeScript + Tailwind CSS, plus Starlight for docs-heavy sites | None by default | Content-first, mostly static output |
+| Lightweight web app | Vite + Svelte/SvelteKit + TypeScript + Tailwind CSS + shadcn-svelte | SvelteKit backend or PocketBase | Small interactive apps where Svelte is a better fit |
+| Fullstack type-safe | Next.js App Router + TypeScript + tRPC + Tailwind CSS + shadcn/ui + Prisma | PostgreSQL | End-to-end typed product apps |
+| Realtime app | Vite/Next.js + React + TypeScript + Tailwind CSS + shadcn/ui + WebSocket/Socket.io | Node/Bun + Redis + PostgreSQL | Chat, collaboration, realtime dashboards |
+| Mobile app | Expo + TypeScript + NativeWind + Tamagui or React Native Paper | Supabase or Firebase | React Native apps; shadcn/ui is not an official React Native default |
+| AI app | Next.js or Vite + React + TypeScript + Tailwind CSS + shadcn/ui + OpenAI/Vercel AI SDK | Next.js API routes, LangChain only when useful | Chat, RAG, agent UI, AI workflow tools |
+| Web game 2D | Vite + TypeScript + Phaser | Optional Node/Bun service | Browser 2D games and prototypes |
+| Web game 3D | Vite + TypeScript + Three.js or React Three Fiber | Optional Node/Bun service | Browser 3D, simulations, interactive scenes |
+
+Choose the smallest stack that fits the product and verification environment. Prefer existing project stack over defaults unless it is clearly unsuitable.
 
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
@@ -217,7 +235,7 @@ The `agents/` folder IS the project wiki — roadmap, research, decisions, and d
 
 ```text
 agents/
-  project/         PHILOSOPHY.md · USAGE.md
+  project/         PHILOSOPHY.md · USAGE.md · TECH_STACK.md
   roadmap/         ALL.md · PHASE_*.md · PHASE_*_FIX.md · legacy FIX_*.md · log.md
   departments/     project-specific capability map
   specialists/     role cards used for advisory/review/implementation judgment
@@ -283,4 +301,4 @@ Skip this section for single-agent projects. Adopt when a second agent joins.
 - Preserve project history. Leave the roadmap understandable and the working tree clean.
 - Never fake completion, skip verification, skip roadmap updates, or bury unrelated changes.
 
-The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/roadmap/ALL.md`, the active phase file, inspect recent commits, and understand exactly what happened and what should happen next.
+The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/TECH_STACK.md` when present, `agents/roadmap/ALL.md`, the active phase file, inspect recent commits, and understand exactly what happened and what should happen next.

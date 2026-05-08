@@ -161,6 +161,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `agents/roadmap/ALL.md` | Template from `/wur:init` step 11 |
    | `agents/project/PHILOSOPHY.md` | Template from `/wur:init` step 9 |
    | `agents/project/USAGE.md` | Template from `/wur:init` step 10 |
+   | `agents/project/TECH_STACK.md` | Template from `/wur:init` step 10, only for software projects or when stack choices matter |
 
    **`agents/SCHEMA.md`** template (use if file is absent):
    ```markdown
@@ -209,6 +210,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
    System pages (may omit frontmatter):
    - `agents/project/PHILOSOPHY.md`
    - `agents/project/USAGE.md`
+   - `agents/project/TECH_STACK.md`
    - `agents/roadmap/ALL.md`
    - `agents/roadmap/log.md`
    - `agents/SCHEMA.md`
@@ -293,6 +295,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
    ## Project
    - [[project/PHILOSOPHY]] — project mission, principles, non-goals
    - [[project/USAGE]] — how to run, test, build, verify
+   - [[project/TECH_STACK]] — selected software stack, defaults, overrides, verification
 
    ## Roadmap
    - [[roadmap/ALL]] — master dashboard: phases, status, commit index
@@ -344,7 +347,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    ### `agents/index.md` (if it already existed)
 
-   - Ensure `## Project` section exists with entries for `PHILOSOPHY` and `USAGE`.
+   - Ensure `## Project` section exists with entries for `PHILOSOPHY`, `USAGE`, and `TECH_STACK` when the file exists.
    - Ensure `## Roadmap` section exists with entries for `ALL` and `log`.
    - For every graph page found under `agents/` (`PHASE_*.md`, `PHASE_*_FIX.md`, legacy `FIX_*.md`, `research/*.md`, `docs/*.md`, `reports/*.md`, `departments/*.md`, `specialists/**/*.md`), check if it appears in `index.md`. If not, append it under the correct section:
      - `PHASE_*.md` / `PHASE_*_FIX.md` / legacy `FIX_*.md` → `## Roadmap`
@@ -407,9 +410,9 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    Append-only — never rewrite or remove existing entries. Do not append any entry here — logging happens only at step 11 (completion).
 
-   ### `agents/project/PHILOSOPHY.md` and `agents/project/USAGE.md`
+   ### `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, and `agents/project/TECH_STACK.md`
 
-   Do not modify these files if they already exist and have content. They are human-authored. If a file exists but is empty (0 bytes or whitespace only), fill it with the template from `/wur:init` steps 9–10.
+   Do not modify these files if they already exist and have content. They are human-authored. If a file exists but is empty (0 bytes or whitespace only), fill it with the template from `/wur:init` steps 9–10. If `TECH_STACK.md` is absent and the project is clearly software, create it; if the stack is unclear, record `Unknown` instead of inventing certainty.
 
 10. **Verification** — after all structural and content changes, verify the migrated workspace before committing.
 

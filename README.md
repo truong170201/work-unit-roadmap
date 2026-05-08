@@ -16,6 +16,8 @@ The `agents/` folder is the unified project wiki: roadmap, research, decisions, 
 
 Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster. Specialists are advisory unless explicitly assigned a WU: runtime subagents may be used when available, otherwise the coordinator applies the role locally. Coordinator owns final planning and execution decisions, and specialist output must be consolidated because one recommendation is not one Work Unit.
 
+Software projects should also keep `agents/project/TECH_STACK.md`: a short stack report with the selected stack, default suggestion used or rejected, override reasons, and verification commands. Defaults are recommendations, not mandates. For common React web UI, WUR prefers TypeScript plus Tailwind CSS + shadcn/ui; for mobile it prefers Expo + TypeScript + NativeWind; for browser games it prefers Vite + TypeScript with Phaser or Three.js depending on 2D/3D needs.
+
 The result: a git history where every commit is cherry-pickable, every bug is bisectable, and any session can be recovered from first principles by reading `agents/roadmap/ALL.md` and `git log`.
 
 ## Scope boundary
@@ -136,7 +138,7 @@ WUR is designed to behave the same way on **Windows, Linux, and macOS**:
 
 This creates the base `agents/` workspace:
 
-- `agents/project/PHILOSOPHY.md` and `USAGE.md`
+- `agents/project/PHILOSOPHY.md`, `USAGE.md`, and optional `TECH_STACK.md`
 - `agents/roadmap/ALL.md` and `agents/roadmap/log.md`
 - `agents/SCHEMA.md` and `agents/index.md`
 - `agents/raw/`, `research/`, `docs/`, `reports/`, `references/`
@@ -311,7 +313,7 @@ flowchart LR
 
     subgraph AW["agents/ canonical wiki"]
         A["agents/"]
-        P["project/<br/>PHILOSOPHY.md<br/>USAGE.md"]
+        P["project/<br/>PHILOSOPHY.md<br/>USAGE.md<br/>TECH_STACK.md"]
         R["roadmap/<br/>ALL.md<br/>PHASE_*.md<br/>PHASE_*_FIX.md<br/>log.md"]
         SP["departments / specialists"]
         K["research / docs / reports / references / raw"]
@@ -428,7 +430,7 @@ This is the core model:
   └─ creates agents/ as the base project wiki
   └─ resolves optional user context plus existing project context
   └─ creates project-specific departments/specialists only when domain is clear
-  └─ writes PHILOSOPHY.md, USAGE.md, ALL.md, log.md, SCHEMA.md, index.md
+  └─ writes PHILOSOPHY.md, USAGE.md, TECH_STACK.md when relevant, ALL.md, log.md, SCHEMA.md, index.md
 
 /wur:wiki:upgrade
   └─ upgrades agents/ with graph-layer files and conventions
@@ -527,10 +529,11 @@ Use this as the practical definition of a production-ready WUR wiki layer for a 
 - [ ] `agents/index.md` covers every graph page (`## Roadmap`, `## Research`, `## Docs`, `## Reports`, `## Departments`, `## Specialists`)
 - [ ] Specialist output is consolidated: one recommendation is not one Work Unit
 - [ ] Implementation-facing specialists include Technology Judgment and record material stack choices
+- [ ] `agents/project/TECH_STACK.md` records selected stack, default-stack overrides, and verification commands when software stack choices matter
 - [ ] `agents/roadmap/ALL.md` Commit Index is archived once it exceeds 30 rows
 - [ ] `agents/roadmap/log.md` remains append-only and merge conflicts preserve entries from both sides
 
-If all fourteen are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
+If all fifteen are true, WUR is operating in the deterministic, low-drift mode needed for long-running software projects.
 
 ## Other platforms
 
