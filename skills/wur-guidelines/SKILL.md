@@ -163,7 +163,7 @@ Every implementation-facing specialist should include **Technology Judgment**:
 
 Choose the smallest stack that fits the product and verification environment. Prefer existing project stack over defaults unless it is clearly unsuitable.
 
-**Design Contract** — software/dev projects with any UI, UX, brand, game feel, content presentation, or user-facing workflow should create or maintain `agents/project/DESIGN.md`. It is the AI-readable product/design system that implementation must follow; `TECH_STACK.md` says what to build with, `DESIGN.md` says how it should look, feel, and behave. A client may copy a `DESIGN.md` from another source into the project, or `/wur:init` and `/wur:wiki:ima` may draft/update one from project context.
+**Design Contract** — software/dev projects should create or maintain `agents/project/DESIGN.md`. It is the AI-readable product/design contract that implementation must follow; `TECH_STACK.md` says what to build with, `DESIGN.md` says how it should look, feel, behave, and present user-facing or developer-facing workflows. A client may copy a `DESIGN.md` from another source into the project, or `/wur:init` and `/wur:wiki:ima` may draft/update one from project context.
 
 Keep `DESIGN.md` concise but actionable. Use these sections:
 - `## Visual Theme & Atmosphere`
@@ -175,7 +175,7 @@ Keep `DESIGN.md` concise but actionable. Use these sections:
 - `## Do's and Don'ts`
 - `## Agent Prompt Guide`
 
-If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
+If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Backend/API/CLI-only projects still use `DESIGN.md` for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
 
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 

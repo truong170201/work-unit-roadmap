@@ -128,11 +128,12 @@ Project context is resolved in this order:
    - Commit message conventions
    - Any project-specific guardrails
 
-   Create or update `agents/project/DESIGN.md` for software/dev projects with UI, UX, brand, content presentation, game feel, or user-facing workflows:
+   Create or update `agents/project/DESIGN.md` for software/dev projects:
    - Treat it as the **Design Contract** that implementation must follow.
    - If the user supplied or copied a `DESIGN.md`, preserve it as the source of truth and summarize only missing project-specific constraints.
    - If no design source exists, draft a concise project-specific design contract from `$ARGUMENTS`, README/package metadata, existing docs, and current conversation.
    - If the visual/product direction is unclear, record known constraints and open questions instead of inventing a brand.
+   - Backend/API/CLI-only projects still use `DESIGN.md` for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience.
    - Do not create Work Units from every design note; convert design guidance into acceptance criteria, risks, or `planned` WUs only when material.
 
    ```markdown

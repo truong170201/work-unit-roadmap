@@ -12,7 +12,7 @@ Most AI coding sessions produce a large changeset the human can't revert cleanly
 
 Work Unit Roadmap enforces a different pattern. Every change is scoped to one **Work Unit** — a small, bounded, verifiable goal. Each WU gets one git commit containing both the implementation and the roadmap update. Phases run on dedicated git branches via `git worktree`, merging into `main` only after human approval.
 
-The `agents/` folder is the unified project wiki: roadmap, research, decisions, and docs in one place. Every page has YAML frontmatter (`type`, `status`, `tags`) and `[[wikilinks]]` that connect phases, fix rounds, decisions, and research. Open `agents/` in Obsidian for instant graph view — see what's done, what's active, what's blocked. Fix rounds live in their own files, separate from the phase file.
+The `agents/` folder is the unified project wiki: roadmap, research, decisions, and docs in one place. Graph pages use YAML frontmatter (`type`, `status`, `tags`) and `[[wikilinks]]` that connect phases, fix rounds, decisions, and research; project system pages may stay plain markdown. Open `agents/` in Obsidian for instant graph view — see what's done, what's active, what's blocked. Fix rounds live in their own files, separate from the phase file.
 
 Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster. Specialists are advisory unless explicitly assigned a WU: runtime subagents may be used when available, otherwise the coordinator applies the role locally. Coordinator owns final planning and execution decisions, and specialist output must be consolidated because one recommendation is not one Work Unit.
 
@@ -138,7 +138,7 @@ WUR is designed to behave the same way on **Windows, Linux, and macOS**:
 
 This creates the base `agents/` workspace:
 
-- `agents/project/PHILOSOPHY.md`, `USAGE.md`, and conditional `DESIGN.md` / `TECH_STACK.md` for software projects
+- `agents/project/PHILOSOPHY.md`, `USAGE.md`, plus `DESIGN.md` / `TECH_STACK.md` for software projects
 - `agents/roadmap/ALL.md` and `agents/roadmap/log.md`
 - `agents/SCHEMA.md` and `agents/index.md`
 - `agents/raw/`, `research/`, `docs/`, `reports/`, `references/`
@@ -529,7 +529,7 @@ Use this as the practical definition of a production-ready WUR wiki layer for a 
 - [ ] `agents/index.md` covers every graph page (`## Roadmap`, `## Research`, `## Docs`, `## Reports`, `## Departments`, `## Specialists`)
 - [ ] Specialist output is consolidated: one recommendation is not one Work Unit
 - [ ] Implementation-facing specialists include Technology Judgment and record material stack choices
-- [ ] `agents/project/DESIGN.md` records the Design Contract when UI, UX, brand, content presentation, game feel, or user-facing workflow choices matter
+- [ ] `agents/project/DESIGN.md` records the Design Contract for software/dev projects, with visual/product UX detail when user-facing choices matter
 - [ ] `agents/project/TECH_STACK.md` records selected stack, default-stack overrides, and verification commands when software stack choices matter
 - [ ] `agents/roadmap/ALL.md` Commit Index is archived once it exceeds 30 rows
 - [ ] `agents/roadmap/log.md` remains append-only and merge conflicts preserve entries from both sides

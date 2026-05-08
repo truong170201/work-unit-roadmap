@@ -83,6 +83,8 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "path/to/skills/wur-guidelines/scripts": "script paths must use project-relative `skills/wur-guidelines/scripts/...`",
         "GRAPH_PAGES": "old extract constant name must not remain after standardizing on GRAPH_PAGE_PATTERNS",
         "| {date} |": "log placeholders must use `{today}`, not `{date}`",
+        "Every page has YAML frontmatter": "README must distinguish graph pages from plain project system pages",
+        "conditional `DESIGN.md`": "DESIGN.md is expected for software/dev projects, not merely optional wording",
     }
     for md_file in all_md_files:
         text = _text(md_file)
@@ -212,6 +214,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "one recommendation is not one Work Unit",
         "Technology Judgment",
         "`agents/project/DESIGN.md`",
+        "software/dev projects should create or maintain",
         "Design Contract",
         "Visual Theme & Atmosphere",
         "Component Styling",
@@ -235,6 +238,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
     init_text = _text(init_md)
     for snippet in (
         "Create or update `agents/project/DESIGN.md`",
+        "for software/dev projects",
         "Design Contract",
         "Visual Theme & Atmosphere",
         "Component Styling",
