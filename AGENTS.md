@@ -48,9 +48,10 @@ Small task, verify, commit. Repeat.
 2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md` (once per project context).
 3. Read `agents/roadmap/ALL.md` → active phase, active WU, blockers, default branch.
 4. Read `agents/roadmap/PHASE_{n}.md` → acceptance criteria, verification.
-5. `cd .worktrees/phase-{n}` — verify with `git branch --show-current`. If the worktree doesn't exist, run `/wur:start {n}` first. Never work from main.
-6. Implement one WU → verify → inspect diff → update roadmap + commit together.
-7. Report what changed, what was verified, what remains, next safe step.
+5. Before `/wur:start`, verify `git status --short agents/` is empty. Commit or intentionally exclude dirty wiki context first; worktrees only receive tracked files from the base commit.
+6. `cd .worktrees/phase-{n}` — verify with `git branch --show-current`. If the worktree doesn't exist, run `/wur:start {n}` first. Never work from main.
+7. Implement one WU → verify → inspect diff → update roadmap + commit together.
+8. Report what changed, what was verified, what remains, next safe step.
 
 **Wiki only (no implementation):**
 1. Invoke `using-wur` → `wur-guidelines`.

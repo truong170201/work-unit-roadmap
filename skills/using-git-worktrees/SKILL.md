@@ -26,6 +26,30 @@ Always use `.worktrees/` at the project root — `/wur:init` adds it to `.gitign
 
 ## Creation Steps
 
+### 0. Verify Tracked Wiki Context
+
+Before creating a phase worktree, run this from the main repo:
+
+```bash
+git status --short agents/
+```
+
+If any `agents/` path is untracked or modified, stop before `git worktree add`.
+A worktree only receives tracked files from the base commit. Untracked wiki
+context such as `agents/raw/` or `agents/docs/` will not appear in the phase
+worktree unless it is committed first.
+
+For intentional wiki context, commit it first:
+
+```bash
+git add agents/
+git commit -m "docs: update project wiki context"
+```
+
+Only continue when `git status --short agents/` is empty, or when the user
+explicitly confirms that the dirty `agents/` paths are temporary and should not
+be available to the phase worktree.
+
 ### 1. Detect Base Branch
 
 ```bash
@@ -105,12 +129,14 @@ Ready to implement <feature>
 
 **Never:**
 - Create worktree without verifying it's gitignored
+- Create a phase worktree while `git status --short agents/` shows untracked or modified wiki context, unless the user explicitly confirms that context should be excluded
 - Skip baseline test verification
 - Proceed with failing tests without asking
 - Use `git checkout` to switch branches when a worktree exists
 
 **Always:**
 - Verify `.worktrees/` is gitignored
+- Verify tracked `agents/` context before creating a phase worktree
 - Auto-detect and run project setup
 - Verify clean test baseline
 - Clean up with `git worktree remove` when done

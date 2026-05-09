@@ -6,12 +6,20 @@ argument-hint: "<phase-number>"
 Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-worktrees` to create the worktree.
 
 1. If `agents/` does not exist, stop and instruct the user to run `/wur:init` first.
-2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
-3. Read `agents/roadmap/ALL.md` — extract the default branch, confirm the target phase is planned, confirm no blocker exists, and enforce the phase gate:
+2. Run `git status --short agents/` before creating the worktree. If any `agents/` path is untracked or modified, stop. Explain that a worktree only receives tracked files from the base commit, so wiki context such as `agents/raw/` and `agents/docs/` must be committed or intentionally excluded first. For project wiki material, the normal fix is:
+
+   ```bash
+   git add agents/
+   git commit -m "docs: update project wiki context"
+   ```
+
+   Do not create the phase worktree from a base commit that omits untracked or dirty `agents/` context.
+3. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
+4. Read `agents/roadmap/ALL.md` — extract the default branch, confirm the target phase is planned, confirm no blocker exists, and enforce the phase gate:
    - if another phase is already `active`, stop — finish or close that phase first
    - if `PHASE_{n}` is already the active phase and its worktree exists, stop — resume it instead of re-starting
    - otherwise continue
-4. Invoke `using-git-worktrees` to create the worktree — it handles gitignore verification internally:
+5. Invoke `using-git-worktrees` to create the worktree — it handles gitignore verification internally:
 
    ```bash
    git fetch origin "$base" 2>/dev/null || true
@@ -21,9 +29,9 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
 
    **All steps from here onwards use `.worktrees/phase-{n}/` as the working directory.** Verify with `git branch --show-current` — must show `feature/phase-{n}`.
 
-5. Run project setup (auto-detect: `npm install`, `pip install`, `cargo build`, etc.).
-6. Verify clean baseline: run tests. Baseline verification is full enough to establish starting health before the phase begins. Later WU verification is scoped by default to the WU acceptance criteria and changed surface. If no test suite exists, confirm the codebase is in a known-good state and document this in `agents/project/USAGE.md` under "Verification".
-7. Create `agents/roadmap/PHASE_{n}.md` using this template:
+6. Run project setup (auto-detect: `npm install`, `pip install`, `cargo build`, etc.).
+7. Verify clean baseline: run tests. Baseline verification is full enough to establish starting health before the phase begins. Later WU verification is scoped by default to the WU acceptance criteria and changed surface. If no test suite exists, confirm the codebase is in a known-good state and document this in `agents/project/USAGE.md` under "Verification".
+8. Create `agents/roadmap/PHASE_{n}.md` using this template:
 
    ```markdown
    ---
@@ -82,8 +90,8 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
    |---|---|---|---|---|
    ```
 
-8. Update `agents/roadmap/ALL.md`: add the phase row with `Status=active`; file column links to `PHASE_{n}.md`.
-9. Append one line to `agents/roadmap/log.md`:
+9. Update `agents/roadmap/ALL.md`: add the phase row with `Status=active`; file column links to `PHASE_{n}.md`.
+10. Append one line to `agents/roadmap/log.md`:
 
    ```
    | {today} | phase-open | PHASE_{n} started — branch: feature/phase-{n}, worktree: .worktrees/phase-{n} |
@@ -94,11 +102,11 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
    - [[roadmap/PHASE_{n}]] — {phase goal one-liner} · status: active
    ```
 
-10. Commit the phase setup as a Tiny WU on the feature branch:
+11. Commit the phase setup as a Tiny WU on the feature branch:
 
     ```bash
     git add agents/roadmap/ agents/index.md agents/project/USAGE.md
     git commit -m "WU-TW-{k}: init phase {n} roadmap"
     ```
 
-11. Report: worktree path, branch, base branch, tests baseline, ready for first Work Unit.
+12. Report: worktree path, branch, base branch, tests baseline, ready for first Work Unit.

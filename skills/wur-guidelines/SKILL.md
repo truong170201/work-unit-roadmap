@@ -62,12 +62,13 @@ WUR does not need a planner. It needs a gatekeeper.
 
 1. `/wur:init` must stop if `agents/` already exists, unless the user is intentionally resetting the workspace.
 2. `/wur:start` must stop if `agents/` does not exist.
-3. Implementation must stop if you are not inside the correct worktree.
-4. `/wur:done` must stop if any related fix round is still `active`.
-5. `/wur:done` requires `test_status = pass` or `test_status = waived` with a non-empty reason.
-6. A WU commit must include both implementation changes and roadmap updates together.
-7. `/wur:done` may run only when the current user request explicitly invokes `/wur:done`. Passing tests or finished fixes only make a phase ready for client closeout; they do not authorize closeout.
-8. Agents may move WUs to `ready-for-review`. Only the client may accept or mark WUs `done`.
+3. `/wur:start` must stop if `git status --short agents/` shows untracked or modified wiki context. A worktree only receives tracked files from the base commit, so `agents/raw/`, `agents/docs/`, roadmap, research, and project context must be committed or intentionally excluded before phase execution starts.
+4. Implementation must stop if you are not inside the correct worktree.
+5. `/wur:done` must stop if any related fix round is still `active`.
+6. `/wur:done` requires `test_status = pass` or `test_status = waived` with a non-empty reason.
+7. A WU commit must include both implementation changes and roadmap updates together.
+8. `/wur:done` may run only when the current user request explicitly invokes `/wur:done`. Passing tests or finished fixes only make a phase ready for client closeout; they do not authorize closeout.
+9. Agents may move WUs to `ready-for-review`. Only the client may accept or mark WUs `done`.
 
 ### Allowed waives
 

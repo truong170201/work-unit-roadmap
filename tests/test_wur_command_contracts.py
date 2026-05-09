@@ -75,6 +75,10 @@ class WurCommandContractTestCase(unittest.TestCase):
             text,
             [
                 "If `agents/` does not exist, stop",
+                "Run `git status --short agents/` before creating the worktree",
+                "If any `agents/` path is untracked or modified, stop",
+                "git add agents/",
+                "worktree only receives tracked files from the base commit",
                 "agents/project/DESIGN.md",
                 "agents/project/TECH_STACK.md",
                 "if another phase is already `active`, stop",
