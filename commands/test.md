@@ -17,6 +17,8 @@ Call this after tests have been run — either by the user manually or by the ag
 
 This command is the only allowed way to set phase `test_status` before `/wur:done`.
 
+Use the phase-level verification strategy before recording `pass` or `waive`. This is broader than normal WU-scoped verification: WU checks prove one bounded change; `/wur:test pass` proves the active phase is ready for client closeout.
+
 If `$ARGUMENTS` is empty or unrecognized, stop and print this help, do not mutate anything:
 
 ```text

@@ -205,9 +205,11 @@ This is the moment execution leaves the main repo and enters a worktree:
 Inside `.worktrees/phase-1` only:
 
 1. Implement one WU
-2. Run verification (`npx tsc`, `pytest`, etc.)
+2. Run scoped verification for that WU (`npx tsc`, targeted `pytest`, relevant lint, etc.)
 3. Update the relevant roadmap files
 4. Commit code + roadmap together in one commit
+
+WU verification is scoped by default: prove the bounded change from the WU acceptance criteria and the user's request. Full-project verification belongs at phase closeout, or when a WU touches high-risk/shared code, graph/schema/scripts, or explicitly asks for broad checks.
 
 Example commit:
 

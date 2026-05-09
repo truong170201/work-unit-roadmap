@@ -41,7 +41,7 @@ Do not infer closeout permission from passing tests, finished fixes, clean diffs
 
    If running from inside `.worktrees/phase-{n}`, the `main_repo` resolver above returns the project root (the first non-worktree entry in `git worktree list`). Always confirm with `pwd` before merging.
 
-5. Respect the recorded closeout test status:
+5. Closeout verification is full-phase verification. Do not use WU-scoped checks as the only closeout evidence. Respect the recorded closeout test status:
    - if `test_status: pass`, run the tests again on the merged result; if they fail, stop and report — do NOT cleanup worktrees
    - if `test_status: waived`, do not fabricate a pass; keep the recorded waive reason and proceed with explicit trace
 6. Clean up worktrees and local branches:

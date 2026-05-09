@@ -46,7 +46,7 @@ You MUST complete these in order:
 3. **Confirm repo state** — `git status`, `git diff`, `git log -1 --oneline`
 4. **Enter worktree** — `cd .worktrees/phase-{n}` (or `fix-{n}-*`), then verify with `git branch --show-current` — must show `feature/phase-{n}`. If the worktree does not exist, stop and run `/wur:start {n}` first. **Never run implementation commands from the main repo.**
 5. **Implement one WU** — exactly one goal, bounded scope, no unrelated changes
-6. **Verify** — run the verification command(s) from the WU. Must pass.
+6. **Verify** — run the verification command(s) scoped to the WU. Must pass.
 7. **Inspect diff** — `git diff --stat`, review changes for scope creep
 8. **Update roadmap** — move the WU to `ready-for-review`, add commit hash, update ALL.md commit index, append to log.md if applicable
 9. **Commit** — one commit per WU, containing **both** implementation files and roadmap updates together: `WU-P{n}-{unit}: {short description}`
@@ -249,7 +249,21 @@ If `agents/SCHEMA.md` is missing the `schema_version` frontmatter (e.g. the work
 
 ### Verification
 
-Run the verification command. Record the result. If it fails: do not commit, fix or split new WU. Passing verification only permits `ready-for-review`; never mark `done` without client confirmation.
+Verification is scoped by default. Start from the active WU acceptance criteria and the user's request, then choose the smallest command set that proves the change. Do not run full-project verification after every WU by default; on large projects that turns WUR into an expensive global audit loop instead of a fast Work Unit loop.
+
+Full-project verification is required only for phase closeout, high-risk/shared changes, schema/graph/script changes, or explicit acceptance criteria. It is also appropriate when a scoped check cannot prove the behavior or when the changed surface is broad.
+
+A scoped verification matrix:
+
+| Change type | Default verification |
+|---|---|
+| Docs-only WU | `git diff --check`, relevant docs/spec consistency check if the docs define behavior |
+| Implementation WU | targeted test(s), typecheck/lint for touched area, build only when needed |
+| UI WU | targeted tests plus screenshot/manual check when visual behavior changed |
+| Graph/schema/script WU | targeted script tests, meta consistency, full test suite if shared script behavior changed |
+| Phase closeout | full phase verification from `PHASE_{n}.md ## Verification Strategy` |
+
+Run the selected verification command(s). Record the result. If it fails: do not commit, fix or split new WU. Passing WU-scoped verification only permits `ready-for-review`; never mark `done` without client confirmation.
 
 ### Wiki & Derived Graph
 

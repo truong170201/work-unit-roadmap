@@ -137,6 +137,50 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
 
+    def test_verification_contract_is_scoped_by_default(self) -> None:
+        skill = (ROOT / "skills" / "wur-guidelines" / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        start = read_command("start.md")
+        test = read_command("test.md")
+        done = read_command("done.md")
+
+        self.assert_contains_all(
+            skill,
+            [
+                "Verification is scoped by default",
+                "Start from the active WU acceptance criteria and the user's request",
+                "Do not run full-project verification after every WU by default",
+                "Full-project verification is required only for phase closeout, high-risk/shared changes, schema/graph/script changes, or explicit acceptance criteria",
+                "A scoped verification matrix",
+                "Docs-only WU",
+                "Implementation WU",
+                "Graph/schema/script WU",
+                "Phase closeout",
+            ],
+        )
+        self.assert_contains_all(
+            start,
+            [
+                "Baseline verification is full enough to establish starting health",
+                "Later WU verification is scoped by default",
+            ],
+        )
+        self.assert_contains_all(
+            test,
+            [
+                "Use the phase-level verification strategy",
+                "This is broader than normal WU-scoped verification",
+            ],
+        )
+        self.assert_contains_all(
+            done,
+            [
+                "Closeout verification is full-phase verification",
+                "Do not use WU-scoped checks as the only closeout evidence",
+            ],
+        )
+
     def test_abort_contract_requires_trace_and_never_merges(self) -> None:
         text = read_command("abort.md")
         self.assert_contains_all(

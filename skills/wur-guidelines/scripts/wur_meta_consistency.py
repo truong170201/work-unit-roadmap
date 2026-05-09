@@ -169,6 +169,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
             )
         )
     start_md = repo_root / "commands" / "start.md"
+    done_md = repo_root / "commands" / "done.md"
     for snippet in ("agents/project/DESIGN.md", "agents/project/TECH_STACK.md"):
         if snippet not in _text(start_md):
             findings.append(
@@ -176,6 +177,42 @@ def run_checks(repo_root: Path) -> list[Finding]:
                     "ERROR",
                     f"`/wur:start` must read `{snippet}` when present",
                     start_md.relative_to(repo_root).as_posix(),
+                )
+            )
+    for snippet in (
+        "Baseline verification is full enough to establish starting health",
+        "Later WU verification is scoped by default",
+    ):
+        if snippet not in _text(start_md):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:start` missing scoped verification snippet `{snippet}`",
+                    start_md.relative_to(repo_root).as_posix(),
+                )
+            )
+    for snippet in (
+        "Use the phase-level verification strategy",
+        "This is broader than normal WU-scoped verification",
+    ):
+        if snippet not in _text(test_md):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:test` missing scoped verification snippet `{snippet}`",
+                    test_md.relative_to(repo_root).as_posix(),
+                )
+            )
+    for snippet in (
+        "Closeout verification is full-phase verification",
+        "Do not use WU-scoped checks as the only closeout evidence",
+    ):
+        if snippet not in _text(done_md):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:done` missing closeout verification snippet `{snippet}`",
+                    done_md.relative_to(repo_root).as_posix(),
                 )
             )
     if "| {today} | wiki-add |" not in _text(wiki_add_md):
@@ -237,6 +274,11 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "coverage-gap",
         "test-failing",
         "Tags are observation signals; status fields remain authoritative",
+        "Verification is scoped by default",
+        "Start from the active WU acceptance criteria and the user's request",
+        "Do not run full-project verification after every WU by default",
+        "Full-project verification is required only for phase closeout, high-risk/shared changes, schema/graph/script changes, or explicit acceptance criteria",
+        "A scoped verification matrix",
         "Prefer TypeScript for non-trivial web/app code",
         "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
     ):

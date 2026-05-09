@@ -22,7 +22,7 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
    **All steps from here onwards use `.worktrees/phase-{n}/` as the working directory.** Verify with `git branch --show-current` — must show `feature/phase-{n}`.
 
 5. Run project setup (auto-detect: `npm install`, `pip install`, `cargo build`, etc.).
-6. Verify clean baseline: run tests. If no test suite exists, confirm the codebase is in a known-good state and document this in `agents/project/USAGE.md` under "Verification".
+6. Verify clean baseline: run tests. Baseline verification is full enough to establish starting health before the phase begins. Later WU verification is scoped by default to the WU acceptance criteria and changed surface. If no test suite exists, confirm the codebase is in a known-good state and document this in `agents/project/USAGE.md` under "Verification".
 7. Create `agents/roadmap/PHASE_{n}.md` using this template:
 
    ```markdown
