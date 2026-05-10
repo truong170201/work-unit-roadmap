@@ -156,6 +156,30 @@ class WurCodexDelegateTestCase(unittest.TestCase):
                 "thr_nested",
             )
 
+    def test_server_side_user_request_is_reported_to_coordinator(self) -> None:
+        code = (
+            "import json,sys,time\n"
+            "for line in sys.stdin:\n"
+            "    msg=json.loads(line)\n"
+            "    if msg.get('id') == 1:\n"
+            "        print(json.dumps({"
+            "'jsonrpc':'2.0','id':99,'method':'tool/requestUserInput',"
+            "'params':{'prompt':'Need user decision'}}), flush=True)\n"
+            "        time.sleep(5)\n"
+        )
+        command = [sys.executable, "-u", "-c", code]
+
+        with wur_codex_delegate.JsonlAppServerClient(
+            command, ROOT, initialize=False
+        ) as client:
+            with self.assertRaises(wur_codex_delegate.UserInteractionRequired) as ctx:
+                client.request(
+                    {"jsonrpc": "2.0", "id": 1, "method": "turn/start", "params": {}},
+                    time.monotonic() + 2,
+                )
+
+        self.assertEqual(ctx.exception.method, "tool/requestUserInput")
+
     def test_rate_limit_classifier_catches_http_429_and_usage_limit(self) -> None:
         self.assertTrue(
             wur_codex_delegate.is_rate_limit_error(
@@ -177,6 +201,14 @@ class WurCodexDelegateTestCase(unittest.TestCase):
                 {"message": "syntax error", "codexErrorInfo": "badRequest"}
             )
         )
+
+    def test_full_access_flag_maps_to_non_interactive_full_permission(self) -> None:
+        args = wur_codex_delegate.parse_args(
+            ["--cwd", ".", "--role", "developer", "--prompt", "implement", "--full-access"]
+        )
+
+        self.assertTrue(args.full_access)
+        self.assertEqual(args.approval_policy, "never")
 
     def test_dry_run_writes_ledger_without_starting_codex(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

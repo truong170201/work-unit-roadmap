@@ -64,6 +64,9 @@ Safety rules:
 - never merge, close phases, run `/wur:done`, or mark WUs accepted/done
 - on timeout or rate-limit, write `timeout` or `rate-limited` to the ledger and
   terminate only the app-server process started by this script
+- for non-interactive worker mode, use `--full-access`; if Codex still asks for
+  user input or approval, the script writes `needs-user` and exits so the WUR
+  coordinator can ask the client
 
 Example real run:
 
@@ -76,6 +79,19 @@ python skills/wur-guidelines/scripts/wur_codex_delegate.py \
   --sandbox read-only \
   --read-only \
   --prompt "Review this WU against its acceptance criteria. Do not edit files." \
+  --json
+```
+
+Example non-interactive implementation worker:
+
+```bash
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-002 \
+  --role developer \
+  --full-access \
+  --prompt "Implement only this WU. Do not merge, close phases, or mark WUs done." \
   --json
 ```
 

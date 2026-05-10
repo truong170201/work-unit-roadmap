@@ -189,12 +189,12 @@ Codex delegation is optional and never authoritative. The WUR coordinator still 
 When delegating to Codex:
 - use `skills/wur-guidelines/scripts/wur_codex_delegate.py`
 - run only from the intended `.worktrees/phase-{n}` or fix worktree unless the job is explicitly read-only and `--allow-main` is supplied
-- prefer `--sandbox read-only --read-only` for review/exploration and `--sandbox workspace-write` only for assigned implementation
+- prefer `--sandbox read-only --read-only` for review/exploration, `--sandbox workspace-write` for assigned implementation, and explicit `--full-access` only when the coordinator intentionally wants non-interactive full Codex permissions inside the scoped worktree
 - record every job under `agents/reports/codex-delegation/{task_id}.json` in the git root of the delegated `--cwd` by default
 - bind the ledger to `cwd`, branch, phase, WU, role, Codex thread id, status, timeout/rate-limit result, and final summary
-- on timeout or 429/usage limit, stop the job, write `timeout` or `rate-limited`, unsubscribe only the recorded thread id, and terminate only the app-server subprocess started for that job
+- on timeout, 429/usage limit, or Codex user/approval request, stop the job, write `timeout`, `rate-limited`, or `needs-user`, unsubscribe only the recorded thread id, and terminate only the app-server subprocess started for that job
 
-Never kill processes by the name `codex`. Never clean up threads you did not create. If App Server is unavailable, skip delegation and continue the normal WUR flow locally.
+Never kill processes by the name `codex`. Never clean up threads you did not create. Never guess an answer to a Codex user/approval request; return `needs-user` so the WUR coordinator can ask the client. If App Server is unavailable, skip delegation and continue the normal WUR flow locally.
 
 **Operational visibility tags** — tags are the Obsidian-facing attention layer for the project second brain. Tags are observation signals; status fields remain authoritative. A page may use `status: active` plus tags such as `state-active`, `needs-review`, or `test-failing` so humans can filter the graph quickly without changing workflow state.
 

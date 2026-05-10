@@ -299,6 +299,8 @@ python skills/wur-guidelines/scripts/wur_codex_delegate.py \
 
 The adapter uses `codex app-server --listen stdio://`, starts exactly one Codex thread, waits for one turn, writes a ledger file, unsubscribes only that thread id, and terminates only the app-server subprocess it started. On 429/usage-limit or timeout it records `rate-limited` or `timeout` instead of leaving background work untracked. It never uses Codex MCP, never merges, never closes phases, and never marks WUs accepted/done.
 
+For non-interactive worker mode, pass `--full-access`. This maps to Codex `danger-full-access` with `approvalPolicy=never`, so the worker should not pause on normal permission prompts. If Codex still emits a user/approval request through App Server, the adapter records `needs-user` and exits; the WUR coordinator must ask the client instead of guessing or hanging.
+
 ### Operational split
 
 - **Execution commands**: `/wur:*`

@@ -303,6 +303,8 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Optional Codex App Server Delegation",
                 "Codex App Server, not Codex MCP",
                 "`skills/wur-guidelines/scripts/wur_codex_delegate.py`",
+                "`needs-user`",
+                "`--full-access`",
                 "Never kill processes by the name `codex`",
                 "Tailwind CSS + shadcn/ui",
                 "Vite + React + TypeScript",

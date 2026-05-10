@@ -55,6 +55,15 @@ class AppServerRequestError(DelegationError):
         self.error = error
 
 
+class UserInteractionRequired(DelegationError):
+    """Raised when App Server asks the caller for input or approval."""
+
+    def __init__(self, message: dict[str, Any]) -> None:
+        self.method = str(message.get("method", "unknown"))
+        self.params = message.get("params")
+        super().__init__(f"codex requested caller interaction: {self.method}")
+
+
 @dataclass(frozen=True)
 class DelegationRequest:
     repo_root: Path
@@ -277,6 +286,16 @@ def is_rate_limit_error(error: dict[str, Any] | None) -> bool:
     return False
 
 
+def is_server_request(message: dict[str, Any], active_request_id: int) -> bool:
+    return (
+        "id" in message
+        and message.get("id") != active_request_id
+        and isinstance(message.get("method"), str)
+        and "result" not in message
+        and "error" not in message
+    )
+
+
 def extract_final_text(turn: dict[str, Any]) -> str:
     parts: list[str] = []
     for item in turn.get("items", []):
@@ -388,6 +407,8 @@ class JsonlAppServerClient:
         request_id = payload["id"]
         while True:
             message = self.read_message(deadline)
+            if is_server_request(message, request_id):
+                raise UserInteractionRequired(message)
             if message.get("id") != request_id:
                 continue
             if "error" in message:
@@ -397,6 +418,8 @@ class JsonlAppServerClient:
     def wait_for_turn(self, thread_id: str, deadline: float) -> dict[str, Any]:
         while True:
             message = self.read_message(deadline)
+            if is_server_request(message, -1):
+                raise UserInteractionRequired(message)
             if message.get("method") != APP_SERVER_TURN_COMPLETED:
                 continue
             params = message.get("params", {})
@@ -539,6 +562,13 @@ def run_once(
                 "error": exc.error,
             }
         )
+    except UserInteractionRequired as exc:
+        ledger.update(
+            {
+                "status": "needs-user",
+                "error": {"message": str(exc), "method": exc.method, "params": exc.params},
+            }
+        )
     except DelegationError as exc:
         ledger.update({"status": "failed", "error": {"message": str(exc)}})
     finally:
@@ -597,6 +627,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--codex-bin", default="codex")
     parser.add_argument("--allow-main", action="store_true")
     parser.add_argument("--read-only", action="store_true")
+    parser.add_argument(
+        "--full-access",
+        action="store_true",
+        help="Shortcut for --sandbox danger-full-access --approval-policy never.",
+    )
     parser.add_argument("--max-retries", type=int, default=0)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
@@ -611,6 +646,25 @@ def main(argv: list[str] | None = None) -> int:
     except DelegationError:
         repo_root = Path(args.repo_root or ".").resolve()
 
+    sandbox = args.sandbox
+    approval_policy = args.approval_policy
+    if args.full_access:
+        if args.read_only:
+            result = {
+                "task_id": f"codex-{uuid.uuid4().hex[:12]}",
+                "status": "blocked",
+                "error": {"message": "--full-access cannot be combined with --read-only"},
+                "updated_at": utc_now(),
+            }
+            if args.json:
+                print(json.dumps(result, indent=2, sort_keys=True))
+            else:
+                print(f"[{result['status']}] {result['task_id']}")
+                print(result["error"])
+            return 1
+        sandbox = "danger-full-access"
+        approval_policy = "never"
+
     request = DelegationRequest(
         repo_root=repo_root,
         cwd=cwd,
@@ -620,8 +674,8 @@ def main(argv: list[str] | None = None) -> int:
         work_unit=args.work_unit,
         model=args.model,
         effort=args.effort,
-        sandbox=args.sandbox,
-        approval_policy=args.approval_policy,
+        sandbox=sandbox,
+        approval_policy=approval_policy,
         timeout_seconds=args.timeout_seconds,
         service_name=args.service_name,
         allow_main=args.allow_main,
