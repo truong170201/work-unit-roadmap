@@ -182,6 +182,20 @@ Keep `DESIGN.md` concise but actionable. Use these sections:
 
 If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Backend/API/CLI-only projects still use `DESIGN.md` for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
 
+**Optional Codex App Server Delegation** — WUR may use Codex as an acceleration layer when Codex is installed and the current client/project allows it. The supported integration path is Codex App Server, not Codex MCP. App Server exposes Codex thread lifecycle (`thread/start`, `turn/start`, `thread/read`, `thread/unsubscribe`, status notifications), which lets WUR bind each delegated job to one project, branch, worktree, phase, WU, role, and ledger entry. MCP is intentionally not part of this plugin's delegation contract because it exposes a narrower tool surface and weaker session semantics.
+
+Codex delegation is optional and never authoritative. The WUR coordinator still owns scope, roadmap state, diff inspection, verification, and commits. Codex must not merge branches, run `/wur:done`, mark Work Units `accepted` or `done`, or close phases. Use delegation for bounded exploration, implementation assistance, review, or scoped verification when it can run inside the correct worktree and produce a concise report.
+
+When delegating to Codex:
+- use `skills/wur-guidelines/scripts/wur_codex_delegate.py`
+- run only from the intended `.worktrees/phase-{n}` or fix worktree unless the job is explicitly read-only and `--allow-main` is supplied
+- prefer `--sandbox read-only --read-only` for review/exploration and `--sandbox workspace-write` only for assigned implementation
+- record every job under `agents/reports/codex-delegation/{task_id}.json`
+- bind the ledger to `cwd`, branch, phase, WU, role, Codex thread id, status, timeout/rate-limit result, and final summary
+- on timeout or 429/usage limit, stop the job, write `timeout` or `rate-limited`, unsubscribe only the recorded thread id, and terminate only the app-server subprocess started for that job
+
+Never kill processes by the name `codex`. Never clean up threads you did not create. If App Server is unavailable, skip delegation and continue the normal WUR flow locally.
+
 **Operational visibility tags** — tags are the Obsidian-facing attention layer for the project second brain. Tags are observation signals; status fields remain authoritative. A page may use `status: active` plus tags such as `state-active`, `needs-review`, or `test-failing` so humans can filter the graph quickly without changing workflow state.
 
 Use state tags to mirror visible lifecycle when helpful: `state-planned`, `state-active`, `state-ready-review`, `state-accepted`, `state-done`, `state-blocked`, `state-deferred`, `state-aborted`. Use attention tags only while an issue is live: `needs-review`, `needs-client`, `open-question`, `contradiction`, `decision-conflict`, `coverage-gap`, `test-failing`, `test-waived`, `graph-stale`, `risk`. Use work-shape tags when they improve browsing: `phase`, `work-unit`, `fix-round`, `decision`, `report`, `specialist`, `design`, `tech-stack`. Remove attention tags when the issue is resolved; do not keep stale warning tags for history.

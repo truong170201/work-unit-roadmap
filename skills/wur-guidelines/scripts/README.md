@@ -12,6 +12,7 @@ Require: Python 3.10+ and PyYAML (`pip install pyyaml`).
 | `wur_graph_query.py` | Query graph — neighbors, edges, path, facts, status filter |
 | `wur_wiki_stats.py` | Dashboard: page counts, status, broken links, graph freshness |
 | `wur_meta_consistency.py` | Local consistency checker for docs/spec/script drift |
+| `wur_codex_delegate.py` | Optional Codex App Server delegation for one scoped WUR task |
 
 ## Quick start
 
@@ -35,8 +36,49 @@ python skills/wur-guidelines/scripts/wur_wiki_stats.py agents/
 # Local consistency check
 python skills/wur-guidelines/scripts/wur_meta_consistency.py .
 
+# Optional Codex App Server delegation dry run
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --repo-root . \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-001 \
+  --role reviewer \
+  --prompt "Review the scoped change and report risks." \
+  --dry-run \
+  --json
+
 # End-to-end script tests
 python -m unittest discover -s tests -v
+```
+
+## Optional Codex delegation (wur_codex_delegate.py)
+
+`wur_codex_delegate.py` uses Codex App Server only. It does not use Codex MCP.
+It is an acceleration layer, not part of WUR's required control path.
+
+Safety rules:
+
+- run only inside the intended `.worktrees/phase-{n}` or fix worktree unless
+  `--allow-main` is explicitly supplied for a read-only investigation
+- record every job under `agents/reports/codex-delegation/{task_id}.json`
+- bind every job to `cwd`, branch, phase, WU, role, Codex thread id, and status
+- never merge, close phases, run `/wur:done`, or mark WUs accepted/done
+- on timeout or rate-limit, write `timeout` or `rate-limited` to the ledger and
+  terminate only the app-server process started by this script
+
+Example real run:
+
+```bash
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --repo-root . \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-001 \
+  --role reviewer \
+  --sandbox read-only \
+  --read-only \
+  --prompt "Review this WU against its acceptance criteria. Do not edit files." \
+  --json
 ```
 
 ## Integration with /wur:wiki:graph
