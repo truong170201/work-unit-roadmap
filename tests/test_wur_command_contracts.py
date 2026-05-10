@@ -329,6 +329,43 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
 
+    def test_active_phase_context_sync_contract_prevents_agents_merge_conflicts(self) -> None:
+        skill = (ROOT / "skills" / "wur-guidelines" / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        scripts = (ROOT / "skills" / "wur-guidelines" / "scripts" / "README.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assert_contains_all(
+            skill,
+            [
+                "Active phase wiki ownership",
+                "`agents/roadmap/PHASE_{n}.md`, `agents/roadmap/ALL.md`, and `agents/roadmap/log.md` must be updated in the active phase/fix worktree",
+                "Selective context sync",
+                "`skills/wur-guidelines/scripts/wur_sync_agents_context.py`",
+                "do not `git merge` the default branch into the phase just to get those files",
+                "refuses to overwrite `agents/roadmap/`, `agents/index.md`, `agents/SCHEMA.md`, or graph artifacts",
+            ],
+        )
+        self.assert_contains_all(
+            readme,
+            [
+                "Active phase roadmap files are branch-owned",
+                "`wur_sync_agents_context.py`",
+                "do not `git merge` just to pick up wiki context",
+            ],
+        )
+        self.assert_contains_all(
+            scripts,
+            [
+                "`wur_sync_agents_context.py`",
+                "Selectively import new agents/ context files into an active phase",
+                "Do not `git merge` only to import new `agents/` context files",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -202,6 +202,10 @@ Use state tags to mirror visible lifecycle when helpful: `state-planned`, `state
 
 **Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
 
+**Active phase wiki ownership** — after `/wur:start {n}`, roadmap execution files are owned by the phase branch, not the default branch. `agents/roadmap/PHASE_{n}.md`, `agents/roadmap/ALL.md`, and `agents/roadmap/log.md` must be updated in the active phase/fix worktree. Do not edit the default branch copy of those files for the active phase after execution has begun. If planning changes are needed while a phase is active, either update the phase branch directly or write separate planning notes such as `agents/docs/PHASE_{n}_PLANNING_NOTES.md`; do not rewrite the default branch's active `PHASE_{n}.md`.
+
+**Selective context sync** — when the default branch gains new wiki context under `agents/docs/`, `agents/research/`, `agents/raw/`, `agents/references/`, `agents/departments/`, `agents/specialists/`, or `agents/reports/`, do not `git merge` the default branch into the phase just to get those files. Use `skills/wur-guidelines/scripts/wur_sync_agents_context.py` inside the phase/fix worktree. It imports only files that are new on the default branch and missing on the phase branch, and it refuses to overwrite `agents/roadmap/`, `agents/index.md`, `agents/SCHEMA.md`, or graph artifacts. This prevents planning-template roadmap files on the default branch from conflicting with execution-state roadmap files on the phase branch.
+
 **Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
 
 ### ALL.md Commit Index — mandatory archival
@@ -226,7 +230,14 @@ Each worktree is an independent directory with its own branch checked out. No st
 
 Wiki operations (`/wur:wiki:*`) and workspace setup run from the main repo — no worktree is created or needed.
 
-**Long-running phases** — if `feature/phase-{n}` lives more than ~3 days, the default branch (`main`/`master`/`develop`) may have moved. Sync inside the phase worktree before the next WU to keep `/wur:done` merges clean:
+**Long-running phases** — if `feature/phase-{n}` lives more than ~3 days, the default branch (`main`/`master`/`develop`) may have moved. First sync new wiki context without a merge:
+
+```bash
+cd .worktrees/phase-{n}
+python skills/wur-guidelines/scripts/wur_sync_agents_context.py --cwd . --json
+```
+
+Only use branch merge/rebase for actual code/config changes that must be incorporated before continuing execution:
 
 ```bash
 cd .worktrees/phase-{n}
@@ -236,7 +247,7 @@ git rebase "origin/$base"   # preferred — keeps WU commits linear
 git merge --no-ff "origin/$base" -m "WU-TW-{k}: sync $base into feature/phase-{n}"
 ```
 
-Resolve conflicts inside the worktree, never on the default branch. The merge or rebase commit becomes a Tiny WU on the feature branch.
+Resolve conflicts inside the worktree, never on the default branch. The merge or rebase commit becomes a Tiny WU on the feature branch. Do not merge only to pick up new `agents/` context files; use selective context sync for that.
 
 **Phase abort** — if a phase was started by mistake or is being abandoned, run `/wur:abort {n}`. Do not manually `git branch -D` — the command also marks the phase `aborted` in the roadmap and records the reason in `log.md`.
 

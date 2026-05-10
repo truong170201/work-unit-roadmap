@@ -20,6 +20,8 @@ Department pages include a Coverage Matrix so the agent can catch missing expert
 
 When Codex is installed, WUR can optionally delegate bounded work to Codex through Codex App Server. This is an acceleration layer only: WUR remains the coordinator, roadmap authority, verifier, and committer. Each delegated job is scoped to one worktree and recorded under `agents/reports/codex-delegation/` with branch, phase, WU, role, Codex thread id, status, and timeout/rate-limit outcome. Codex MCP is not used for this path; App Server is preferred because it exposes thread lifecycle and cleanup semantics.
 
+Active phase roadmap files are branch-owned. Once `/wur:start {n}` opens a phase, `PHASE_{n}.md`, `ALL.md`, and `log.md` are updated on the phase branch. If the default branch later gains new `agents/docs`, `research`, `raw`, `references`, `departments`, `specialists`, or `reports` files, import only those new files with `wur_sync_agents_context.py`; do not `git merge` just to pick up wiki context.
+
 Software projects should also keep `agents/project/DESIGN.md` and `agents/project/TECH_STACK.md`. `DESIGN.md` is the AI-readable Design Contract: visual theme, color roles, typography, component styling, layout, responsive behavior, and do/don't guardrails. A client can copy a `DESIGN.md` from a design reference into the project, or WUR can draft/update one from init/IMA context. `TECH_STACK.md` records the selected stack, default suggestion used or rejected, override reasons, and verification commands. Defaults are recommendations, not mandates. For common React web UI, WUR prefers TypeScript plus Tailwind CSS + shadcn/ui; for mobile it prefers Expo + TypeScript + NativeWind; for browser games it prefers Vite + TypeScript with Phaser or Three.js depending on 2D/3D needs.
 
 The result: a git history where every commit is cherry-pickable, every bug is bisectable, and any session can be recovered from first principles by reading `agents/roadmap/ALL.md` and `git log`.
@@ -300,6 +302,17 @@ python skills/wur-guidelines/scripts/wur_codex_delegate.py \
 The adapter uses `codex app-server --listen stdio://`, starts exactly one Codex thread, waits for one turn, writes a ledger file, unsubscribes only that thread id, and terminates only the app-server subprocess it started. On 429/usage-limit or timeout it records `rate-limited` or `timeout` instead of leaving background work untracked. It never uses Codex MCP, never merges, never closes phases, and never marks WUs accepted/done.
 
 For non-interactive worker mode, pass `--full-access`. This maps to Codex `danger-full-access` with `approvalPolicy=never`, so the worker should not pause on normal permission prompts. If Codex still emits a user/approval request through App Server, the adapter records `needs-user` and exits; the WUR coordinator must ask the client instead of guessing or hanging.
+
+### Selective agents context sync
+
+When the default branch gains new wiki context while a phase is active, sync only new context files into the phase worktree:
+
+```bash
+cd .worktrees/phase-1
+python skills/wur-guidelines/scripts/wur_sync_agents_context.py --cwd . --json
+```
+
+This script imports only files that exist on the default branch and are missing on the phase branch under safe context folders. It refuses to overwrite `agents/roadmap/`, `agents/index.md`, `agents/SCHEMA.md`, and graph artifacts, so execution-state roadmap files do not conflict with planning-template roadmap files.
 
 ### Operational split
 
