@@ -31,6 +31,7 @@ APP_SERVER_METHOD_TURN_START = "turn/start"
 APP_SERVER_METHOD_TURN_INTERRUPT = "turn/interrupt"
 APP_SERVER_METHOD_THREAD_UNSUBSCRIBE = "thread/unsubscribe"
 APP_SERVER_TURN_COMPLETED = "turn/completed"
+APP_SERVER_METHOD_INITIALIZE = "initialize"
 
 RATE_LIMIT_CODES = {
     429,
@@ -96,20 +97,28 @@ def current_branch(cwd: Path) -> str:
 
 
 def repo_default_branch(repo_root: Path) -> str:
-    candidates = [
-        ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"],
-        ["rev-parse", "--abbrev-ref", "HEAD"],
-    ]
-    for args in candidates:
-        try:
-            value = run_git(repo_root, args)
-        except DelegationError:
-            continue
+    try:
+        value = run_git(repo_root, ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"])
         if value.startswith("origin/"):
             return value.removeprefix("origin/")
-        if value:
-            return value
-    return "main"
+    except DelegationError:
+        pass
+
+    for name in ("main", "master", "develop"):
+        try:
+            run_git(repo_root, ["rev-parse", "--verify", name])
+            return name
+        except DelegationError:
+            pass
+
+    try:
+        return run_git(repo_root, ["rev-parse", "--abbrev-ref", "HEAD"])
+    except DelegationError:
+        return "main"
+
+
+def git_root(cwd: Path) -> Path:
+    return Path(run_git(cwd, ["rev-parse", "--show-toplevel"])).resolve()
 
 
 def is_inside(child: Path, parent: Path) -> bool:
@@ -132,6 +141,8 @@ def validate_scope(request: DelegationRequest) -> dict[str, str]:
     default_branch = repo_default_branch(repo_root)
     in_worktree = ".worktrees" in cwd.parts
 
+    outside_phase_worktree = branch == default_branch or not in_worktree
+
     if not request.allow_main:
         if branch == default_branch:
             raise DelegationError(
@@ -139,6 +150,8 @@ def validate_scope(request: DelegationRequest) -> dict[str, str]:
             )
         if not in_worktree:
             raise DelegationError("refusing Codex delegation outside .worktrees/")
+    elif outside_phase_worktree and not request.read_only:
+        raise DelegationError("--allow-main is only valid for read-only delegation")
 
     if request.read_only and request.sandbox != "read-only":
         raise DelegationError("read-only delegation requires --sandbox read-only")
@@ -202,7 +215,12 @@ def build_thread_start_request(
     }
     if request.model:
         params["model"] = request.model
-    return {"id": request_id, "method": APP_SERVER_METHOD_THREAD_START, "params": params}
+    return {
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "method": APP_SERVER_METHOD_THREAD_START,
+        "params": params,
+    }
 
 
 def build_turn_start_request(
@@ -227,7 +245,20 @@ def build_turn_start_request(
         params["model"] = request.model
     if request.effort:
         params["effort"] = request.effort
-    return {"id": request_id, "method": APP_SERVER_METHOD_TURN_START, "params": params}
+    return {
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "method": APP_SERVER_METHOD_TURN_START,
+        "params": params,
+    }
+
+
+def extract_thread_id(thread_result: dict[str, Any]) -> str | None:
+    nested = thread_result.get("thread")
+    if isinstance(nested, dict) and isinstance(nested.get("id"), str):
+        return nested["id"]
+    value = thread_result.get("id")
+    return value if isinstance(value, str) else None
 
 
 def is_rate_limit_error(error: dict[str, Any] | None) -> bool:
@@ -259,9 +290,10 @@ def extract_final_text(turn: dict[str, Any]) -> str:
 
 
 class JsonlAppServerClient:
-    def __init__(self, command: list[str], cwd: Path) -> None:
+    def __init__(self, command: list[str], cwd: Path, *, initialize: bool = True) -> None:
         self.command = command
         self.cwd = cwd
+        self.initialize = initialize
         self.process: subprocess.Popen[str] | None = None
         self._stdout_queue: queue.Queue[str] = queue.Queue()
         self._reader_thread: threading.Thread | None = None
@@ -283,6 +315,23 @@ class JsonlAppServerClient:
             daemon=True,
         )
         self._reader_thread.start()
+        if self.initialize:
+            self.request(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 0,
+                    "method": APP_SERVER_METHOD_INITIALIZE,
+                    "params": {
+                        "clientInfo": {
+                            "name": "wur-codex-delegate",
+                            "title": "WUR Codex Delegation",
+                            "version": "1",
+                        },
+                        "capabilities": {"experimentalApi": True},
+                    },
+                },
+                time.monotonic() + 10,
+            )
         return self
 
     def __exit__(self, _exc_type: object, _exc: object, _tb: object) -> None:
@@ -367,6 +416,7 @@ def cleanup_codex_thread(
         try:
             client.send(
                 {
+                    "jsonrpc": "2.0",
                     "id": 98,
                     "method": APP_SERVER_METHOD_TURN_INTERRUPT,
                     "params": {"turnId": turn_id},
@@ -380,6 +430,7 @@ def cleanup_codex_thread(
         try:
             client.request(
                 {
+                    "jsonrpc": "2.0",
                     "id": 99,
                     "method": APP_SERVER_METHOD_THREAD_UNSUBSCRIBE,
                     "params": {"threadId": thread_id},
@@ -433,7 +484,7 @@ def run_once(
                 thread_result = client.request(
                     build_thread_start_request(1, request, scope), deadline
                 )
-                thread_id = thread_result.get("thread", {}).get("id")
+                thread_id = extract_thread_id(thread_result)
                 if not thread_id:
                     raise DelegationError("thread/start response did not include thread.id")
                 ledger.update({"thread_id": thread_id, "status": "thread-started"})
@@ -519,7 +570,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Delegate one scoped WUR task to Codex App Server.",
     )
-    parser.add_argument("--repo-root", default=".", help="Project repo root.")
+    parser.add_argument(
+        "--repo-root",
+        default=None,
+        help="WUR ledger repo root. Defaults to the git root of --cwd.",
+    )
     parser.add_argument("--cwd", required=True, help="Worktree directory for Codex.")
     parser.add_argument("--role", required=True, help="Specialist role name.")
     parser.add_argument("--prompt", required=True, help="Task prompt for Codex.")
@@ -550,9 +605,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
+    cwd = Path(args.cwd).resolve()
+    try:
+        repo_root = Path(args.repo_root).resolve() if args.repo_root else git_root(cwd)
+    except DelegationError:
+        repo_root = Path(args.repo_root or ".").resolve()
+
     request = DelegationRequest(
-        repo_root=Path(args.repo_root).resolve(),
-        cwd=Path(args.cwd).resolve(),
+        repo_root=repo_root,
+        cwd=cwd,
         role=args.role,
         prompt=args.prompt,
         phase=args.phase,

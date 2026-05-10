@@ -93,6 +93,30 @@ class WurCodexDelegateTestCase(unittest.TestCase):
             ):
                 wur_codex_delegate.validate_scope(request)
 
+    def test_allow_main_is_read_only_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            subprocess.run(
+                ["git", "init", "-b", "main"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            request = self.make_request(
+                root,
+                root,
+                allow_main=True,
+                read_only=False,
+                sandbox="workspace-write",
+            )
+
+            with self.assertRaisesRegex(
+                wur_codex_delegate.DelegationError,
+                "--allow-main is only valid for read-only delegation",
+            ):
+                wur_codex_delegate.validate_scope(request)
+
     def test_thread_and_turn_requests_use_app_server_shapes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -111,15 +135,26 @@ class WurCodexDelegateTestCase(unittest.TestCase):
                 2, "thr_test", request, scope
             )
 
+            self.assertEqual(thread["jsonrpc"], "2.0")
             self.assertEqual(thread["method"], "thread/start")
             self.assertEqual(thread["params"]["threadSource"], "subagent")
             self.assertEqual(thread["params"]["sandbox"], "workspace-write")
             self.assertEqual(thread["params"]["serviceName"], "wur-codex-delegation")
             self.assertNotIn("mcp", json.dumps(thread).lower())
 
+            self.assertEqual(turn["jsonrpc"], "2.0")
             self.assertEqual(turn["method"], "turn/start")
             self.assertEqual(turn["params"]["threadId"], "thr_test")
             self.assertIn("WU-P1-001", turn["params"]["input"][0]["text"])
+
+            self.assertEqual(
+                wur_codex_delegate.extract_thread_id({"id": "thr_direct"}),
+                "thr_direct",
+            )
+            self.assertEqual(
+                wur_codex_delegate.extract_thread_id({"thread": {"id": "thr_nested"}}),
+                "thr_nested",
+            )
 
     def test_rate_limit_classifier_catches_http_429_and_usage_limit(self) -> None:
         self.assertTrue(
@@ -170,7 +205,9 @@ class WurCodexDelegateTestCase(unittest.TestCase):
     def test_app_server_read_timeout_does_not_block_on_silent_process(self) -> None:
         command = [sys.executable, "-c", "import time; time.sleep(5)"]
         started = time.monotonic()
-        with wur_codex_delegate.JsonlAppServerClient(command, ROOT) as client:
+        with wur_codex_delegate.JsonlAppServerClient(
+            command, ROOT, initialize=False
+        ) as client:
             with self.assertRaises(TimeoutError):
                 client.read_message(time.monotonic() + 0.2)
         self.assertLess(time.monotonic() - started, 2.0)

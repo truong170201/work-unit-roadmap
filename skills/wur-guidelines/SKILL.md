@@ -190,7 +190,7 @@ When delegating to Codex:
 - use `skills/wur-guidelines/scripts/wur_codex_delegate.py`
 - run only from the intended `.worktrees/phase-{n}` or fix worktree unless the job is explicitly read-only and `--allow-main` is supplied
 - prefer `--sandbox read-only --read-only` for review/exploration and `--sandbox workspace-write` only for assigned implementation
-- record every job under `agents/reports/codex-delegation/{task_id}.json`
+- record every job under `agents/reports/codex-delegation/{task_id}.json` in the git root of the delegated `--cwd` by default
 - bind the ledger to `cwd`, branch, phase, WU, role, Codex thread id, status, timeout/rate-limit result, and final summary
 - on timeout or 429/usage limit, stop the job, write `timeout` or `rate-limited`, unsubscribe only the recorded thread id, and terminate only the app-server subprocess started for that job
 

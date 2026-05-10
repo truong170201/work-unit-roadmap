@@ -287,7 +287,6 @@ Use this only when Codex is installed and the current WUR scope benefits from a 
 
 ```bash
 python skills/wur-guidelines/scripts/wur_codex_delegate.py \
-  --repo-root . \
   --cwd .worktrees/phase-1 \
   --phase 1 \
   --work-unit WU-P1-001 \

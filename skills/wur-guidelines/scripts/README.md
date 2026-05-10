@@ -38,7 +38,6 @@ python skills/wur-guidelines/scripts/wur_meta_consistency.py .
 
 # Optional Codex App Server delegation dry run
 python skills/wur-guidelines/scripts/wur_codex_delegate.py \
-  --repo-root . \
   --cwd .worktrees/phase-1 \
   --phase 1 \
   --work-unit WU-P1-001 \
@@ -70,7 +69,6 @@ Example real run:
 
 ```bash
 python skills/wur-guidelines/scripts/wur_codex_delegate.py \
-  --repo-root . \
   --cwd .worktrees/phase-1 \
   --phase 1 \
   --work-unit WU-P1-001 \
