@@ -12,6 +12,8 @@ Require: Python 3.10+ and PyYAML (`pip install pyyaml`).
 | `wur_graph_query.py` | Query graph — neighbors, edges, path, facts, status filter |
 | `wur_wiki_stats.py` | Dashboard: page counts, status, broken links, graph freshness |
 | `wur_meta_consistency.py` | Local consistency checker for docs/spec/script drift |
+| `wur_codex_delegate.py` | Optional Codex App Server delegation for one scoped WUR task |
+| `wur_sync_agents_context.py` | Selectively import new agents/ context files into an active phase |
 
 ## Quick start
 
@@ -35,8 +37,86 @@ python skills/wur-guidelines/scripts/wur_wiki_stats.py agents/
 # Local consistency check
 python skills/wur-guidelines/scripts/wur_meta_consistency.py .
 
+# Import new default-branch agents/ context into an active phase without merge
+python skills/wur-guidelines/scripts/wur_sync_agents_context.py --cwd .worktrees/phase-1 --json
+
+# Optional Codex App Server delegation dry run
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-001 \
+  --role reviewer \
+  --prompt "Review the scoped change and report risks." \
+  --dry-run \
+  --json
+
 # End-to-end script tests
 python -m unittest discover -s tests -v
+```
+
+## Selective context sync (wur_sync_agents_context.py)
+
+Use when the default branch gained new wiki context while a phase branch is
+already active. Do not `git merge` only to import new `agents/` context files.
+
+The script imports only files that are:
+
+- present on the default branch
+- missing on the phase/fix branch
+- under safe context folders: `agents/docs/`, `research/`, `raw/`,
+  `references/`, `departments/`, `specialists/`, or `reports/`
+
+It refuses to overwrite roadmap execution files, `agents/index.md`,
+`agents/SCHEMA.md`, and graph artifacts.
+
+```bash
+cd .worktrees/phase-1
+python skills/wur-guidelines/scripts/wur_sync_agents_context.py --cwd . --json
+```
+
+## Optional Codex delegation (wur_codex_delegate.py)
+
+`wur_codex_delegate.py` uses Codex App Server only. It does not use Codex MCP.
+It is an acceleration layer, not part of WUR's required control path.
+
+Safety rules:
+
+- run only inside the intended `.worktrees/phase-{n}` or fix worktree unless
+  `--allow-main` is explicitly supplied for a read-only investigation
+- record every job under `agents/reports/codex-delegation/{task_id}.json`
+- bind every job to `cwd`, branch, phase, WU, role, Codex thread id, and status
+- never merge, close phases, run `/wur:done`, or mark WUs accepted/done
+- on timeout or rate-limit, write `timeout` or `rate-limited` to the ledger and
+  terminate only the app-server process started by this script
+- for non-interactive worker mode, use `--full-access`; if Codex still asks for
+  user input or approval, the script writes `needs-user` and exits so the WUR
+  coordinator can ask the client
+
+Example real run:
+
+```bash
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-001 \
+  --role reviewer \
+  --sandbox read-only \
+  --read-only \
+  --prompt "Review this WU against its acceptance criteria. Do not edit files." \
+  --json
+```
+
+Example non-interactive implementation worker:
+
+```bash
+python skills/wur-guidelines/scripts/wur_codex_delegate.py \
+  --cwd .worktrees/phase-1 \
+  --phase 1 \
+  --work-unit WU-P1-002 \
+  --role developer \
+  --full-access \
+  --prompt "Implement only this WU. Do not merge, close phases, or mark WUs done." \
+  --json
 ```
 
 ## Integration with /wur:wiki:graph
