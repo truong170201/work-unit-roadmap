@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create and update one-file WUR execution contracts.
+"""Create and update WUR execution contract files.
 
 Contracts keep execution instructions and returned reports outside `agents/`
 while preserving `agents/` as the canonical project wiki.
@@ -17,6 +17,17 @@ from pathlib import Path
 
 REPORT_MARKER = "## Execution Rounds And Reports"
 DONE_STATUSES = {"accepted", "done"}
+RULE_FILE = "rule.md"
+PROJECT_CONTEXT_FILES = (
+    "agents/project/PHILOSOPHY.md",
+    "agents/project/USAGE.md",
+    "agents/project/DESIGN.md",
+    "agents/project/TECH_STACK.md",
+)
+COORDINATION_DIRS = (
+    "agents/departments",
+    "agents/specialists",
+)
 
 
 @dataclass(frozen=True)
@@ -110,6 +121,80 @@ def report_tail(existing: str | None) -> str:
     return existing[existing.index(REPORT_MARKER) :].rstrip() + "\n"
 
 
+def coordination_context_paths(root: Path) -> list[str]:
+    paths: list[str] = []
+    for rel_path in PROJECT_CONTEXT_FILES:
+        if (root / rel_path).exists():
+            paths.append(rel_path)
+    for rel_dir in COORDINATION_DIRS:
+        folder = root / rel_dir
+        if not folder.exists():
+            continue
+        for path in sorted(folder.glob("*.md")):
+            paths.append(path.relative_to(root).as_posix())
+    return paths
+
+
+def render_rule_file() -> str:
+    return "\n".join(
+        [
+            "# WUR Contract Rules",
+            "",
+            "This file is the shared rule contract for every `contracts/PHASE_*_CONTRACT.md` handoff.",
+            "Phase contracts contain phase-specific work and reports; this file contains reusable rules.",
+            "",
+            "## Execution Boundary",
+            "",
+            "- `agents/` is the source-of-truth wiki.",
+            "- Do not modify `agents/`.",
+            "- Do not modify `contracts/` except the active phase contract report section.",
+            "- Do not create `contracts/inbox/` or `contracts/outbox/`.",
+            "- Do not create Phase Fix files for new work.",
+            "- Do not mark Work Units accepted, done, or close a phase.",
+            "- Do not merge branches or run `/wur:done`.",
+            "- Implement only pending work listed in the active phase contract.",
+            "",
+            "## Allowed Reads",
+            "",
+            "- Read only the `agents/` paths listed in the active phase contract's `Allowed Read References` section.",
+            "- Do not scan all of `agents/`.",
+            "- Do not read unlisted `agents/` files unless the client or WUR contract explicitly adds them.",
+            "- Infer useful specialist lenses from the listed references and WU scope.",
+            "",
+            "## Work, Fix, Report",
+            "",
+            "- Run verification before claiming success.",
+            "- If blocked, add a blocked report instead of guessing.",
+            "- If verification fails, add or update a `### Fix Round R{n} - {scope}` section in the active phase contract.",
+            "- Do not wait for WUR to generate a separate fix file or run another helper command.",
+            "- Use one contract ledger for task brief, fix rounds, and reports.",
+            "- Report changed files, commit hash, verification evidence, specialist lenses applied, and any material coverage gaps.",
+            "- Keep output concise; WUR coordinator performs final acceptance.",
+            "",
+            "## Optional Sparse Worktree",
+            "",
+            "If isolation is needed, create a worktree that excludes WUR state:",
+            "",
+            "```bash",
+            "git worktree add .worktrees/P{phase}_contract -b work/P{phase}_contract main",
+            "cd .worktrees/P{phase}_contract",
+            "git sparse-checkout init --no-cone",
+            "git sparse-checkout set \"/*\" \"!/agents/\" \"!/contracts/\"",
+            "```",
+            "",
+            "Use the active phase contract as the task brief. Do not carry `agents/` or `contracts/` into the execution worktree.",
+            "",
+        ]
+    )
+
+
+def ensure_rule_file(root: Path) -> Path:
+    target = root / "contracts" / RULE_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(render_rule_file(), encoding="utf-8")
+    return target
+
+
 def render_contract(
     *,
     phase: str,
@@ -117,6 +202,7 @@ def render_contract(
     criteria: list[str],
     units: list[WorkUnit],
     work_unit: str | None,
+    context_paths: list[str],
     existing: str | None,
 ) -> str:
     today = date.today().isoformat()
@@ -127,33 +213,7 @@ def render_contract(
         f"Generated: {today}",
         f"Scope mode: `{scope_mode}`",
         f"Source: `agents/roadmap/PHASE_{phase}.md`",
-        "",
-        "## WUR Contract Rules",
-        "",
-        "- This contract is the execution boundary for an external agent.",
-        "- `agents/` remains the canonical wiki and must be read-only to the executor.",
-        "- Do not modify `agents/`.",
-        "- Do not modify `contracts/` except this contract report section.",
-        "- Do not mark Work Units accepted, done, or close a phase.",
-        "- Do not merge branches or run `/wur:done`.",
-        "- Implement only pending work listed in this file.",
-        "- Run verification before claiming success.",
-        "- If blocked, add a blocked report instead of guessing.",
-        "- Keep output concise; WUR coordinator performs final acceptance.",
-        "",
-        "## Optional Sparse Worktree",
-        "",
-        "If isolation is needed, create a worktree that excludes WUR state:",
-        "",
-        "```bash",
-        "git worktree add .worktrees/P{phase}_contract -b work/P{phase}_contract main",
-        "cd .worktrees/P{phase}_contract",
-        "git sparse-checkout init --no-cone",
-        "git sparse-checkout set \"/*\" \"!/agents/\" \"!/contracts/\"",
-        "```",
-        "",
-        "The executor should use this contract as its task brief and must not carry "
-        "`agents/` or `contracts/` into the execution worktree.",
+        f"Shared rules: `contracts/{RULE_FILE}`",
         "",
         "## Goal",
         "",
@@ -198,11 +258,24 @@ def render_contract(
     lines.extend(
         [
             "",
-            "## Receive Rules",
+            "## Allowed Read References",
             "",
-            "- WUR accepts a report only after checking commit hash, changed files, and verification evidence.",
-            "- WUR updates `agents/` after receive; external executors do not update roadmap files directly.",
-            "- Failed work becomes another execution round in this same contract, not a separate Phase Fix file.",
+            "Only read the listed paths when deeper context is needed. Do not scan all of `agents/`.",
+            "Do not read unlisted `agents/` files unless the client or WUR contract explicitly adds them.",
+            "",
+        ]
+    )
+    if context_paths:
+        lines.extend(f"- `{path}`" for path in context_paths)
+    else:
+        lines.append("- No project/personnel references were selected.")
+    lines.extend(
+        [
+            "",
+            "Specialist coordination:",
+            "- Infer useful specialist lenses from the listed references and WU scope.",
+            "- Do not require WUR to assign one person per WU.",
+            "- Report which specialist lenses were applied.",
             "",
         ]
     )
@@ -220,6 +293,7 @@ def create_contract(root: Path, phase: str, work_unit: str | None) -> Path:
     selected = pending_units(units, work_unit)
     target = contract_path(root, phase)
     target.parent.mkdir(parents=True, exist_ok=True)
+    ensure_rule_file(root)
     existing = target.read_text(encoding="utf-8") if target.exists() else None
     target.write_text(
         render_contract(
@@ -228,6 +302,7 @@ def create_contract(root: Path, phase: str, work_unit: str | None) -> Path:
             criteria=criteria,
             units=selected,
             work_unit=work_unit,
+            context_paths=coordination_context_paths(root),
             existing=existing,
         ),
         encoding="utf-8",

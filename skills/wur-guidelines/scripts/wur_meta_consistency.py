@@ -165,7 +165,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
     for snippet in (
         "`contracts/PHASE_{n}_CONTRACT.md`",
         "Do not create `PHASE_{n}_FIX.md`",
-        "append a new execution round in the same contract file",
+        "record failing status and use the contract's existing fix-round/report ledger",
     ):
         if snippet not in _text(test_md):
             findings.append(
@@ -261,7 +261,7 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise",
         "Technology Judgment",
         "`agents/project/DESIGN.md`",
-        "software/dev projects should create or maintain",
+        "Software/dev projects should create or maintain",
         "Design Contract",
         "Visual Theme & Atmosphere",
         "Component Styling",
@@ -287,8 +287,13 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "Prefer TypeScript for non-trivial web/app code",
         "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
         "WUR Contract Model",
+        "`contracts/rule.md` stores shared execution rules",
         "`contracts/PHASE_{n}_CONTRACT.md`",
-        "one file contains both task instructions and returned execution reports",
+        "Phase contracts contain task brief, pending Work Units",
+        "Executors add or update fix rounds in the same contract file when verification fails",
+        "Allowed Read References",
+        "Infer useful specialist lenses from the listed references and WU scope",
+        "Report which specialist lenses were applied",
         "Do not create `contracts/outbox/` or `contracts/inbox/`",
         "Do not create Phase Fix ledgers for new work",
     ):

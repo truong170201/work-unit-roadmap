@@ -24,18 +24,21 @@ WUR does **not** define hosted CI/CD, deployment pipelines, cloud services, proj
 
 `agents/` is the source-of-truth wiki. It is the project second brain: roadmap, research, decisions, design, tech stack, specialist registry, reports, graph contract, and status.
 
-`contracts/PHASE_{n}_CONTRACT.md` is the execution contract. one file contains both task instructions and returned execution reports. one file contains both the task brief and report ledger. It includes WUR rules, pending Work Units, skipped completed WUs, verification requirements, optional sparse worktree guidance, and the `## Execution Rounds And Reports` ledger.
+`contracts/rule.md` stores shared execution rules. `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract. Phase contracts contain task brief, pending Work Units, skipped completed WUs, verification requirements, explicit Allowed Read References, fix rounds, and returned execution reports.
 
 Rules:
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
 - Do not create Phase Fix ledgers for new work.
-- Failed work becomes a new execution round in the same contract file.
-- External executors may read `agents/` through the contract context, but must not edit `agents/`.
+- Executors add or update fix rounds in the same contract file when verification fails; WUR does not need a separate fail helper.
+- External executors may read only the `agents/` paths listed under Allowed Read References; they must not scan all of `agents/` or edit `agents/`.
+- Allowed Read References list specific project docs, departments, and specialists for role-aware execution.
+- Infer useful specialist lenses from the listed references and WU scope; do not require WUR to assign one person per WU.
+- Report which specialist lenses were applied and any material coverage gaps.
 - WUR receives and validates reports before updating `agents/`.
-- `/wur:start` creates or refreshes a contract; it does not execute code by itself.
+- `/wur:start` creates or refreshes `contracts/rule.md` and the phase contract; it does not execute code by itself.
 - `/wur:done` only runs after explicit client request.
 
-Optional sparse worktree guidance belongs inside the contract. If isolation is needed, create a worktree that excludes `agents/` and `contracts/`; the executor uses the contract as the brief and returns a report for WUR to receive.
+Optional sparse worktree guidance belongs in `contracts/rule.md`. If isolation is needed, create a worktree that excludes `agents/` and `contracts/`; the executor uses the phase contract as the brief and returns a report for WUR to receive.
 
 ## Checklist
 
@@ -46,7 +49,7 @@ Optional sparse worktree guidance belongs inside the contract. If isolation is n
 5. **Verify** — run checks scoped to acceptance criteria and changed surface.
 6. **Report** — append evidence under the contract's `## Execution Rounds And Reports`.
 7. **Receive** — WUR validates report, then updates roadmap/status/log in `agents/`.
-8. **Close only on request** — only `/wur:done` from the current client request can close a phase.
+8. **Close only on request** - only `/wur:done` from the current client request can close a phase. Closeout reads the contract ledger: report-backed and client-approved WUs may move to `done`; unreported work is deferred or blocked; skipped completed WUs stay unchanged.
 
 ## Minimal Enforcement Model
 
@@ -119,11 +122,11 @@ Coverage Matrix categories are checklists, not mandatory files: domain expertise
 
 ## Design And Tech Stack
 
-software/dev projects should create or maintain `agents/project/DESIGN.md` as the Design Contract: Visual Theme & Atmosphere, Color Palette & Roles, Typography, Component Styling, Layout, Responsive Behavior, and concrete do/don't rules. Backend/API/CLI-only projects still use DESIGN.md for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience.
+Software/dev projects should create or maintain `agents/project/DESIGN.md` as the Design Contract: Visual Theme & Atmosphere, Color Palette & Roles, Typography, Component Styling, Layout, Responsive Behavior, and concrete do/don't rules. Backend/API/CLI-only projects still use DESIGN.md for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience.
 
 Software/dev projects should create or maintain `agents/project/TECH_STACK.md`. Technology Judgment matters: Prefer TypeScript for non-trivial web/app code. Consider Vite + React first for common frontend web apps. Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested. Record material stack choices with verification commands.
 
-Default Stack Suggestions are recommendations, not mandates. Defaults are recommendations, not mandates:
+Default Stack Suggestions are recommendations, not mandates:
 - SPA/dashboard/CRM: Vite + React + TypeScript + Tailwind CSS + shadcn/ui.
 - SEO/marketing/blog: Next.js App Router + TypeScript + Tailwind CSS + shadcn/ui.
 - Mobile: Expo + TypeScript + NativeWind.

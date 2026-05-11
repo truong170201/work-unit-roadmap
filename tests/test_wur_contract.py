@@ -18,12 +18,20 @@ class WurContractTestCase(unittest.TestCase):
         self.agents = self.root / "agents"
         (self.agents / "roadmap").mkdir(parents=True)
         (self.agents / "project").mkdir(parents=True)
+        (self.agents / "departments").mkdir(parents=True)
+        (self.agents / "specialists").mkdir(parents=True)
         (self.root / "src").mkdir()
         (self.root / "src" / "app.ts").write_text("export const ok = true;\n", encoding="utf-8")
         (self.agents / "project" / "PHILOSOPHY.md").write_text("# Philosophy\n", encoding="utf-8")
         (self.agents / "project" / "USAGE.md").write_text("# Usage\n", encoding="utf-8")
         (self.agents / "project" / "DESIGN.md").write_text("# Design\n", encoding="utf-8")
         (self.agents / "project" / "TECH_STACK.md").write_text("# Tech Stack\n", encoding="utf-8")
+        (self.agents / "departments" / "engineering.md").write_text(
+            "# Engineering Department\n", encoding="utf-8"
+        )
+        (self.agents / "specialists" / "frontend-engineer.md").write_text(
+            "# Frontend Engineer\n", encoding="utf-8"
+        )
         (self.agents / "roadmap" / "PHASE_1.md").write_text(
             """---
 type: phase
@@ -65,21 +73,26 @@ Build a dashboard slice.
             encoding="utf-8",
         )
 
-    def test_create_phase_contract_skips_completed_work_and_uses_one_file(self) -> None:
+    def test_create_phase_contract_skips_completed_work_and_uses_shared_rule_file(self) -> None:
         result = self.run_script("create", "--root", str(self.root), "--phase", "1")
         self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
 
         contracts = sorted((self.root / "contracts").glob("*.md"))
-        self.assertEqual([path.name for path in contracts], ["PHASE_1_CONTRACT.md"])
-        text = contracts[0].read_text(encoding="utf-8")
+        self.assertEqual([path.name for path in contracts], ["PHASE_1_CONTRACT.md", "rule.md"])
+        text = (self.root / "contracts" / "PHASE_1_CONTRACT.md").read_text(
+            encoding="utf-8"
+        )
+        rule = (self.root / "contracts" / "rule.md").read_text(encoding="utf-8")
 
         self.assertIn("# WUR Contract: PHASE_1", text)
-        self.assertIn("## WUR Contract Rules", text)
-        self.assertIn("Do not modify `agents/`", text)
-        self.assertIn("Do not modify `contracts/` except this contract report section", text)
-        self.assertIn("git sparse-checkout init --no-cone", text)
-        self.assertIn("!/agents/", text)
-        self.assertIn("!/contracts/", text)
+        self.assertIn("Shared rules: `contracts/rule.md`", text)
+        self.assertNotIn("## WUR Contract Rules", text)
+        self.assertIn("# WUR Contract Rules", rule)
+        self.assertIn("Do not modify `agents/`", rule)
+        self.assertIn("Do not modify `contracts/` except the active phase contract report section.", rule)
+        self.assertIn("git sparse-checkout init --no-cone", rule)
+        self.assertIn("!/agents/", rule)
+        self.assertIn("!/contracts/", rule)
         self.assertIn("| WU002 | Card layout", text)
         self.assertIn("| WU003 | Filter state", text)
         self.assertNotIn("| WU001 | Setup shell", text)
@@ -151,6 +164,64 @@ Build a dashboard slice.
         self.assertIn("Commit: abc123", text)
         self.assertFalse((self.root / "contracts" / "inbox").exists())
         self.assertFalse((self.root / "contracts" / "outbox").exists())
+
+    def test_contract_teaches_executor_owned_fix_rounds_without_fail_command(self) -> None:
+        self.assertEqual(
+            self.run_script("create", "--root", str(self.root), "--phase", "1").returncode,
+            0,
+        )
+
+        contract = self.root / "contracts" / "PHASE_1_CONTRACT.md"
+        text = contract.read_text(encoding="utf-8")
+        rule = (self.root / "contracts" / "rule.md").read_text(encoding="utf-8")
+        self.assertIn("If verification fails, add or update a `### Fix Round R{n} - {scope}` section in the active phase contract.", rule)
+        self.assertIn("Do not wait for WUR to generate a separate fix file or run another helper command.", rule)
+        self.assertIn("Use one contract ledger for task brief, fix rounds, and reports.", rule)
+        self.assertNotIn("wur_contract.py fail", text)
+        self.assertEqual(
+            [path.name for path in (self.root / "contracts").glob("*.md")],
+            ["PHASE_1_CONTRACT.md", "rule.md"],
+        )
+
+        result = self.run_script(
+            "fail",
+            "--root",
+            str(self.root),
+            "--phase",
+            "1",
+            "--wu",
+            "WU002",
+            "--description",
+            "Cards overflow on mobile",
+            "--verification",
+            "npm run test:cards",
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("invalid choice: 'fail'", result.stderr)
+
+    def test_contract_lists_explicit_allowed_read_references_near_ledger(self) -> None:
+        result = self.run_script("create", "--root", str(self.root), "--phase", "1")
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        text = (self.root / "contracts" / "PHASE_1_CONTRACT.md").read_text(
+            encoding="utf-8"
+        )
+
+        references_index = text.index("## Allowed Read References")
+        self.assertGreater(references_index, text.index("## Pending Work"))
+        self.assertLess(references_index, text.index("## Execution Rounds And Reports"))
+        self.assertIn("Only read the listed paths when deeper context is needed.", text)
+        self.assertIn("Do not scan all of `agents/`.", text)
+        self.assertIn("Do not read unlisted `agents/` files unless the client or WUR contract explicitly adds them.", text)
+        self.assertIn("Infer useful specialist lenses from the listed references and WU scope.", text)
+        self.assertIn("Do not require WUR to assign one person per WU.", text)
+        self.assertIn("Report which specialist lenses were applied.", text)
+        self.assertIn("- `agents/project/PHILOSOPHY.md`", text)
+        self.assertIn("- `agents/project/DESIGN.md`", text)
+        self.assertIn("- `agents/project/TECH_STACK.md`", text)
+        self.assertIn("- `agents/departments/engineering.md`", text)
+        self.assertIn("- `agents/specialists/frontend-engineer.md`", text)
+        references = text[references_index : text.index("## Execution Rounds And Reports")]
+        self.assertNotIn("- `agents/`", references)
 
 
 if __name__ == "__main__":

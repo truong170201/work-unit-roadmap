@@ -5,10 +5,10 @@ argument-hint: "<phase-number> [work-unit-id]"
 
 Start Phase $ARGUMENTS using the `wur-guidelines` skill.
 
-`/wur:start` no longer makes WUR execute code directly. It prepares one phase contract file that can be handed to another agent or human executor.
+`/wur:start` no longer makes WUR execute code directly. It prepares `contracts/rule.md` plus one phase contract file that can be handed to another agent or human executor.
 
 1. If `agents/` does not exist, stop and instruct the user to run `/wur:init` first.
-2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
+2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, `agents/project/TECH_STACK.md` when present, plus `agents/departments/` and `agents/specialists/` when present if not already read this session.
 3. Read `agents/roadmap/ALL.md` and `agents/roadmap/PHASE_{n}.md`:
    - confirm the target phase exists or can be scaffolded from planned roadmap data
    - if another phase is already `active`, stop unless the user explicitly asks to prepare a contract for that active phase
@@ -45,7 +45,7 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    Only the client may move a WU to `accepted` or `done`.
    ```
 
-5. Create or refresh the one-file execution contract:
+5. Create or refresh the shared rule file and phase execution contract:
 
    ```bash
    python skills/wur-guidelines/scripts/wur_contract.py create --phase {n}
@@ -57,8 +57,11 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    python skills/wur-guidelines/scripts/wur_contract.py create --phase {n} --wu WU003
    ```
 
-6. The result is `contracts/PHASE_{n}_CONTRACT.md`. This one file contains the task brief, WUR rules, pending WUs, and report area. Do not create `contracts/outbox/` or `contracts/inbox/`.
-7. Do not create a worktree by default. If the executor needs isolation, the contract contains optional sparse worktree commands that exclude `agents/` and `contracts/`.
+6. The result is `contracts/rule.md` plus `contracts/PHASE_{n}_CONTRACT.md`. Shared rules live in `contracts/rule.md`; the phase file contains the task brief, pending WUs, Allowed Read References, and report area. Do not create `contracts/outbox/` or `contracts/inbox/`.
+   - The executor may read only the `agents/` paths listed in the contract's Allowed Read References.
+   - The executor must not modify `agents/`.
+   - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.
+7. Do not create a worktree by default. If the executor needs isolation, `contracts/rule.md` contains optional sparse worktree commands that exclude `agents/` and `contracts/`.
 8. Update `agents/roadmap/ALL.md` only as planning/status state requires. Do not mark WUs `accepted` or `done` from this command.
 9. Append to `agents/roadmap/log.md`:
 

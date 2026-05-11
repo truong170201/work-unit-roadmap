@@ -12,7 +12,7 @@ Require: Python 3.10+ and PyYAML (`pip install pyyaml`).
 | `wur_graph_query.py` | Query graph — neighbors, edges, path, facts, status filter |
 | `wur_wiki_stats.py` | Dashboard: page counts, status, broken links, graph freshness |
 | `wur_meta_consistency.py` | Local consistency checker for docs/spec/script drift |
-| `wur_contract.py` | Create or refresh one-file execution contracts and append returned reports to the same contract file |
+| `wur_contract.py` | Create or refresh shared rule files and phase execution contracts, then append returned reports to the same contract file |
 
 ## Quick start
 
@@ -36,7 +36,7 @@ python skills/wur-guidelines/scripts/wur_wiki_stats.py agents/
 # Local consistency check
 python skills/wur-guidelines/scripts/wur_meta_consistency.py .
 
-# Create or refresh a phase contract
+# Create or refresh shared rules and a phase contract
 python skills/wur-guidelines/scripts/wur_contract.py create --phase 1
 
 # Create or refresh a single-WU contract inside the same phase file
@@ -49,23 +49,33 @@ python skills/wur-guidelines/scripts/wur_contract.py receive --phase 1 --report-
 python -m unittest discover -s tests -v
 ```
 
-## One-file contracts (wur_contract.py)
+## Contract files (wur_contract.py)
 
 Use contracts when execution should happen outside the WUR wiki state. The contract
 file is the boundary between WUR and an executor.
 
 - `agents/` is the source-of-truth wiki.
-- `contracts/PHASE_{n}_CONTRACT.md` is the execution contract.
-- One file contains task instructions, WUR rules, pending Work Units, optional sparse worktree guidance, and returned execution reports.
+- `contracts/rule.md` is the shared execution rule contract.
+- `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract.
+- Phase contracts contain task instructions, pending Work Units, explicit Allowed Read References, and returned execution reports.
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
 - Do not create Phase Fix ledgers for new work; failed execution becomes another round inside the same contract.
 
-`create` reads `agents/roadmap/PHASE_{n}.md`, skips WUs already `accepted` or
-`done`, and refreshes the task section while preserving `## Execution Rounds And
-Reports`. Re-running it is safe.
+`create` writes `contracts/rule.md`, reads `agents/roadmap/PHASE_{n}.md`, skips
+WUs already `accepted` or `done`, and refreshes the phase task section while
+preserving `## Execution Rounds And Reports`. Re-running it is safe.
+
+The generated contract lists explicit Allowed Read References selected from
+`agents/project/`, `agents/departments/`, and `agents/specialists/` when present.
+Executors use only those listed paths to infer useful specialist lenses for the
+work. They must not scan all of `agents/` or modify `agents/`.
 
 `receive` appends a report to `## Execution Rounds And Reports` in the same
 contract file. WUR then validates the report before updating `agents/`.
+
+Executors working from the contract add or update Fix Round sections directly
+inside `## Execution Rounds And Reports` when verification fails. This avoids a
+second WUR helper command and keeps the contract as the single handoff ledger.
 
 ## Integration with /wur:wiki:graph
 

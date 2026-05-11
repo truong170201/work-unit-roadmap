@@ -12,7 +12,7 @@ Most AI coding sessions fail because the agent mixes planning, execution, status
 
 `agents/` is the project second brain: roadmap, research, decisions, design, tech stack, specialist registry, reports, and graph state. It is the source of truth.
 
-`contracts/PHASE_{n}_CONTRACT.md` is the execution contract. It is one file per phase. The same file contains the task brief, WUR rules, pending Work Units, optional sparse worktree guidance, and the report ledger. The executor works from the contract and returns evidence there; WUR receives the report and updates `agents/`.
+`contracts/rule.md` stores shared WUR execution rules. `contracts/PHASE_{n}_CONTRACT.md` is one phase contract per phase: task brief, pending Work Units, explicit Allowed Read References, and the report ledger. The executor reads only the listed `agents/` paths when deeper context is needed, follows `contracts/rule.md`, returns evidence in the phase contract, and WUR receives the report before updating `agents/`.
 
 There is no Codex App Server integration, no MCP runtime coordinator, and no required subagent platform. WUR is a wiki + contract + receive workflow.
 
@@ -44,10 +44,10 @@ The contract keeps the executor focused. The wiki stays clean.
 
 1. `/wur:init` creates `agents/` once.
 2. `/wur:wiki:*` enriches and queries the wiki.
-3. `/wur:start {n}` creates or refreshes `contracts/PHASE_{n}_CONTRACT.md`.
+3. `/wur:start {n}` creates or refreshes `contracts/rule.md` and `contracts/PHASE_{n}_CONTRACT.md`.
 4. The executor follows that contract. It must not edit `agents/`.
 5. Reports are appended to the same contract file.
-6. `/wur:test` records pass/waive/fail state. A fail creates another execution round in the same contract, not a Phase Fix file.
+6. `/wur:test` records pass/waive/fail state. Failed work stays in the same contract ledger; the executor may add or update a fix round there, not a Phase Fix file.
 7. `/wur:done` closes a phase only when the current client request explicitly invokes it.
 
 ## Installation
@@ -113,6 +113,7 @@ IMA writes durable knowledge into `agents/` and may update roadmap planning when
 This creates or refreshes:
 
 ```text
+contracts/rule.md
 contracts/PHASE_1_CONTRACT.md
 ```
 
@@ -120,7 +121,7 @@ The contract skips WUs already `accepted` or `done`. Re-running `/wur:start 1` u
 
 ### 5. Execute outside WUR state
 
-Give the contract file to another agent or human executor. The executor may implement code, run tests, and commit code, but must not edit `agents/`. If isolation is needed, use the optional sparse worktree instructions in the contract so `agents/` and `contracts/` are not carried into the execution worktree.
+Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It may implement code, run tests, and commit code. If isolation is needed, use the optional sparse worktree instructions in `contracts/rule.md` so `agents/` and `contracts/` are not carried into the execution worktree.
 
 ### 6. Receive reports and close
 
@@ -139,10 +140,10 @@ The executor writes the result into the contract's `## Execution Rounds And Repo
 |---|---|---|
 | `/wur:init` | main repo | Create the `agents/` project wiki |
 | `/wur:upgrade` | main repo | Migrate an existing `agents/` workspace |
-| `/wur:start {n}` | main repo | Create or refresh `contracts/PHASE_{n}_CONTRACT.md` |
+| `/wur:start {n}` | main repo | Create or refresh `contracts/rule.md` and `contracts/PHASE_{n}_CONTRACT.md` |
 | `/wur:test pass` | main repo | Record phase test pass |
 | `/wur:test waive: <reason>` | main repo | Record traceable verification waive |
-| `/wur:test fail: <description>` | main repo | Add another failed execution round to the same contract |
+| `/wur:test fail: <description>` | main repo | Record failing status and keep follow-up in the same contract ledger |
 | `/wur:done` | main repo | Client-confirmed phase closeout |
 | `/wur:abort {n}` | main repo | Abandon phase with trace |
 | `/wur:status` | main repo | Show active phase, contract, WU, reports, blockers |
@@ -191,6 +192,7 @@ work-unit-roadmap/
 - [ ] `agents/project/DESIGN.md` exists for software/dev projects
 - [ ] `agents/project/TECH_STACK.md` records material stack choices
 - [ ] `agents/roadmap/ALL.md` and phase files are current
+- [ ] `contracts/rule.md` exists for shared execution rules
 - [ ] `contracts/PHASE_{n}_CONTRACT.md` exists for active execution
 - [ ] reports live in the same contract file, not scattered files
 - [ ] `python skills/wur-guidelines/scripts/wur_meta_consistency.py .` returns OK

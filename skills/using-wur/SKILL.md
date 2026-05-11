@@ -18,7 +18,7 @@ Invoke relevant or requested WUR skills before any response or action. Start her
 WUR uses three local skills:
 
 1. **`using-wur`** — this bootstrap.
-2. **`wur-guidelines`** — core workflow: `agents/` wiki, Work Units, one-file contracts, verification, receive, and client-confirmed closeout.
+2. **`wur-guidelines`** — core workflow: `agents/` wiki, Work Units, shared contract rules, phase contracts, verification, receive, and client-confirmed closeout.
 3. **`using-git-worktrees`** — optional isolation guidance only when a contract explicitly recommends a sparse worktree.
 
 Everything else is driven by slash commands in `commands/` and `commands/wiki/`.
@@ -27,10 +27,11 @@ Everything else is driven by slash commands in `commands/` and `commands/wiki/`.
 
 ```text
 agents/ = source-of-truth wiki
-contracts/PHASE_{n}_CONTRACT.md = one-file execution contract + report ledger
+contracts/rule.md = shared execution rules
+contracts/PHASE_{n}_CONTRACT.md = phase execution contract + report ledger
 ```
 
-`/wur:start {n}` creates or refreshes the contract. It does not make the WUR coordinator execute code by itself.
+`/wur:start {n}` creates or refreshes the shared rule file and phase contract. It does not make the WUR coordinator execute code by itself.
 
 External executors may implement from the contract, but they must not edit `agents/`. WUR receives their report and updates `agents/` after verification.
 

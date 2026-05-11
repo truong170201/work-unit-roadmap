@@ -1,5 +1,5 @@
 ---
-description: Record phase test status or append a failed execution round to the phase contract.
+description: Record phase test status or create/update a failed execution round in the phase contract.
 argument-hint: "[pass | waive: <reason> | fail: <description>]"
 ---
 
@@ -11,9 +11,9 @@ Before doing anything else, read `agents/roadmap/ALL.md` and enforce the phase g
 - if the contract is missing, stop and run `/wur:start {n}` first
 
 Call this after tests have been run by the user or by an executor. Pass the result as `$ARGUMENTS`:
-- `pass` — tests passed; record phase closeout readiness only
-- `waive: <reason>` — closeout readiness is allowed without a clean pass, but the reason must be recorded
-- `fail: <description>` — bugs found; append a new execution round in the same contract file
+- `pass` - tests passed; record phase closeout readiness only
+- `waive: <reason>` - closeout readiness is allowed without a clean pass, but the reason must be recorded
+- `fail: <description>` - bugs found; record failing status and use the contract's existing fix-round/report ledger
 
 This command is the only allowed way to set phase `test_status` before `/wur:done`.
 
@@ -28,7 +28,7 @@ Usage: /wur:test pass
 
   pass    Mark active phase test_status: pass.   Use after tests succeed.
   waive   Mark active phase test_status: waived. Reason is required.
-  fail    Append a failed execution round to the phase contract. Description is required.
+  fail    Record failing status and point to the phase contract ledger. Description is required.
 ```
 
 ## Status Ownership
@@ -45,9 +45,12 @@ If $ARGUMENTS indicates **bugs found**:
 1. Update the active phase frontmatter:
    - `test_status: failing`
    - `test_waive_reason: null`
-2. Append a new execution round in the same contract file, `contracts/PHASE_{n}_CONTRACT.md`.
+2. Review `contracts/PHASE_{n}_CONTRACT.md`.
+   - If the executor already added a `### Fix Round R{n} - {scope}` section, do not duplicate it.
+   - If the failure was found outside the executor, append a concise coordinator note under `## Execution Rounds And Reports` that names the failed scope, failure description, and required verification.
+   - The executor owns detailed fix-round writing when it is working from the contract.
 3. Do not create `PHASE_{n}_FIX.md`. Do not create fix branches or fix worktrees by default. Failed work is another contract round, not a separate Phase Fix lane.
-4. The new round must include failure description, affected WU or phase scope, required verification, and a report slot for the executor.
+4. The round must include failure description, affected WU or phase scope, required verification, and a report slot for the executor.
 5. Append to `agents/roadmap/log.md`:
 
    ```text
