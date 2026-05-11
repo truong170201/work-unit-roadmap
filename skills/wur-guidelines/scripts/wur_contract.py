@@ -106,7 +106,8 @@ def report_tail(existing: str | None) -> str:
         "Keep all execution reports in this same contract file. Do not create "
         "`contracts/inbox/` or `contracts/outbox/` files.\n\n"
         "Executors update touched Pending Work rows before reporting: Status and Commit cells only. "
-        "Allowed Status values are `active`, `ready-for-review`, `blocked`, or `deferred`; never `accepted` or `done`.\n\n"
+        "Executor-owned statuses may become `active`, `ready-for-review`, `blocked`, or `deferred`. "
+        "Accepted/done requires explicit current-client approval for exact WU IDs.\n\n"
         "### Report Template\n\n"
         "```markdown\n"
         "### Received Report - {round or WU}\n"
@@ -118,8 +119,9 @@ def report_tail(existing: str | None) -> str:
         "- {path}\n"
         "Allowed Contract Edits Used: Pending Work Status/Commit cells and `## Execution Rounds And Reports` only\n"
         "Pending Work Table Updated: yes | no; rows: {WU ids}\n"
+        "Client Authorization For Accepted/Done: {exact user instruction or none}\n"
         "Work Unit State Updates:\n"
-        "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}\n"
+        "- {WU id}: {before status} -> {after status: active | ready-for-review | blocked | deferred | accepted | done}; reason: {evidence or client authorization}\n"
         "Notes For WUR:\n"
         "- {roadmap/status update suggestion}\n"
         "```\n"
@@ -171,12 +173,12 @@ def render_rule_file() -> str:
             "- You may edit only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus the active contract's `## Execution Rounds And Reports` section.",
             "- Do not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, or Allowed Read References.",
             "- You may update only the Status and Commit cells for touched WU rows in the active contract's Pending Work table.",
-            "- Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
-            "- Never set Pending Work rows to `accepted` or `done`; WUR closeout applies those after client confirmation.",
+            "- Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            "- Set `accepted` or `done` only when the current client request explicitly approves those exact WU IDs.",
             "- Do not edit any other `contracts/` file.",
             "- Do not create `contracts/inbox/` or `contracts/outbox/`.",
             "- Do not create Phase Fix files for new work.",
-            "- Never mark Work Units `accepted`, `done`, or close a phase; WUR coordinator applies `accepted` or `done` only after client confirmation.",
+            "- Never mark unspecified Work Units `accepted` or `done`, and never close a phase unless the client explicitly invokes closeout.",
             "- Do not merge branches or run `/wur:done`.",
             "- Implement only pending work listed in the active phase contract.",
             "",
@@ -195,7 +197,7 @@ def render_rule_file() -> str:
             "- Do not wait for WUR to generate a separate fix file or run another helper command.",
             "- Use one contract ledger for task brief, fix rounds, and reports.",
             "- Record lifecycle evidence for every touched Work Unit: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.",
-            "- Allowed executor status suggestions: `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            "- Allowed executor status suggestions without explicit client approval: `active`, `ready-for-review`, `blocked`, or `deferred`.",
             "- Report changed files, commit hash, verification evidence, specialist lenses applied, and any material coverage gaps.",
             "- Keep output concise; WUR coordinator performs final acceptance.",
             "",

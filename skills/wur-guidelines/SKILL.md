@@ -31,9 +31,10 @@ Rules:
 - Do not create Phase Fix ledgers for new work.
 - Executors add or update fix rounds in the same contract file when verification fails; WUR does not need a separate fail helper.
 - Executors may update only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus `## Execution Rounds And Reports`; they must not edit the contract header, goal, success criteria, scope, dependencies, verification text, Allowed Read References, any other contract file, or `agents/`.
-- Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`; never `accepted` or `done`.
+- Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.
+- Accepted/done requires explicit current-client approval for exact WU IDs.
 - Executor reports must include lifecycle evidence for every touched WU: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.
-- Executor status suggestions stop at `active`, `ready-for-review`, `blocked`, or `deferred`; WUR receives the report and applies roadmap state in `agents/`.
+- Executor status suggestions without explicit client approval stop at `active`, `ready-for-review`, `blocked`, or `deferred`; WUR receives the report and applies roadmap state in `agents/`.
 - External executors may read only the `agents/` paths listed under Allowed Read References; they must not scan all of `agents/` or edit `agents/`.
 - Allowed Read References list specific project docs, departments, and specialists for role-aware execution.
 - Infer useful specialist lenses from the listed references and WU scope; do not require WUR to assign one person per WU.

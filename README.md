@@ -121,11 +121,11 @@ The contract skips WUs already `accepted` or `done`. Re-running `/wur:start 1` u
 
 ### 5. Execute outside WUR state
 
-Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It first checks whether the contract contains executable project work. If not, it reports blocked/no-op/clarification-needed without creating a worktree. If implementation requires editing project files, it creates or reuses a sparse worktree using `contracts/rule.md` so `agents/` and `contracts/` are not carried into execution. It may implement code, run tests, commit code, update touched Pending Work Status/Commit cells to `active`, `ready-for-review`, `blocked`, or `deferred`, and append evidence under `## Execution Rounds And Reports`.
+Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It first checks whether the contract contains executable project work. If not, it reports blocked/no-op/clarification-needed without creating a worktree. If implementation requires editing project files, it creates or reuses a sparse worktree using `contracts/rule.md` so `agents/` and `contracts/` are not carried into execution. It may implement code, run tests, commit code, update touched Pending Work Status/Commit cells to `active`, `ready-for-review`, `blocked`, or `deferred`, and append evidence under `## Execution Rounds And Reports`. accepted/done requires explicit current-client approval for exact WU IDs.
 
 ### 6. Receive reports and close
 
-The executor writes the result into the contract's `## Execution Rounds And Reports` section, including WU lifecycle evidence and matching Pending Work table updates. WUR validates the report and updates `agents/`; executors do not mark WUs `accepted` or `done`.
+The executor writes the result into the contract's `## Execution Rounds And Reports` section, including WU lifecycle evidence and matching Pending Work table updates. WUR validates the report and updates `agents/`; accepted/done requires explicit current-client approval for exact WU IDs.
 
 ```text
 /wur:test pass

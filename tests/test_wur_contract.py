@@ -111,11 +111,11 @@ Build a dashboard slice.
             rule,
         )
         self.assertIn(
-            "Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            "Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
             rule,
         )
         self.assertIn(
-            "Never set Pending Work rows to `accepted` or `done`; WUR closeout applies those after client confirmation.",
+            "Set `accepted` or `done` only when the current client request explicitly approves those exact WU IDs.",
             rule,
         )
         self.assertIn("Do not edit any other `contracts/` file.", rule)
@@ -124,11 +124,11 @@ Build a dashboard slice.
             rule,
         )
         self.assertIn(
-            "Allowed executor status suggestions: `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            "Allowed executor status suggestions without explicit client approval: `active`, `ready-for-review`, `blocked`, or `deferred`.",
             rule,
         )
         self.assertIn(
-            "Never mark Work Units `accepted`, `done`, or close a phase; WUR coordinator applies `accepted` or `done` only after client confirmation.",
+            "Never mark unspecified Work Units `accepted` or `done`, and never close a phase unless the client explicitly invokes closeout.",
             rule,
         )
         self.assertIn(
@@ -167,9 +167,10 @@ Build a dashboard slice.
         self.assertIn("Pending Work Table Updated: yes | no; rows: {WU ids}", text)
         self.assertIn("Work Unit State Updates:", text)
         self.assertIn(
-            "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}",
+            "- {WU id}: {before status} -> {after status: active | ready-for-review | blocked | deferred | accepted | done}; reason: {evidence or client authorization}",
             text,
         )
+        self.assertIn("Client Authorization For Accepted/Done: {exact user instruction or none}", text)
 
     def test_create_wu_contract_filters_to_one_pending_work_unit(self) -> None:
         result = self.run_script(

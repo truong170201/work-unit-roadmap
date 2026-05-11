@@ -78,8 +78,9 @@ active contract's Pending Work table, plus the report ledger. They must not edit
 the phase header, goal, success criteria, scope, dependencies, verification text,
 Allowed Read References, other contract files, or `agents/`.
 Reports must include WU lifecycle evidence and matching Pending Work table updates.
-Executor statuses may only become `active`, `ready-for-review`,
-`blocked`, or `deferred`; WUR applies roadmap state after receive.
+Executor-owned statuses may only become `active`, `ready-for-review`, `blocked`,
+or `deferred`. Accepted/done requires explicit current-client approval for exact
+WU IDs; WUR applies roadmap state after receive.
 
 Executors working from the contract add or update Fix Round sections directly
 inside `## Execution Rounds And Reports` when verification fails. This avoids a

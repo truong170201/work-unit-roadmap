@@ -61,9 +61,10 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    - The executor may read only the `agents/` paths listed in the contract's Allowed Read References.
    - The executor must not modify `agents/`.
    - The executor may update only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus `## Execution Rounds And Reports`.
-   - Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`; never `accepted` or `done`.
+   - Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.
+   - Set `accepted` or `done` only when the current client request explicitly approves those exact WU IDs.
    - The executor must not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, Allowed Read References, or any other contract file.
-   - The executor reports WU lifecycle evidence and may suggest only `active`, `ready-for-review`, `blocked`, or `deferred`; WUR applies roadmap state in `agents/`.
+   - The executor reports WU lifecycle evidence and may suggest only `active`, `ready-for-review`, `blocked`, or `deferred` unless the client explicitly approved exact WU IDs; WUR applies roadmap state in `agents/`.
    - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.
 7. Do not create a worktree just because a contract exists. The executor first reads the active contract and decides whether there is executable project work:
    - If there is no implementation task, do not create a worktree; report blocked/no-op/clarification-needed in the contract ledger.
