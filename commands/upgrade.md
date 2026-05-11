@@ -179,8 +179,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | Type | Location | Description |
    |---|---|---|
    | `phase` | `agents/roadmap/PHASE_*.md` | One execution phase |
-   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Consolidated fix ledger for a phase |
-   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file, readable but not preferred for new work |
+   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Legacy fix ledger; readable for old work, not created for new work |
+   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file; readable for old work only |
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
@@ -196,6 +196,14 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    Agents may set `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`.
    Only the client may set `accepted` or `done`.
+
+   ## Contract Boundary
+   - `agents/` is the source-of-truth wiki.
+   - `contracts/rule.md` stores shared execution rules outside `agents/`.
+   - `contracts/PHASE_{n}_CONTRACT.md` stores phase task brief, Allowed Read References, and executor report ledger.
+   - Executor handoff reports stay in the active phase contract.
+   - `agents/reports/` stores durable WUR reports and summaries, not executor handoff ledgers.
+   - If a worktree is used, exclude `agents/` and `contracts/`; keep WUR state in the main project root only.
 
    ## Graph Scope
    Graph pages (must have frontmatter):
@@ -356,10 +364,11 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    | Required section | Append if absent |
    |---|---|
-   | `## Page Types` | Full table with all 6 types |
+   | `## Page Types` | Full table with all page types |
    | `## Status Values` | Status values line |
    | `## Graph Scope` | Graph/system pages lists |
    | `## Required Frontmatter (graph pages)` | type + status + tags description |
+   | `## Contract Boundary` | `agents/` source-of-truth, `contracts/` execution boundary, sparse worktree rule |
    | `## Graph Conventions` | Wikilink syntax + typed edge list |
    | `## Tag Conventions` | Format rule + predefined vocabulary + lint rules |
 
@@ -459,8 +468,8 @@ If any step would break one of these, abort the migration and surface a `## Manu
     - Collect every broken link: `{source file} → [[{link}]] (not found)`
 
     **Frontmatter completeness** — for every graph page:
-    - Check `type` is present and is one of the 6 valid types
-    - Check `status` is present and is one of the 5 valid values
+    - Check `type` is present and is one of the valid page types
+    - Check `status` is present and is one of the 6 valid values
     - Check `tags` is present and is a list (not a scalar)
     - Collect every violation: `{file}: missing {field}` or `{file}: invalid {field} value '{value}'`
 
