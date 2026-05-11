@@ -85,7 +85,8 @@ Build a dashboard slice.
         rule = (self.root / "contracts" / "rule.md").read_text(encoding="utf-8")
 
         self.assertIn("# WUR Contract: PHASE_1", text)
-        self.assertIn("Shared rules: `contracts/rule.md`", text)
+        self.assertIn("Required shared rules: `contracts/rule.md`", text)
+        self.assertIn("read before execution", text)
         self.assertNotIn("## WUR Contract Rules", text)
         self.assertIn("# WUR Contract Rules", rule)
         self.assertIn("Do not modify `agents/`", rule)

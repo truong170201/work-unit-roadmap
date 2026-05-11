@@ -24,7 +24,7 @@ WUR does **not** define hosted CI/CD, deployment pipelines, cloud services, proj
 
 `agents/` is the source-of-truth wiki. It is the project second brain: roadmap, research, decisions, design, tech stack, specialist registry, reports, graph contract, and status.
 
-`contracts/rule.md` stores shared execution rules. `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract. Phase contracts contain task brief, pending Work Units, skipped completed WUs, verification requirements, explicit Allowed Read References, fix rounds, and returned execution reports.
+`contracts/rule.md` stores shared execution rules. `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract. Phase contracts contain task brief, pending Work Units, skipped completed WUs, verification requirements, explicit Allowed Read References, fix rounds, and returned executor reports. Durable WUR/internal reports, archives, and completion summaries remain in `agents/reports/`.
 
 Rules:
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
@@ -72,7 +72,7 @@ Allowed waives leave a trace: no test suite, tooling failure outside scope, expl
 | Thought | Reality |
 |---|---|
 | "I can just edit agents/ from the executor" | No. Executors report; WUR receives and updates `agents/`. |
-| "One more report file is cleaner" | No. Use one phase contract file to avoid file noise. |
+| "One more executor report file is cleaner" | No. Use one phase contract file to avoid handoff noise. Durable WUR/internal reports still belong in `agents/reports/`. |
 | "The fix needs PHASE_N_FIX.md" | No. Add another execution round in the contract. |
 | "Tests pass, so I can run `/wur:done`" | No. Report readiness and wait for the client to send `/wur:done`. |
 | "The WU is verified, so it is done" | No. Mark `ready-for-review`; `done` is client-confirmed. |

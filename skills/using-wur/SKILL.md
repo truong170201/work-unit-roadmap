@@ -50,7 +50,7 @@ External executors may implement from the contract, but they must not edit `agen
 |---|---|
 | "This is just a simple question" | Questions are tasks. Check WUR first. |
 | "I'll update agents/ after execution" | External executors do not edit `agents/`; WUR receives reports. |
-| "I'll make a new report file" | Keep reports in the same phase contract file unless the command says otherwise. |
+| "I'll make a new executor report file" | Keep executor handoff reports in the same phase contract file unless the command says otherwise. Durable WUR/internal reports still belong in `agents/reports/`. |
 | "Tests passed, so I can run `/wur:done`" | Only the current client request can authorize `/wur:done`. |
 | "I'll skip verification" | Evidence before claims. |
 | "I'll create Phase Fix files" | New work uses contract rounds, not Phase Fix ledgers. |

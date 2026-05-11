@@ -33,7 +33,7 @@ Short form:
 WUR prevents common AI drift:
 
 - editing roadmap state directly during execution
-- creating many noisy fix/report files
+- creating many noisy executor handoff/fix files
 - marking Work Units done without client review
 - losing project context when the agent hits context limits
 - making the executor ask too many questions because the task lacks a clear contract
@@ -194,7 +194,8 @@ work-unit-roadmap/
 - [ ] `agents/roadmap/ALL.md` and phase files are current
 - [ ] `contracts/rule.md` exists for shared execution rules
 - [ ] `contracts/PHASE_{n}_CONTRACT.md` exists for active execution
-- [ ] reports live in the same contract file, not scattered files
+- [ ] executor handoff reports live in the same phase contract file, not scattered files
+- [ ] durable internal reports, archives, and completion summaries live in `agents/reports/`
 - [ ] `python skills/wur-guidelines/scripts/wur_meta_consistency.py .` returns OK
 - [ ] `python -m unittest discover -s tests -v` passes locally
 

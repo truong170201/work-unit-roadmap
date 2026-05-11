@@ -213,7 +213,7 @@ def render_contract(
         f"Generated: {today}",
         f"Scope mode: `{scope_mode}`",
         f"Source: `agents/roadmap/PHASE_{phase}.md`",
-        f"Shared rules: `contracts/{RULE_FILE}`",
+        f"Required shared rules: `contracts/{RULE_FILE}` — read before execution.",
         "",
         "## Goal",
         "",

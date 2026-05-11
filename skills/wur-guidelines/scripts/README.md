@@ -57,7 +57,8 @@ file is the boundary between WUR and an executor.
 - `agents/` is the source-of-truth wiki.
 - `contracts/rule.md` is the shared execution rule contract.
 - `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract.
-- Phase contracts contain task instructions, pending Work Units, explicit Allowed Read References, and returned execution reports.
+- Phase contracts contain task instructions, pending Work Units, explicit Allowed Read References, and returned executor reports.
+- Durable WUR/internal reports, archives, and completion summaries live in `agents/reports/`.
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
 - Do not create Phase Fix ledgers for new work; failed execution becomes another round inside the same contract.
 
