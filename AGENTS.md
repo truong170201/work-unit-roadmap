@@ -7,8 +7,8 @@
 All live under `skills/`:
 
 - **`using-wur`** — bootstrap. Skill discovery + Red Flags. Invoke first.
-- **`wur-guidelines`** — core workflow. Phases, Work Units, verification, one commit per WU.
-- **`using-git-worktrees`** — isolated implementation under `.worktrees/`.
+- **`wur-guidelines`** — core workflow. Wiki, Work Units, contracts, verification, receive, closeout.
+- **`using-git-worktrees`** — optional isolation guidance when a contract asks for a sparse worktree.
 
 ## Commands (14)
 
@@ -19,11 +19,11 @@ Claude Code exposes them as `/wur:*` and `/wur:wiki:*`. Other clients are not bu
 ```text
 /wur:init [project-context] # one-time bootstrap of agents/ workspace (schema v1)
 /wur:upgrade               # migrate agents/ between WUR plugin versions (schema bump)
-/wur:start {n}             # create worktree + feature branch, init phase file
-/wur:test                  # record pass/waive/fail test status → spawn fix worktree if needed
-/wur:done                  # merge phase, cleanup worktrees, close phase
-/wur:abort {n}             # abandon a phase: discard worktree + branches, mark aborted
-/wur:status                # current phase/WU/worktree summary
+/wur:start {n}             # create or refresh contracts/PHASE_{n}_CONTRACT.md
+/wur:test                  # record pass/waive/fail status in agents/ and contract
+/wur:done                  # client-confirmed closeout after contract reports are verified
+/wur:abort {n}             # abandon a phase with trace
+/wur:status                # current phase/WU/contract/wiki summary
 /wur:wiki:upgrade          # add/upgrade graph layer on agents/
 /wur:wiki:add {src}        # ingest a source into agents/research/
 /wur:wiki:ima {idea}       # Idea-to-MVP wiki enrichment; optional roadmap planning updates
@@ -36,25 +36,24 @@ Claude Code exposes them as `/wur:*` and `/wur:wiki:*`. Other clients are not bu
 ## Summary
 
 ```text
-Small task, verify, commit. Repeat.
+Small task, verify, report, receive. Repeat.
 ```
 
 **New project (first time):**
 1. Run `/wur:init` once, optionally with project context, or ask "initialize WUR for ..." → creates `agents/` workspace after resolving existing project context; asks only if no context exists.
-2. Run `/wur:start 1`, or ask "start phase 1 with WUR" → creates worktree and phase file, verify baseline.
+2. Run `/wur:start 1`, or ask "create the WUR contract for phase 1" → creates or refreshes `contracts/PHASE_1_CONTRACT.md`.
 
 **Every session (returning agent):**
 1. Invoke `using-wur` → `wur-guidelines`.
-2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md` (once per project context).
+2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md`, and `agents/project/TECH_STACK.md` when present.
 3. Read `agents/roadmap/ALL.md` → active phase, active WU, blockers, default branch.
 4. Read `agents/roadmap/PHASE_{n}.md` → acceptance criteria, verification.
-5. Before `/wur:start`, verify `git status --short agents/` is empty. Commit or intentionally exclude dirty wiki context first; worktrees only receive tracked files from the base commit.
-6. `cd .worktrees/phase-{n}` — verify with `git branch --show-current`. If the worktree doesn't exist, run `/wur:start {n}` first. Never work from main.
-7. Implement one WU → verify → inspect diff → update roadmap + commit together.
-8. Report what changed, what was verified, what remains, next safe step.
+5. Read or create `contracts/PHASE_{n}_CONTRACT.md`.
+6. Executor follows the contract and must not modify `agents/`.
+7. WUR receives report evidence, updates `agents/`, and reports the next safe step.
 
 **Wiki only (no implementation):**
 1. Invoke `using-wur` → `wur-guidelines`.
-2. Run `/wur:wiki:upgrade` when available, or ask for the equivalent WUR wiki action, then use add/ima/ask/lint/stats/graph as needed. No worktree required.
+2. Run `/wur:wiki:upgrade` when available, or ask for the equivalent WUR wiki action, then use add/ima/ask/lint/stats/graph as needed.
 
 If any skill file is missing, stop and report it before proceeding.

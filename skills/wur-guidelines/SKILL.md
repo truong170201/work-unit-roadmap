@@ -1,366 +1,205 @@
 ---
 name: wur-guidelines
-description: "You MUST use this before any implementation work. Enforces roadmap-driven development: atomic Work Units, verification evidence, clean git history, one commit per completed WU. Use when planning, executing, tracking, resuming, or repairing roadmap-driven work."
+description: "Use when planning, tracking, contracting, receiving reports, or closing Work Unit Roadmap work. Keeps agents/ as wiki, contracts/ as execution handoff, and client-confirmed closeout only."
 ---
 
 # Work Unit Roadmap
 
-Produce real project results with clear tracking, clean commits, and recoverable history. Operate like a senior engineer: precise, scoped, test-oriented, accountable.
+Produce project results with clear tracking, small Work Units, verification evidence, and recoverable history.
 
 ```text
-Small task, verify, commit. Repeat.
+Small task, verify, report, receive. Repeat.
 ```
 
 ## Scope Boundary
 
 WUR is intentionally narrow:
 - **Wiki = plan** — `agents/` stores roadmap, phase state, research, decisions, reports, and the derived graph contract.
-- **Outside wiki = execution** — worktrees, branches, hooks, commits, merge/abort/fix flow.
-- **Outside wiki = checks** — local deterministic scripts such as lint, stats, graph extract/query, and consistency checks.
+- **Contract = execution boundary** — `contracts/PHASE_{n}_CONTRACT.md` tells an external executor what to do and where to report.
+- **Outside wiki = checks** — local deterministic scripts such as lint, stats, graph extract/query, contract creation, and consistency checks.
 
-WUR does **not** define hosted CI/CD, deployment pipelines, cloud services, or project-specific runtime infrastructure. Those live outside WUR.
+WUR does **not** define hosted CI/CD, deployment pipelines, cloud services, project-specific runtime infrastructure, or runtime subagent orchestration.
 
-<HARD-GATE>
-Before modifying any project source code, tests, or application configs, you MUST have:
-1. Read the active phase file and confirmed the current Work Unit
-2. Confirmed you are inside the correct worktree (`.worktrees/phase-{n}` or `.worktrees/fix-{n}-*`)
-3. Understood the acceptance criteria and verification steps
+## WUR Contract Model
 
-**Exempt — run from the main repo, no worktree required:**
-- **`/wur:init`** — creates `agents/` scaffolding; writing `.gitignore` here is setup, not implementation
-- **`/wur:start`** — creates the worktree itself; satisfies this gate for all work that follows
-- **`/wur:status`** — read-only
-- **`/wur:wiki:*`** — knowledge management, not implementation; no phase file or worktree needed
+`agents/` is the source-of-truth wiki. It is the project second brain: roadmap, research, decisions, design, tech stack, specialist registry, reports, graph contract, and status.
 
-This gate applies to every line of code/test/config changed during implementation, regardless of perceived simplicity.
-</HARD-GATE>
+`contracts/PHASE_{n}_CONTRACT.md` is the execution contract. one file contains both task instructions and returned execution reports. one file contains both the task brief and report ledger. It includes WUR rules, pending Work Units, skipped completed WUs, verification requirements, optional sparse worktree guidance, and the `## Execution Rounds And Reports` ledger.
+
+Rules:
+- Do not create `contracts/outbox/` or `contracts/inbox/`.
+- Do not create Phase Fix ledgers for new work.
+- Failed work becomes a new execution round in the same contract file.
+- External executors may read `agents/` through the contract context, but must not edit `agents/`.
+- WUR receives and validates reports before updating `agents/`.
+- `/wur:start` creates or refreshes a contract; it does not execute code by itself.
+- `/wur:done` only runs after explicit client request.
+
+Optional sparse worktree guidance belongs inside the contract. If isolation is needed, create a worktree that excludes `agents/` and `contracts/`; the executor uses the contract as the brief and returns a report for WUR to receive.
 
 ## Checklist
 
-**Applies to implementation work only.** Wiki operations (`/wur:wiki:*`) and workspace/phase setup (`/wur:init`, `/wur:start`) do not follow this checklist — they have their own command procedures.
-
-You MUST complete these in order:
-
-1. **Read roadmap** — `agents/roadmap/ALL.md` → find active phase, active WU, latest completed unit, blockers
-2. **Read phase file** — `agents/roadmap/PHASE_{n}.md` → acceptance criteria, scope, dependencies, verification
-3. **Confirm repo state** — `git status`, `git diff`, `git log -1 --oneline`
-4. **Enter worktree** — `cd .worktrees/phase-{n}` (or `fix-{n}-*`), then verify with `git branch --show-current` — must show `feature/phase-{n}`. If the worktree does not exist, stop and run `/wur:start {n}` first. **Never run implementation commands from the main repo.**
-5. **Implement one WU** — exactly one goal, bounded scope, no unrelated changes
-6. **Verify** — run the verification command(s) scoped to the WU. Must pass.
-7. **Inspect diff** — `git diff --stat`, review changes for scope creep
-8. **Update roadmap** — move the WU to `ready-for-review`, add commit hash, update ALL.md commit index, append to log.md if applicable
-9. **Commit** — one commit per WU, containing **both** implementation files and roadmap updates together: `WU-P{n}-{unit}: {short description}`
-10. **Report** — what changed, what was verified, what remains, and whether the client should review, continue, or explicitly run `/wur:done`
+1. **Read roadmap** — `agents/roadmap/ALL.md` → active phase, active WU, blockers, latest completed unit.
+2. **Read phase file** — `agents/roadmap/PHASE_{n}.md` → goal, success criteria, WUs, verification.
+3. **Create or refresh contract** — `python skills/wur-guidelines/scripts/wur_contract.py create --phase {n}`.
+4. **Executor works from contract** — one WU or scoped phase slice, no edits to `agents/`.
+5. **Verify** — run checks scoped to acceptance criteria and changed surface.
+6. **Report** — append evidence under the contract's `## Execution Rounds And Reports`.
+7. **Receive** — WUR validates report, then updates roadmap/status/log in `agents/`.
+8. **Close only on request** — only `/wur:done` from the current client request can close a phase.
 
 ## Minimal Enforcement Model
 
-WUR does not need a planner. It needs a gatekeeper.
+Principle: the right path should be the easiest path, and the wrong path should be blocked or leave a trace.
 
-**Principle:** The right path should be the easiest path. The wrong path should be blocked — or at minimum leave a trace.
-
-### Non-bypass rules
-
-1. `/wur:init` must stop if `agents/` already exists, unless the user is intentionally resetting the workspace.
+Non-bypass rules:
+1. `/wur:init` must stop if `agents/` already exists, unless the user is intentionally resetting it.
 2. `/wur:start` must stop if `agents/` does not exist.
-3. `/wur:start` must stop if `git status --short agents/` shows untracked or modified wiki context. A worktree only receives tracked files from the base commit, so `agents/raw/`, `agents/docs/`, roadmap, research, and project context must be committed or intentionally excluded before phase execution starts.
-4. Implementation must stop if you are not inside the correct worktree.
-5. `/wur:done` must stop if any related fix round is still `active`.
+3. `/wur:start` must produce or refresh `contracts/PHASE_{n}_CONTRACT.md` and skip WUs already `accepted` or `done`.
+4. External executors must not edit `agents/` or create new roadmap/fix files.
+5. WUR must not trust a report without checking commit hash, changed files, and verification evidence when implementation changed.
 6. `/wur:done` requires `test_status = pass` or `test_status = waived` with a non-empty reason.
-7. A WU commit must include both implementation changes and roadmap updates together.
-8. `/wur:done` may run only when the current user request explicitly invokes `/wur:done`. Passing tests or finished fixes only make a phase ready for client closeout; they do not authorize closeout.
-9. Agents may move WUs to `ready-for-review`. Only the client may accept or mark WUs `done`.
+7. `/wur:done` may run only when the current user request explicitly invokes `/wur:done`.
+8. Agents may move WUs to `ready-for-review`; only the client may accept or mark WUs `done`.
 
-### Allowed waives
-
-A waive is valid only when it leaves a trace in the phase file or log.
-
-- intentional workspace reset during `/wur:init`
-- no test suite exists
-- tooling failure is outside the WU scope
-- exploratory/spike phase
-- required manual/device environment is unavailable
-- graph layer is not enabled, so graph-specific checks are skipped
-
-### Enforcement anchors
-
-To make the rules harder to bypass in real git usage, `/wur:init` should scaffold project-root git hooks:
-- `commit-msg` — enforce WU-prefixed commit messages
-- `pre-commit` — block implementation commits on the default branch and require roadmap updates with code changes
-- `pre-push` — block pushing the default branch while a phase or WU is still active
-
-See `skills/wur-guidelines/references/git-hooks.md` for the minimal hook templates.
+Allowed waives leave a trace: no test suite, tooling failure outside scope, exploratory phase, unavailable device/manual environment, or graph layer not enabled.
 
 ## Red Flags
 
-These thoughts mean STOP — you're rationalizing:
-
 | Thought | Reality |
-|---------|---------|
-| "This is a tiny fix, no need for a WU" | Every change is a WU. Tiny ones use Tiny WU flow. |
-| "I'll just fix this while I'm here" | Unrelated fixes are scope creep. New WU or leave it. |
-| "The verification is obvious" | Run the command. Evidence, not assumptions. |
-| "I'll update the roadmap later" | Update now. Stale roadmaps cause confusion. |
-| "I'll commit the code now, roadmap in a separate commit" | No. One commit = implementation + roadmap update together. Separate roadmap commits pollute git log. |
-| "One commit for two WUs is fine" | One WU = one commit. Always. |
-| "The test failed but it's probably fine" | Blocked. Do not mark done. Fix or split new WU. |
+|---|---|
+| "I can just edit agents/ from the executor" | No. Executors report; WUR receives and updates `agents/`. |
+| "One more report file is cleaner" | No. Use one phase contract file to avoid file noise. |
+| "The fix needs PHASE_N_FIX.md" | No. Add another execution round in the contract. |
 | "Tests pass, so I can run `/wur:done`" | No. Report readiness and wait for the client to send `/wur:done`. |
 | "The WU is verified, so it is done" | No. Mark `ready-for-review`; `done` is client-confirmed. |
-| "I'll just add one more feature" | Scope creep. New WU in next phase. |
-| "I'll just use the main branch for this" | Every phase has a dedicated worktree. Create it. |
-| "I'll git checkout to switch feature branches" | No. Use a worktree. The main repo stays on the default branch. |
+| "I'll just add one more feature" | Scope creep. New WU or next phase. |
 | "I can skip the phase file read" | Read it. Acceptance criteria change. |
-| "I'll just `rm -rf agents/` and re-init" | No. Use `/wur:upgrade`. `/wur:init` refuses populated workspaces for a reason. |
-| "I'll bump `schema_version` by hand" | No. Only an automated migration script may bump it. |
 
-## Core Workflow
+## Phase & Work Unit
 
-### Phase & Work Unit
+Every phase has: goal, success criteria, exit gate, out of scope, dependencies, Work Units table, and verification strategy.
 
-Every phase has: goal, success criteria, exit gate, out of scope, dependencies, Work Units table, verification strategy.
+Every Work Unit has: ID, goal, acceptance criteria, scope, dependencies, verification, status, and commit/report reference.
 
-Every Work Unit has: ID, goal, acceptance criteria, scope, dependencies, parent (fix WUs only), verification, status, commit reference.
-
-**WU lifecycle**:
+WU lifecycle:
 
 ```text
 planned -> active -> ready-for-review -> accepted -> done
 ```
 
-Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. Clients own `accepted` and `done`. After implementation, verification, roadmap update, and commit, the agent reports evidence and moves the WU to `ready-for-review`. Do not mark a WU `done` because tests passed.
+Agents own `planned`, `active`, `ready-for-review`, `blocked`, and `deferred`. Clients own `accepted` and `done`. After implementation, verification, report receive, and roadmap update, WUR may move the WU to `ready-for-review`. Do not mark a WU `done` because tests passed.
 
-**Splitting rule** — split before coding if a WU: has >1 goal, touches unrelated modules, mixes feature + refactor, mixes behavior + formatting, needs >1 independent verification, or is too large to revert independently.
+Splitting rule: split before execution if a WU has more than one goal, touches unrelated modules, mixes feature and refactor, mixes behavior and formatting, needs more than one independent verification path, or is too large to revert independently.
 
-**Fix WUs** — created during `/wur:test`. Stored in one phase fix ledger: `agents/roadmap/PHASE_{n}_FIX.md`. Do not create a new markdown file for every bug batch. Each fix round is a section/table row in that ledger, and each fix WU carries a `Parent WU` field. The phase file's Fix Rounds table links to anchors in the ledger. Legacy `agents/roadmap/FIX_P{n}_{slug}.md` files remain readable but are not the preferred shape for new work. Fix work lives on `fix/phase-{n}-{slug}` branch in a dedicated worktree.
+## Verification
 
-**Tiny WUs** — for roadmap maintenance, doc updates. Prefix `WU-TW-{number}`. Same flow: implement → verify → commit → update ALL.md.
+Verification is scoped by default. Start from the active WU acceptance criteria and the user's request. Do not run full-project verification after every WU by default.
 
-**Specialist Registry** — `agents/departments/` and `agents/specialists/` are project-specific wiki knowledge that describe which expert roles this project can use. They are not a fixed roster shipped by WUR. Create or revise them from project context during `/wur:init`, `/wur:wiki:ima`, or normal wiki maintenance when the domain is clear; if the domain is unclear, ask one focused question instead of creating generic placeholders.
-
-Specialists are runtime optional: if the client supports subagents, the coordinator may dispatch the matching role; otherwise it reads the specialist file and applies that role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated before it affects roadmap state: one recommendation is not one Work Unit. Recommendations become acceptance criteria, risks, rejected suggestions, or planned WUs only when they are material and fit the active scope. Do not mark WUs `active`, `accepted`, or `done`, close phases, or bypass worktrees from a specialist role.
-
-**Coverage Matrix** — every clear domain should have a department coverage map before specialist roles are trusted. Coverage categories are checklists, not mandatory files: one specialist can cover multiple categories in a small project, but missing critical coverage must be recorded as a `coverage gap` instead of silently ignored.
-
-Default coverage categories are: domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration. Domain examples are illustrative, not exhaustive. For game projects, check coverage for game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Platform-specific expertise means the relevant runtime such as Unity, Godot, Unreal, Roblox, mobile, web, console, multiplayer, shader, or toolchain work. If context is enough, create the matching project-specific role cards; if not, ask one focused question or record the coverage gap. Do not create generic specialist placeholders.
-
-Every implementation-facing specialist should include **Technology Judgment**:
-- Prefer TypeScript for non-trivial web/app code.
-- Consider Vite + React first for common frontend web apps.
-- Consider Bun for new JavaScript/TypeScript projects when dependencies, deployment, and team constraints allow it.
-- Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested, existing project context requires it, or the scope is a tiny static artifact.
-- Defaults are recommendations, not mandates: explicit user instructions, existing stack, runtime constraints, ecosystem maturity, team familiarity, and verification ability override defaults.
-- Create or maintain `agents/project/TECH_STACK.md` for software projects. It records the current stack, selected default, reasons, overrides, and verification commands. If the stack is unknown, record the uncertainty and ask one focused question; do not invent certainty.
-- Record material stack choices in `agents/project/TECH_STACK.md` first, and use `agents/docs/` only for durable ADR-level decisions.
-
-**Default Stack Suggestions** are planning defaults, not mandates:
-
-| Project type | Default stack | Backend / data default | Use when |
-|---|---|---|---|
-| SPA / dashboard / CRM | Vite + React + TypeScript + Tailwind CSS + shadcn/ui + React Router | Supabase, or Node/Bun + PostgreSQL | Dense app UI, internal tools, admin surfaces |
-| SEO / marketing / blog | Next.js App Router + TypeScript + Tailwind CSS + shadcn/ui | Next.js API routes + Prisma + PostgreSQL when needed | SEO, routing, content, server rendering |
-| Static site / docs | Astro + TypeScript + Tailwind CSS, plus Starlight for docs-heavy sites | None by default | Content-first, mostly static output |
-| Lightweight web app | Vite + Svelte/SvelteKit + TypeScript + Tailwind CSS + shadcn-svelte | SvelteKit backend or PocketBase | Small interactive apps where Svelte is a better fit |
-| Fullstack type-safe | Next.js App Router + TypeScript + tRPC + Tailwind CSS + shadcn/ui + Prisma | PostgreSQL | End-to-end typed product apps |
-| Realtime app | Vite/Next.js + React + TypeScript + Tailwind CSS + shadcn/ui + WebSocket/Socket.io | Node/Bun + Redis + PostgreSQL | Chat, collaboration, realtime dashboards |
-| Mobile app | Expo + TypeScript + NativeWind + Tamagui or React Native Paper | Supabase or Firebase | React Native apps; shadcn/ui is not an official React Native default |
-| AI app | Next.js or Vite + React + TypeScript + Tailwind CSS + shadcn/ui + OpenAI/Vercel AI SDK | Next.js API routes, LangChain only when useful | Chat, RAG, agent UI, AI workflow tools |
-| Web game 2D | Vite + TypeScript + Phaser | Optional Node/Bun service | Browser 2D games and prototypes |
-| Web game 3D | Vite + TypeScript + Three.js or React Three Fiber | Optional Node/Bun service | Browser 3D, simulations, interactive scenes |
-
-Choose the smallest stack that fits the product and verification environment. Prefer existing project stack over defaults unless it is clearly unsuitable.
-
-**Design Contract** — software/dev projects should create or maintain `agents/project/DESIGN.md`. It is the AI-readable product/design contract that implementation must follow; `TECH_STACK.md` says what to build with, `DESIGN.md` says how it should look, feel, behave, and present user-facing or developer-facing workflows. A client may copy a `DESIGN.md` from another source into the project, or `/wur:init` and `/wur:wiki:ima` may draft/update one from project context.
-
-Keep `DESIGN.md` concise but actionable. Use these sections:
-- `## Visual Theme & Atmosphere`
-- `## Color Palette & Roles`
-- `## Typography Rules`
-- `## Component Styling`
-- `## Layout Principles`
-- `## Responsive Behavior`
-- `## Do's and Don'ts`
-- `## Agent Prompt Guide`
-
-If the design direction is unknown, write the known constraints and mark open questions instead of inventing a brand. Backend/API/CLI-only projects still use `DESIGN.md` for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience. Do not create roadmap bloat: design guidance becomes acceptance criteria, risks, or planned WUs only when material.
-
-**Optional Codex App Server Delegation** — WUR may use Codex as an acceleration layer when Codex is installed and the current client/project allows it. The supported integration path is Codex App Server, not Codex MCP. App Server exposes Codex thread lifecycle (`thread/start`, `turn/start`, `thread/read`, `thread/unsubscribe`, status notifications), which lets WUR bind each delegated job to one project, branch, worktree, phase, WU, role, and ledger entry. MCP is intentionally not part of this plugin's delegation contract because it exposes a narrower tool surface and weaker session semantics.
-
-Codex delegation is optional and never authoritative. The WUR coordinator still owns scope, roadmap state, diff inspection, verification, and commits. Codex must not merge branches, run `/wur:done`, mark Work Units `accepted` or `done`, or close phases. Use delegation for bounded exploration, implementation assistance, review, or scoped verification when it can run inside the correct worktree and produce a concise report.
-
-When delegating to Codex:
-- use `skills/wur-guidelines/scripts/wur_codex_delegate.py`
-- run only from the intended `.worktrees/phase-{n}` or fix worktree unless the job is explicitly read-only and `--allow-main` is supplied
-- prefer `--sandbox read-only --read-only` for review/exploration, `--sandbox workspace-write` for assigned implementation, and explicit `--full-access` only when the coordinator intentionally wants non-interactive full Codex permissions inside the scoped worktree
-- record every job under `agents/reports/codex-delegation/{task_id}.json` in the git root of the delegated `--cwd` by default
-- bind the ledger to `cwd`, branch, phase, WU, role, Codex thread id, status, timeout/rate-limit result, and final summary
-- on timeout, 429/usage limit, or Codex user/approval request, stop the job, write `timeout`, `rate-limited`, or `needs-user`, unsubscribe only the recorded thread id, and terminate only the app-server subprocess started for that job
-
-Never kill processes by the name `codex`. Never clean up threads you did not create. Never guess an answer to a Codex user/approval request; return `needs-user` so the WUR coordinator can ask the client. If App Server is unavailable, skip delegation and continue the normal WUR flow locally.
-
-**Operational visibility tags** — tags are the Obsidian-facing attention layer for the project second brain. Tags are observation signals; status fields remain authoritative. A page may use `status: active` plus tags such as `state-active`, `needs-review`, or `test-failing` so humans can filter the graph quickly without changing workflow state.
-
-Use state tags to mirror visible lifecycle when helpful: `state-planned`, `state-active`, `state-ready-review`, `state-accepted`, `state-done`, `state-blocked`, `state-deferred`, `state-aborted`. Use attention tags only while an issue is live: `needs-review`, `needs-client`, `open-question`, `contradiction`, `decision-conflict`, `coverage-gap`, `test-failing`, `test-waived`, `graph-stale`, `risk`. Use work-shape tags when they improve browsing: `phase`, `work-unit`, `fix-round`, `decision`, `report`, `specialist`, `design`, `tech-stack`. Remove attention tags when the issue is resolved; do not keep stale warning tags for history.
-
-**Wiki operations** — `/wur:wiki:*` commands are not Work Units. They are knowledge management operations that run from the main repo. No WU ID, no phase file, and no worktree required. Most wiki operations leave roadmap execution state unchanged. `/wur:wiki:ima` may update roadmap planning artifacts when the client explicitly asks, but it must not move WUs to `active`, `accepted`, or `done`.
-
-**Active phase wiki ownership** — after `/wur:start {n}`, roadmap execution files are owned by the phase branch, not the default branch. `agents/roadmap/PHASE_{n}.md`, `agents/roadmap/ALL.md`, and `agents/roadmap/log.md` must be updated in the active phase/fix worktree. Do not edit the default branch copy of those files for the active phase after execution has begun. If planning changes are needed while a phase is active, either update the phase branch directly or write separate planning notes such as `agents/docs/PHASE_{n}_PLANNING_NOTES.md`; do not rewrite the default branch's active `PHASE_{n}.md`.
-
-**Selective context sync** — when the default branch gains new wiki context under `agents/docs/`, `agents/research/`, `agents/raw/`, `agents/references/`, `agents/departments/`, `agents/specialists/`, or `agents/reports/`, do not `git merge` the default branch into the phase just to get those files. Use `skills/wur-guidelines/scripts/wur_sync_agents_context.py` inside the phase/fix worktree. It imports only files that are new on the default branch and missing on the phase branch, and it refuses to overwrite `agents/roadmap/`, `agents/index.md`, `agents/SCHEMA.md`, or graph artifacts. This prevents planning-template roadmap files on the default branch from conflicting with execution-state roadmap files on the phase branch.
-
-**Activity log** — `agents/roadmap/log.md` is an append-only journal. Agents append one line on: phase open, fix round open, readiness changes, and phase close. Never edit past entries. Use it to navigate "what happened when" without reading every phase file.
-
-### ALL.md Commit Index — mandatory archival
-
-When the Commit Index table exceeds 30 rows:
-1. Move completed-phase rows to `agents/reports/commit-index-PHASE_{n}.md`.
-2. Replace in ALL.md with: `| PHASE_{n} (archived) | {N} WUs | [[reports/commit-index-PHASE_{n}]] | done |`
-3. Commit as a Tiny WU: `WU-TW-{k}: archive PHASE_{n} commit index`
-
-This is not optional. An ALL.md with 70+ rows causes LLM update errors that corrupt roadmap state.
-
-### Task Branch Workflow
-
-All work uses git worktrees under `.worktrees/` for isolation. Never use `git checkout` to switch branches — create a worktree instead.
-
-```text
-.worktrees/phase-{n}          ← /wur:start creates via git worktree add -b feature/phase-{n}
-.worktrees/fix-{n}-{slug}     ← /wur:test creates via git worktree add -b fix/phase-{n}-{slug}
-```
-
-Each worktree is an independent directory with its own branch checked out. No stashing, no switching. Cleanup via `/wur:done`: `git worktree remove` + `git branch -d`.
-
-Wiki operations (`/wur:wiki:*`) and workspace setup run from the main repo — no worktree is created or needed.
-
-**Long-running phases** — if `feature/phase-{n}` lives more than ~3 days, the default branch (`main`/`master`/`develop`) may have moved. First sync new wiki context without a merge:
-
-```bash
-cd .worktrees/phase-{n}
-python skills/wur-guidelines/scripts/wur_sync_agents_context.py --cwd . --json
-```
-
-Only use branch merge/rebase for actual code/config changes that must be incorporated before continuing execution:
-
-```bash
-cd .worktrees/phase-{n}
-git fetch origin
-git rebase "origin/$base"   # preferred — keeps WU commits linear
-# or, if rebase is risky:
-git merge --no-ff "origin/$base" -m "WU-TW-{k}: sync $base into feature/phase-{n}"
-```
-
-Resolve conflicts inside the worktree, never on the default branch. The merge or rebase commit becomes a Tiny WU on the feature branch. Do not merge only to pick up new `agents/` context files; use selective context sync for that.
-
-**Phase abort** — if a phase was started by mistake or is being abandoned, run `/wur:abort {n}`. Do not manually `git branch -D` — the command also marks the phase `aborted` in the roadmap and records the reason in `log.md`.
-
-### Schema versioning
-
-Every `agents/` workspace declares its layout in `agents/SCHEMA.md` YAML frontmatter:
-
-```yaml
----
-schema_version: 1
----
-```
-
-The `wiki` layout is **schema `1`**. Additive folders such as `agents/departments/` and `agents/specialists/` are schema-1 compatible because they remain wiki knowledge, not execution infrastructure. When a future WUR plugin ships a breaking schema, it adds a migration script under `skills/wur-guidelines/references/migrations/v{from}-to-v{to}.md` and bumps the plugin's latest schema number.
-
-Rules:
-
-- **`/wur:init` refuses to overwrite** an existing populated `agents/`. Use `/wur:upgrade` for any populated workspace.
-- **`/wur:upgrade` treats the current `agents/` as raw input.** It never assumes the workspace is already in the target shape — it always reads the old shape, transforms, then writes the new shape and bumps `schema_version`.
-- **`schema_version` is the only authoritative marker.** File layout and naming cannot be inferred — always derive from the schema map for the declared version.
-- **Migrations are unidirectional and atomic per step.** Rollback is via `git revert`.
-- **Never hand-edit `schema_version`.** The bump is the last action of an automated migration step.
-
-If `agents/SCHEMA.md` is missing the `schema_version` frontmatter (e.g. the workspace was created before versioning), `/wur:upgrade` backfills `schema_version: 1` as the legacy migration step.
-
-### Verification
-
-Verification is scoped by default. Start from the active WU acceptance criteria and the user's request, then choose the smallest command set that proves the change. Do not run full-project verification after every WU by default; on large projects that turns WUR into an expensive global audit loop instead of a fast Work Unit loop.
-
-Full-project verification is required only for phase closeout, high-risk/shared changes, schema/graph/script changes, or explicit acceptance criteria. It is also appropriate when a scoped check cannot prove the behavior or when the changed surface is broad.
+Full-project verification is required only for phase closeout, high-risk/shared changes, schema/graph/script changes, or explicit acceptance criteria.
 
 A scoped verification matrix:
 
-| Change type | Default verification |
+| Work shape | Verification |
 |---|---|
-| Docs-only WU | `git diff --check`, relevant docs/spec consistency check if the docs define behavior |
-| Implementation WU | targeted test(s), typecheck/lint for touched area, build only when needed |
-| UI WU | targeted tests plus screenshot/manual check when visual behavior changed |
-| Graph/schema/script WU | targeted script tests, meta consistency, full test suite if shared script behavior changed |
-| Phase closeout | full phase verification from `PHASE_{n}.md ## Verification Strategy` |
+| Docs-only WU | markdown/schema/link checks relevant to changed docs |
+| Implementation WU | targeted tests plus type/lint/build checks for changed surface |
+| Graph/schema/script WU | script tests, meta consistency, graph lint/extract/query |
+| Phase closeout | full phase verification and closeout evidence |
 
-Run the selected verification command(s). Record the result. If it fails: do not commit, fix or split new WU. Passing WU-scoped verification only permits `ready-for-review`; never mark `done` without client confirmation.
+Never claim pass without fresh evidence.
 
-### Wiki & Derived Graph
+## Specialist Registry
 
-The `agents/` folder IS the project wiki — roadmap, research, decisions, and docs in one unified place. There is no separate `wiki/` directory.
+Projects may define a lightweight Specialist Registry in `agents/departments/` and `agents/specialists/`. It is project-specific knowledge, not a fixed WUR roster.
+
+Specialists are runtime optional: if the client supports subagents, the coordinator may dispatch the matching role; otherwise it reads the specialist file and applies that role locally. Coordinator owns final planning and execution decisions. Specialist output must be consolidated before it affects roadmap state: one recommendation is not one Work Unit. Recommendations become acceptance criteria, risks, rejected suggestions, or planned WUs only when they are material and fit the active scope. Do not mark WUs `active`, `accepted`, or `done`, close phases, or bypass contract receive from a specialist role.
+
+Coverage Matrix categories are checklists, not mandatory files: domain expertise, product/strategy, architecture/engineering, design/UX/content, data/AI, security/compliance, QA/testing, operations/support, and platform/tooling/integration. Domain examples are illustrative, not exhaustive. For game projects, check game design, level design, gameplay/engine, art/technical art, audio, QA/playtest, production, and platform-specific expertise. Record any material coverage gap.
+
+## Design And Tech Stack
+
+software/dev projects should create or maintain `agents/project/DESIGN.md` as the Design Contract: Visual Theme & Atmosphere, Color Palette & Roles, Typography, Component Styling, Layout, Responsive Behavior, and concrete do/don't rules. Backend/API/CLI-only projects still use DESIGN.md for product shape, API ergonomics, CLI output, docs/readme style, error presentation, and developer experience.
+
+Software/dev projects should create or maintain `agents/project/TECH_STACK.md`. Technology Judgment matters: Prefer TypeScript for non-trivial web/app code. Consider Vite + React first for common frontend web apps. Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested. Record material stack choices with verification commands.
+
+Default Stack Suggestions are recommendations, not mandates. Defaults are recommendations, not mandates:
+- SPA/dashboard/CRM: Vite + React + TypeScript + Tailwind CSS + shadcn/ui.
+- SEO/marketing/blog: Next.js App Router + TypeScript + Tailwind CSS + shadcn/ui.
+- Mobile: Expo + TypeScript + NativeWind.
+- 2D browser game: Vite + TypeScript + Phaser.
+- 3D browser game: Vite + TypeScript + Three.js.
+- AI app: TypeScript UI plus a project-appropriate AI SDK/API layer.
+
+## Operational Visibility Tags
+
+Operational visibility tags:
+
+Use state tags to mirror visible lifecycle when helpful: `state-planned`, `state-active`, `state-ready-review`, `state-accepted`, `state-done`, `state-blocked`, `state-deferred`, `state-aborted`.
+
+Use attention tags only while an issue is live: `needs-review`, `needs-client`, `open-question`, `contradiction`, `decision-conflict`, `coverage-gap`, `test-failing`, `test-waived`, `graph-stale`, `risk`.
+
+Tags are observation signals; status fields remain authoritative. Remove attention tags when the issue is resolved.
+
+## Wiki & Derived Graph
+
+The `agents/` folder IS the project wiki. There is no separate `wiki/` directory.
 
 ```text
 agents/
-  project/         PHILOSOPHY.md · USAGE.md · DESIGN.md · TECH_STACK.md
-  roadmap/         ALL.md · PHASE_*.md · PHASE_*_FIX.md · legacy FIX_*.md · log.md
-  departments/     project-specific capability map
-  specialists/     role cards used for advisory/review/implementation judgment
-  research/        ingested sources and analysis
-  docs/            ADRs, durable notes, synthesis
-  reports/         verification and completion reports
-  references/      external references, API notes
-  raw/             immutable source material (tracked)
-  SCHEMA.md        wiki conventions: types, status, frontmatter schema
-  index.md         one-line summary of every page
-  graph/           ontology.yaml · README.md · .gitignore
-                   nodes.jsonl · edges.jsonl · summary.md · last_extracted.md  (tracked)
-                   graph.sqlite · graph.graphml  (gitignored — binary/large, rebuild anytime)
+  project/        PHILOSOPHY.md · USAGE.md · DESIGN.md · TECH_STACK.md
+  roadmap/        ALL.md · PHASE_*.md · log.md
+  departments/    project-specific department pages
+  specialists/    project-specific specialist pages
+  research/       curated research notes
+  docs/           decisions, design, architecture notes
+  reports/        verification and completion reports
+  references/     external references, API notes
+  raw/            immutable source material
+  SCHEMA.md       wiki conventions
+  index.md        one-line summary of every page
+  graph/          ontology.yaml · README.md · nodes.jsonl · edges.jsonl
 ```
 
-Graph pages use YAML frontmatter with `type`, `status`, `tags` (required — see `agents/SCHEMA.md ## Tag Conventions` for format rules and predefined vocabulary), and typed edges such as `depends_on`, `parent`, `verifies`, and `informs`. The graph layer is optional: run `/wur:wiki:upgrade` to enable it, then `/wur:wiki:graph extract` to compile `nodes.jsonl`, `edges.jsonl`, and `graph.sqlite`. Open `agents/` in Obsidian for instant graph view. Use path-style wikilinks such as `[[roadmap/PHASE_1]]`, not basename-only links.
+Graph pages use YAML frontmatter with `type`, `status`, `tags`, and typed edges such as `depends_on`, `parent`, `verifies`, and `informs`. The graph layer is optional: run `/wur:wiki:upgrade`, then `/wur:wiki:graph extract` to compile `nodes.jsonl`, `edges.jsonl`, and `graph.sqlite`. Use path-style wikilinks such as `[[roadmap/PHASE_1]]`.
 
 Wiki operations:
-- **upgrade** (`/wur:wiki:upgrade`) — add graph-layer files and conventions
-- **ingest** (`/wur:wiki:add`) — add knowledge into `agents/research/`
-- **idea-to-MVP analysis** (`/wur:wiki:ima`) — enrich the wiki from a prompt, feedback, or idea; optionally update roadmap plans when explicitly requested
-- **query** (`/wur:wiki:ask`) — index-first, graph-aware when derived artifacts exist
-- **lint** (`/wur:wiki:lint`) — structural/semantic checks, plus graph-aware checks when the graph layer exists
-- **stats** (`/wur:wiki:stats`) — size, status, and graph health dashboard
-- **graph** (`/wur:wiki:graph`) — explicit graph extract/lint/query operations on derived artifacts
+- `/wur:wiki:upgrade` — add graph-layer files and conventions
+- `/wur:wiki:add` — add knowledge into `agents/research/`
+- `/wur:wiki:ima` — enrich the wiki from a prompt, feedback, or idea; optionally update roadmap plans when explicitly requested
+- `/wur:wiki:ask` — index-first, graph-aware when derived artifacts exist
+- `/wur:wiki:lint` — structural/semantic checks, plus graph-aware checks when enabled
+- `/wur:wiki:stats` — size, status, and graph health dashboard
+- `/wur:wiki:graph` — explicit graph extract/lint/query operations
 
-### Commands
-
-Full procedures in `commands/<command>.md` (phase) and `commands/wiki/<command>.md` (wiki). Read before executing. They are registered under the plugin namespace `wur`.
+## Commands
 
 ```text
-/wur:init                                               # one-time project bootstrap
-/wur:upgrade                                            # migrate agents/ between WUR plugin versions
-/wur:start {n}  /wur:done  /wur:abort {n}  /wur:test  /wur:status
-/wur:wiki:upgrade  /wur:wiki:add {src}  /wur:wiki:ima {idea}  /wur:wiki:ask {q}  /wur:wiki:lint  /wur:wiki:stats  /wur:wiki:graph {action}
+/wur:init
+/wur:upgrade
+/wur:start {n}
+/wur:test [pass | waive: <reason> | fail: <description>]
+/wur:done
+/wur:abort {n}
+/wur:status
+/wur:wiki:upgrade  /wur:wiki:add {src}  /wur:wiki:ima {idea}
+/wur:wiki:ask {q}  /wur:wiki:lint  /wur:wiki:stats  /wur:wiki:graph {action}
 ```
 
-**Commit format:**
-- Implementation WU: `WU-P{n}-{unit}: {description}` — e.g. `WU-P01-003: add login validation`
-- Tiny WU: `WU-TW-{n}: {description}` — e.g. `WU-TW-001: fix typo in README`
-- Phase close (administrative): `WU-P{n}-close: mark phase {n} done`
-- Fix-round merge (administrative): `WU-P{n}-fix: merge fix/phase-{n}-{slug}`
-- Phase abort (administrative): `WU-P{n}-abort: abandon phase {n} ({mode})`
+Commit format:
+- Implementation WU: `WU-P{n}-{unit}: {description}`
+- Tiny WU: `WU-TW-{n}: {description}`
+- Phase close: `WU-P{n}-close: mark phase {n} done`
+- Phase abort: `WU-P{n}-abort: abandon phase {n} ({mode})`
 
-**Rule**: Only `/wur:done` from the current client request triggers merge + closeout. An agent must not run `/wur:done` on its own after fixing, testing, or seeing a clean roadmap. It must report readiness and wait for the client to send `/wur:done`. `/wur:abort` discards a phase without merging — never use it as a shortcut to skip closeout.
-
-## Multi-Agent Protocol
-
-Skip this section for single-agent projects. Adopt when a second agent joins.
-
-### Merge conflict on `agents/roadmap/log.md`
-
-`log.md` is append-only. When a merge conflict occurs:
-1. Keep ALL entries from both sides — never drop a line.
-2. Sort by date (first column). If dates are identical, preserve both lines.
-3. Use `git checkout --ours agents/roadmap/log.md` then manually append the other side's new lines.
-4. Never rebase or squash log entries.
+Rule: Only `/wur:done` from the current client request triggers closeout. An agent must not run `/wur:done` on its own after fixing, testing, or seeing a clean roadmap. It must report readiness and wait for the client to send `/wur:done`.
 
 ## Senior Agent Behavior
 
-- Be exact and concise. Keep scope controlled. Prefer simple correct changes.
-- Ask or block when requirements are ambiguous.
-- Preserve project history. Leave the roadmap understandable and the working tree clean.
-- Never fake completion, skip verification, skip roadmap updates, or bury unrelated changes.
+- Be exact and concise.
+- Keep scope controlled.
+- Preserve project history.
+- Leave the roadmap understandable and the working tree clean.
+- Never fake completion, skip verification, skip report receive, or bury unrelated changes.
 
-The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, `agents/project/TECH_STACK.md` when present, `agents/roadmap/ALL.md`, the active phase file, inspect recent commits, and understand exactly what happened and what should happen next.
+The next agent should be able to open `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, `agents/project/TECH_STACK.md` when present, `agents/roadmap/ALL.md`, the active phase file, `contracts/PHASE_{n}_CONTRACT.md`, inspect recent commits, and understand exactly what happened and what should happen next.

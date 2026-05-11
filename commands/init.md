@@ -235,7 +235,7 @@ Project context is resolved in this order:
    - Blockers: none
 
    ## Phases
-   | Phase | Goal | Status | File | Fix Rounds |
+   | Phase | Goal | Status | File | Contract |
    |---|---|---|---|---|
 
    ## Commit Index
@@ -244,9 +244,9 @@ Project context is resolved in this order:
 
    ## Operating Rules
    - Work in Work Units only. One WU = one commit.
-   - Fix WUs live in `PHASE_{n}_FIX.md` — one consolidated fix ledger per phase, not one file per bug batch.
+   - Failed work becomes another execution round in `contracts/PHASE_{n}_CONTRACT.md`; do not create Phase Fix ledgers for new work.
    - WU status lifecycle: `planned -> active -> ready-for-review -> accepted -> done`; agents stop at `ready-for-review` unless the client confirms.
-   - Append to `log.md` on every phase open, fix round open, and phase close.
+   - Append to `log.md` on every contract open, test status change, and phase close.
    - Small task, verify, commit. Repeat.
    ```
 
@@ -278,8 +278,8 @@ Project context is resolved in this order:
    | Type | Location | Description |
    |---|---|---|
    | `phase` | `agents/roadmap/PHASE_*.md` | One execution phase |
-   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Consolidated fix ledger for a phase |
-   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file, readable but not preferred for new work |
+   | `fix-round` | `agents/roadmap/PHASE_*_FIX.md` | Legacy fix ledger; readable for old work, not created for new work |
+   | `fix-round` | `agents/roadmap/FIX_*.md` | Legacy bug fix batch file; readable for old work only |
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
@@ -350,8 +350,8 @@ Project context is resolved in this order:
 
    ## Graph Conventions
    - `depends_on: ["[[roadmap/PHASE_1]]"]` — phase dependency
-   - `parent: "[[roadmap/PHASE_1]]"` — fix-round belongs to a phase
-   - `verifies: ["[[roadmap/PHASE_1]]"]` — report verifies a phase or fix round
+   - `parent: "[[roadmap/PHASE_1]]"` — legacy fix-round or related page belongs to a phase
+   - `verifies: ["[[roadmap/PHASE_1]]"]` — report verifies a phase or legacy fix round
    - `informs: ["[[roadmap/PHASE_1]]"]` — research or docs inform another graph page
    - Use path-style wikilinks like `[[roadmap/PHASE_1]]`, not `[[PHASE_1]]`
    - Every `[[wikilink]]` creates an edge in Obsidian graph view
@@ -424,7 +424,7 @@ Project context is resolved in this order:
    | `risk` | Needs extra risk attention |
    | `phase` | Phase page |
    | `work-unit` | Work Unit content or WU-specific page |
-   | `fix-round` | Fix ledger or fix-round content |
+   | `fix-round` | Legacy fix ledger or fix-round content |
    | `decision` | Decision content |
    | `report` | Verification or completion report |
    | `specialist` | Specialist role content |

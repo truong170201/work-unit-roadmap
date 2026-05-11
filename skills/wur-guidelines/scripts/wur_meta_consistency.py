@@ -160,16 +160,21 @@ def run_checks(repo_root: Path) -> list[Finding]:
             )
 
     # Key command/docs conventions.
-    if "under the `## Roadmap` section" not in _text(test_md):
-        findings.append(
-            Finding(
-                "ERROR",
-                "FIX round index update must target `## Roadmap`",
-                test_md.relative_to(repo_root).as_posix(),
-            )
-        )
     start_md = repo_root / "commands" / "start.md"
     done_md = repo_root / "commands" / "done.md"
+    for snippet in (
+        "`contracts/PHASE_{n}_CONTRACT.md`",
+        "Do not create `PHASE_{n}_FIX.md`",
+        "append a new execution round in the same contract file",
+    ):
+        if snippet not in _text(test_md):
+            findings.append(
+                Finding(
+                    "ERROR",
+                    f"`/wur:test` missing contract snippet `{snippet}`",
+                    test_md.relative_to(repo_root).as_posix(),
+                )
+            )
     for snippet in ("agents/project/DESIGN.md", "agents/project/TECH_STACK.md"):
         if snippet not in _text(start_md):
             findings.append(
@@ -281,6 +286,11 @@ def run_checks(repo_root: Path) -> list[Finding]:
         "A scoped verification matrix",
         "Prefer TypeScript for non-trivial web/app code",
         "Avoid plain HTML/CSS/JS for app-scale work unless explicitly requested",
+        "WUR Contract Model",
+        "`contracts/PHASE_{n}_CONTRACT.md`",
+        "one file contains both task instructions and returned execution reports",
+        "Do not create `contracts/outbox/` or `contracts/inbox/`",
+        "Do not create Phase Fix ledgers for new work",
     ):
         if snippet not in skill_text:
             findings.append(
@@ -329,11 +339,11 @@ def run_checks(repo_root: Path) -> list[Finding]:
                 wiki_ima_md.relative_to(repo_root).as_posix(),
             )
         )
-    if "WU-P{n}-fix:" not in _text(skill_md) or "WU-P{n}-abort:" not in _text(skill_md):
+    if "WU-P{n}-abort:" not in _text(skill_md):
         findings.append(
             Finding(
                 "ERROR",
-                "SKILL.md commit format list must include fix and abort administrative commits",
+                "SKILL.md commit format list must include abort administrative commits",
                 skill_md.relative_to(repo_root).as_posix(),
             )
         )

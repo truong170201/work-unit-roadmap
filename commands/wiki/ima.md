@@ -27,15 +27,15 @@ Source: $ARGUMENTS
 
 1. Read `agents/SCHEMA.md`, `agents/index.md`, `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, and `agents/roadmap/ALL.md`. Read `agents/project/DESIGN.md` when present. Read `agents/project/TECH_STACK.md` when present.
 2. Read `agents/departments/` and `agents/specialists/` when present. Select only roles relevant to the idea/context. Runtime subagents are optional; if unavailable, apply the specialist role locally.
-3. Infer whether `$ARGUMENTS` points to a specific phase, current phase, roadmap, WU, or feature scope. If it does, read the relevant `agents/roadmap/PHASE_{n}.md`, `agents/roadmap/PHASE_{n}_FIX.md` if present, and recent `agents/roadmap/log.md` entries.
+3. Infer whether `$ARGUMENTS` points to a specific phase, current phase, roadmap, WU, or feature scope. If it does, read the relevant `agents/roadmap/PHASE_{n}.md`, `contracts/PHASE_{n}_CONTRACT.md` if present, legacy `agents/roadmap/PHASE_{n}_FIX.md` only for old workspaces, and recent `agents/roadmap/log.md` entries.
 4. Save the prompt or supplied context into `agents/raw/` with a slugified filename unless it already exists as a file path. Preserve the original wording as raw input.
 5. Run the IMA stations:
 
-   - **INTAKE** — extract the core idea, target users, constraints, explicit asks, unknowns, and non-goals.
-   - **DISCOVER** — identify what must be researched. Use existing `agents/` content first. Use web search only when the current request or risk profile needs fresh external facts; cite sources in the research page if used.
-   - **DEFINE** — write the MVP shape: users, core outcome, scope, constraints, success metrics, and failure modes.
-   - **DECIDE** — separate must-have from nice-to-have using impact vs feasibility. Record tradeoffs and rejected options.
-   - **ROADMAP** — produce roadmap implications: new phases, phase edits, candidate Work Units, risks, and verification ideas.
+   - **INTAKE** â€” extract the core idea, target users, constraints, explicit asks, unknowns, and non-goals.
+   - **DISCOVER** â€” identify what must be researched. Use existing `agents/` content first. Use web search only when the current request or risk profile needs fresh external facts; cite sources in the research page if used.
+   - **DEFINE** â€” write the MVP shape: users, core outcome, scope, constraints, success metrics, and failure modes.
+   - **DECIDE** â€” separate must-have from nice-to-have using impact vs feasibility. Record tradeoffs and rejected options.
+   - **ROADMAP** â€” produce roadmap implications: new phases, phase edits, candidate Work Units, risks, and verification ideas.
 
 6. Write one research page in `agents/research/`:
 
@@ -51,7 +51,7 @@ Source: $ARGUMENTS
 
    # IMA: {Short Title}
 
-   > [[roadmap/ALL]] · [[index]]
+   > [[roadmap/ALL]] Â· [[index]]
 
    ## Intake
    ## Discover

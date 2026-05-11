@@ -5,19 +5,19 @@
     "name": "truong170201"
   },
   "metadata": {
-    "description": "AI Agent workflow skills for roadmap-driven development.",
+    "description": "AI Agent workflow skills for roadmap-driven wiki and execution contracts.",
     "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "wur",
       "source": "./",
-      "description": "Atomic Work Units, verification evidence, one verified commit per completed unit.",
+      "description": "Atomic Work Units, one-file execution contracts, verification evidence, and client-confirmed closeout.",
       "version": "2.0.0",
       "author": {
         "name": "truong170201"
       },
-      "keywords": ["workflow", "roadmap", "work-unit", "git", "agent", "skills"],
+      "keywords": ["workflow", "roadmap", "work-unit", "contract", "wiki", "agent", "skills"],
       "category": "workflow"
     }
   ]

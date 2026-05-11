@@ -1,44 +1,27 @@
 ---
-description: Start a new phase — create worktree with feature branch, init phase file, verify clean baseline.
-argument-hint: "<phase-number>"
+description: Start or refresh a WUR execution contract for a phase.
+argument-hint: "<phase-number> [work-unit-id]"
 ---
 
-Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-worktrees` to create the worktree.
+Start Phase $ARGUMENTS using the `wur-guidelines` skill.
+
+`/wur:start` no longer makes WUR execute code directly. It prepares one phase contract file that can be handed to another agent or human executor.
 
 1. If `agents/` does not exist, stop and instruct the user to run `/wur:init` first.
-2. Run `git status --short agents/` before creating the worktree. If any `agents/` path is untracked or modified, stop. Explain that a worktree only receives tracked files from the base commit, so wiki context such as `agents/raw/` and `agents/docs/` must be committed or intentionally excluded first. For project wiki material, the normal fix is:
-
-   ```bash
-   git add agents/
-   git commit -m "docs: update project wiki context"
-   ```
-
-   Do not create the phase worktree from a base commit that omits untracked or dirty `agents/` context.
-3. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
-4. Read `agents/roadmap/ALL.md` — extract the default branch, confirm the target phase is planned, confirm no blocker exists, and enforce the phase gate:
-   - if another phase is already `active`, stop — finish or close that phase first
-   - if `PHASE_{n}` is already the active phase and its worktree exists, stop — resume it instead of re-starting
-   - otherwise continue
-5. Invoke `using-git-worktrees` to create the worktree — it handles gitignore verification internally:
-
-   ```bash
-   git fetch origin "$base" 2>/dev/null || true
-   git worktree add .worktrees/phase-{n} -b feature/phase-{n} "$base"
-   cd .worktrees/phase-{n}
-   ```
-
-   **All steps from here onwards use `.worktrees/phase-{n}/` as the working directory.** Verify with `git branch --show-current` — must show `feature/phase-{n}`.
-
-6. Run project setup (auto-detect: `npm install`, `pip install`, `cargo build`, etc.).
-7. Verify clean baseline: run tests. Baseline verification is full enough to establish starting health before the phase begins. Later WU verification is scoped by default to the WU acceptance criteria and changed surface. If no test suite exists, confirm the codebase is in a known-good state and document this in `agents/project/USAGE.md` under "Verification".
-8. Create `agents/roadmap/PHASE_{n}.md` using this template:
+2. Read `agents/project/PHILOSOPHY.md`, `agents/project/USAGE.md`, `agents/project/DESIGN.md` when present, and `agents/project/TECH_STACK.md` when present if not already read this session.
+3. Read `agents/roadmap/ALL.md` and `agents/roadmap/PHASE_{n}.md`:
+   - confirm the target phase exists or can be scaffolded from planned roadmap data
+   - if another phase is already `active`, stop unless the user explicitly asks to prepare a contract for that active phase
+   - skip WUs already `accepted` or `done`
+   - keep `planned`, `active`, `ready-for-review`, `blocked`, and `deferred` work available for contract execution
+4. If `agents/roadmap/PHASE_{n}.md` is missing but the roadmap says the phase is planned, create the phase file with this minimal template:
 
    ```markdown
    ---
    type: phase
    phase: {n}
    status: active
-   tags: []
+   tags: [state-active]
    depends_on: []
    opened: {YYYY-MM-DD}
    closed: null
@@ -48,65 +31,46 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill. Invoke `using-git-workt
 
    # PHASE_{n}: {phase name}
 
-   > [← Roadmap](ALL.md) · [Philosophy](../project/PHILOSOPHY.md) · [Usage](../project/USAGE.md)
-
    ## Goal
    {One concrete phase goal.}
 
-   ## Observable Outcome
-   {What can be observed when this phase is complete.}
-
    ## Success Criteria
    - {Measurable condition 1}
-
-   ## Exit Gate
-   - {Required check before moving to next phase}
-
-   ## Out of Scope
-   - {Explicitly excluded work}
-
-   ## Dependencies
-   - {Prior phase or WU, or "none"}
 
    ## Work Units
    | ID | Goal | Acceptance Criteria | Scope | Dependencies | Verification | Status | Commit |
    |---|---|---|---|---|---|---|---|
 
    Status lifecycle: planned -> active -> ready-for-review -> accepted -> done.
-   The agent may move a WU through `ready-for-review` after implementation, verification, roadmap update, and commit.
    Only the client may move a WU to `accepted` or `done`.
-
-   ## Fix Rounds
-   _Fix rounds are consolidated in `PHASE_{n}_FIX.md`. Links appear here as rounds are opened._
-
-   | Round | File | Branch | Status |
-   |---|---|---|---|
-
-   ## Verification Strategy
-   - {Phase-level verification}
-
-   ## Completion Log
-   | Work Unit | Completed At | Commit | Verification Evidence | Notes |
-   |---|---|---|---|---|
    ```
 
-9. Update `agents/roadmap/ALL.md`: add the phase row with `Status=active`; file column links to `PHASE_{n}.md`.
-10. Append one line to `agents/roadmap/log.md`:
+5. Create or refresh the one-file execution contract:
 
-   ```
-   | {today} | phase-open | PHASE_{n} started — branch: feature/phase-{n}, worktree: .worktrees/phase-{n} |
-   ```
-
-   Add one line to `agents/index.md` under the `## Roadmap` section (create section if absent):
-   ```
-   - [[roadmap/PHASE_{n}]] — {phase goal one-liner} · status: active
+   ```bash
+   python skills/wur-guidelines/scripts/wur_contract.py create --phase {n}
    ```
 
-11. Commit the phase setup as a Tiny WU on the feature branch:
+   For a single WU:
+
+   ```bash
+   python skills/wur-guidelines/scripts/wur_contract.py create --phase {n} --wu WU003
+   ```
+
+6. The result is `contracts/PHASE_{n}_CONTRACT.md`. This one file contains the task brief, WUR rules, pending WUs, and report area. Do not create `contracts/outbox/` or `contracts/inbox/`.
+7. Do not create a worktree by default. If the executor needs isolation, the contract contains optional sparse worktree commands that exclude `agents/` and `contracts/`.
+8. Update `agents/roadmap/ALL.md` only as planning/status state requires. Do not mark WUs `accepted` or `done` from this command.
+9. Append to `agents/roadmap/log.md`:
+
+   ```text
+   | {today} | contract-open | PHASE_{n} contract refreshed |
+   ```
+
+10. Commit the contract setup as a Tiny WU when files changed:
 
     ```bash
-    git add agents/roadmap/ agents/index.md agents/project/USAGE.md
-    git commit -m "WU-TW-{k}: init phase {n} roadmap"
+    git add agents/roadmap/ agents/index.md contracts/
+    git commit -m "WU-TW-{k}: create phase {n} contract"
     ```
 
-12. Report: worktree path, branch, base branch, tests baseline, ready for first Work Unit.
+11. Report: contract path, pending WUs included, skipped completed WUs, and the next safe step. Baseline verification is full enough to establish starting health when the contract asks for a phase-level baseline. Later WU verification is scoped by default to the WU acceptance criteria and changed surface.

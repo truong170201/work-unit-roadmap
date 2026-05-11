@@ -1,152 +1,51 @@
 ---
 name: using-git-worktrees
-description: Use when starting feature work that needs isolation — creates isolated git worktrees under .worktrees/ with safety verification and clean baseline
+description: Use only when a WUR contract explicitly asks for isolated execution with a sparse worktree that excludes agents/ and contracts/.
 ---
 
-# Using Git Worktrees
+# Optional Sparse Worktrees
 
-## Overview
+WUR no longer requires worktrees for normal `/wur:start` flow. The default execution boundary is `contracts/PHASE_{n}_CONTRACT.md`.
 
-Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple branches simultaneously without switching or stashing.
+Use this skill only when the contract or user explicitly asks for isolation.
 
-**Core principle:** Systematic directory selection + safety verification = reliable isolation.
+## Principle
 
-**Scope:** Used only for phase implementation (`.worktrees/phase-{n}`) and bug-fix branches (`.worktrees/fix-{n}-*`). Wiki operations (`/wur:wiki:*`) and workspace setup (`/wur:init`) run from the main repo — no worktree is created or needed for them.
+A worktree used by an external executor should not carry WUR state. `agents/` is the source-of-truth wiki and `contracts/` is the contract/report boundary. The executor works from the contract brief and must not edit those folders.
 
-**Git log guarantee:** Every WU commit made inside the worktree lands on `feature/phase-{n}`. When `/wur:done` runs `git merge --no-ff`, all WU commits appear in the default branch log as a named group under one merge commit. This preserves full cherry-pick, revert, and bisect capability per WU. The main repo stays on the default branch throughout — no branch switching, no stashing, no history tangling.
-
-**Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
-
-## Directory Selection
-
-Always use `.worktrees/` at the project root — `/wur:init` adds it to `.gitignore` by default.
-
-1. Verify `.worktrees/` is gitignored: `git check-ignore -q .worktrees/`
-2. If not ignored: add `.worktrees/` to `.gitignore` and commit before creating the worktree.
-
-## Creation Steps
-
-### 0. Verify Tracked Wiki Context
-
-Before creating a phase worktree, run this from the main repo:
+## Recommended Sparse Worktree
 
 ```bash
-git status --short agents/
+git worktree add .worktrees/P{n}_contract -b work/P{n}_contract main
+cd .worktrees/P{n}_contract
+git sparse-checkout init --no-cone
+git sparse-checkout set "/*" "!/agents/" "!/contracts/"
 ```
 
-If any `agents/` path is untracked or modified, stop before `git worktree add`.
-A worktree only receives tracked files from the base commit. Untracked wiki
-context such as `agents/raw/` or `agents/docs/` will not appear in the phase
-worktree unless it is committed first.
-
-For intentional wiki context, commit it first:
+Verify:
 
 ```bash
-git add agents/
-git commit -m "docs: update project wiki context"
+git status --short
+Test-Path agents
+Test-Path contracts
 ```
 
-Only continue when `git status --short agents/` is empty, or when the user
-explicitly confirms that the dirty `agents/` paths are temporary and should not
-be available to the phase worktree.
+`agents/` and `contracts/` should not be present in the execution worktree. If the Git version does not support the exclude patterns reliably, do not force automation; copy the contract instructions manually and keep execution out of `agents/`.
 
-### 1. Detect Base Branch
+## Rules
 
-```bash
-# Detect default branch (main, master, or develop)
-base=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
-base=${base:-$(git rev-parse --verify main 2>/dev/null && echo main || \
-              git rev-parse --verify master 2>/dev/null && echo master || \
-              git rev-parse --verify develop 2>/dev/null && echo develop)}
-```
+- Do not create phase/fix worktrees by default.
+- Do not copy `agents/` into the execution worktree.
+- Do not copy `contracts/` into the execution worktree.
+- Do not use sparse worktree setup as a substitute for WUR receive.
+- The executor returns evidence; WUR updates `agents/`.
 
-### 2. Create Worktree
+## When To Use
 
-**Phase worktree** (from base branch):
-
-```bash
-git fetch origin "$base" 2>/dev/null || true
-git worktree add .worktrees/phase-{n} -b feature/phase-{n} "$base"
-cd .worktrees/phase-{n}
-```
-
-**Fix worktree** (from the phase branch):
-
-```bash
-git worktree add .worktrees/fix-{n}-{slug} -b fix/phase-{n}-{slug} feature/phase-{n}
-cd .worktrees/fix-{n}-{slug}
-```
-
-Naming conventions (match `/wur:*` commands):
-
-| Kind | Worktree path | Branch |
-|------|---------------|--------|
-| Phase | `.worktrees/phase-{n}` | `feature/phase-{n}` |
-| Fix | `.worktrees/fix-{n}-{slug}` | `fix/phase-{n}-{slug}` |
-
-### 3. Run Project Setup
-
-Auto-detect and run appropriate setup:
-
-```bash
-# Node.js
-[ -f package.json ] && npm install
-
-# Python
-[ -f requirements.txt ] && pip install -r requirements.txt
-[ -f pyproject.toml ] && poetry install
-
-# Rust
-[ -f Cargo.toml ] && cargo build
-
-# Go
-[ -f go.mod ] && go mod download
-```
-
-### 4. Verify Clean Baseline
-
-Run tests to ensure worktree starts clean. If tests fail, report and ask before proceeding.
-
-### 5. Report Location
-
-```
-Worktree ready at .worktrees/<name>
-Tests passing (N tests, 0 failures)
-Ready to implement <feature>
-```
-
-## Quick Reference
-
-| Situation | Action |
-|-----------|--------|
-| `.worktrees/` exists | Use it (verify gitignored) |
-| `.worktrees/` missing | Create it, add to .gitignore |
-| Directory not ignored | Add to .gitignore + commit |
-| Tests fail during baseline | Report failures + ask |
-| No package.json/etc | Skip dependency install |
-
-## Red Flags
-
-**Never:**
-- Create worktree without verifying it's gitignored
-- Create a phase worktree while `git status --short agents/` shows untracked or modified wiki context, unless the user explicitly confirms that context should be excluded
-- Skip baseline test verification
-- Proceed with failing tests without asking
-- Use `git checkout` to switch branches when a worktree exists
-
-**Always:**
-- Verify `.worktrees/` is gitignored
-- Verify tracked `agents/` context before creating a phase worktree
-- Auto-detect and run project setup
-- Verify clean test baseline
-- Clean up with `git worktree remove` when done
-
-## Integration
-
-**Called by:**
-- `/wur:start` — REQUIRED before phase implementation
-- `/wur:test` — REQUIRED for fix branches
-- Any task needing isolated workspace
-
-**Cleaned up by:**
-- `/wur:done` — removes phase + fix worktrees after phase closeout
+| Situation | Use sparse worktree? |
+|---|---|
+| Small docs/wiki update | No |
+| Executor can safely work in normal repo without touching `agents/` | Optional |
+| Large/risky code change | Yes |
+| User explicitly asks for isolated execution | Yes |
+| Git sparse checkout errors or permission problems | Prefer manual execution from contract |

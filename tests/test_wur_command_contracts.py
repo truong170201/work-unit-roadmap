@@ -69,42 +69,41 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
 
-    def test_start_contract_requires_agents_worktree_baseline_and_tiny_wu(self) -> None:
+    def test_start_contract_creates_one_file_execution_contract(self) -> None:
         text = read_command("start.md")
         self.assert_contains_all(
             text,
             [
                 "If `agents/` does not exist, stop",
-                "Run `git status --short agents/` before creating the worktree",
-                "If any `agents/` path is untracked or modified, stop",
-                "git add agents/",
-                "worktree only receives tracked files from the base commit",
                 "agents/project/DESIGN.md",
                 "agents/project/TECH_STACK.md",
                 "if another phase is already `active`, stop",
-                "git worktree add .worktrees/phase-{n} -b feature/phase-{n}",
-                "Verify with `git branch --show-current`",
-                "Verify clean baseline: run tests",
+                "python skills/wur-guidelines/scripts/wur_contract.py create --phase {n}",
+                "`contracts/PHASE_{n}_CONTRACT.md`",
+                "one file contains the task brief, WUR rules, pending WUs, and report area",
+                "skip WUs already `accepted` or `done`",
+                "Do not create a worktree by default",
+                "optional sparse worktree",
+                "`agents/` and `contracts/`",
                 "type: phase",
                 "test_status: not-run",
                 "planned -> active -> ready-for-review -> accepted -> done",
-                "git commit -m \"WU-TW-{k}: init phase {n} roadmap\"",
+                "git commit -m \"WU-TW-{k}: create phase {n} contract\"",
             ],
         )
 
-    def test_test_contract_records_pass_waive_or_opens_fix_round(self) -> None:
+    def test_test_contract_records_pass_waive_or_updates_contract_round(self) -> None:
         text = read_command("test.md")
         self.assert_contains_all(
             text,
             [
                 "there must be an active phase",
-                "otherwise stop and resolve the mismatch first",
                 "If `$ARGUMENTS` is empty or unrecognized, stop",
                 "test_status: failing",
-                "git worktree add .worktrees/fix-{n}-{slug}",
-                "Create or reuse `agents/roadmap/PHASE_{n}_FIX.md`",
-                "Do not create a new fix-round file per bug batch",
-                "Fix WU status moves to `ready-for-review`",
+                "`contracts/PHASE_{n}_CONTRACT.md`",
+                "append a new execution round in the same contract file",
+                "Do not create `PHASE_{n}_FIX.md`",
+                "Do not create fix branches or fix worktrees by default",
                 "test_status: pass",
                 "test_status: waived",
                 "test_waive_reason: {reason from $ARGUMENTS}",
@@ -115,7 +114,8 @@ class WurCommandContractTestCase(unittest.TestCase):
             text,
             [
                 "Create `agents/roadmap/FIX_P{n}_{slug}.md`",
-                "When all fix WUs are done",
+                "git worktree add .worktrees/fix-{n}-{slug}",
+                "Create or reuse `agents/roadmap/PHASE_{n}_FIX.md`",
             ],
         )
 
@@ -129,11 +129,9 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Active Work Unit` must be `none`",
                 "allow `test_status: pass`",
                 "allow `test_status: waived` only if `test_waive_reason` is non-empty",
-                "git merge --no-ff fix/phase-{n}-{slug}",
-                "git merge --no-ff \"feature/phase-{n}\"",
+                "`contracts/PHASE_{n}_CONTRACT.md`",
+                "review the contract's Execution Rounds And Reports",
                 "run the tests again on the merged result",
-                "git worktree remove .worktrees/phase-{n}",
-                "git branch -d feature/phase-{n}",
                 "client-confirmed `done`",
                 "mark the phase row `done`",
                 "Commit Index table in `agents/roadmap/ALL.md` exceeds 30 rows",
@@ -300,12 +298,9 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Technology Judgment",
                 "Default Stack Suggestions",
                 "`agents/project/TECH_STACK.md`",
-                "Optional Codex App Server Delegation",
-                "Codex App Server, not Codex MCP",
-                "`skills/wur-guidelines/scripts/wur_codex_delegate.py`",
-                "`needs-user`",
-                "`--full-access`",
-                "Never kill processes by the name `codex`",
+                "WUR Contract Model",
+                "`contracts/PHASE_{n}_CONTRACT.md`",
+                "one file contains both the task brief and report ledger",
                 "Tailwind CSS + shadcn/ui",
                 "Vite + React + TypeScript",
                 "Next.js App Router + TypeScript",
@@ -329,7 +324,7 @@ class WurCommandContractTestCase(unittest.TestCase):
             ],
         )
 
-    def test_active_phase_context_sync_contract_prevents_agents_merge_conflicts(self) -> None:
+    def test_contract_model_replaces_worktree_sync_and_codex_delegation(self) -> None:
         skill = (ROOT / "skills" / "wur-guidelines" / "SKILL.md").read_text(
             encoding="utf-8"
         )
@@ -341,28 +336,39 @@ class WurCommandContractTestCase(unittest.TestCase):
         self.assert_contains_all(
             skill,
             [
-                "Active phase wiki ownership",
-                "`agents/roadmap/PHASE_{n}.md`, `agents/roadmap/ALL.md`, and `agents/roadmap/log.md` must be updated in the active phase/fix worktree",
-                "Selective context sync",
-                "`skills/wur-guidelines/scripts/wur_sync_agents_context.py`",
-                "do not `git merge` the default branch into the phase just to get those files",
-                "refuses to overwrite `agents/roadmap/`, `agents/index.md`, `agents/SCHEMA.md`, or graph artifacts",
+                "WUR Contract Model",
+                "`agents/` is the source-of-truth wiki",
+                "`contracts/PHASE_{n}_CONTRACT.md` is the execution contract",
+                "one file contains both task instructions and returned execution reports",
+                "Do not create `contracts/outbox/` or `contracts/inbox/`",
+                "Do not create Phase Fix ledgers for new work",
+                "optional sparse worktree",
             ],
         )
         self.assert_contains_all(
             readme,
             [
-                "Active phase roadmap files are branch-owned",
-                "`wur_sync_agents_context.py`",
-                "do not `git merge` just to pick up wiki context",
+                "`agents/` is the project second brain",
+                "`contracts/PHASE_{n}_CONTRACT.md`",
+                "one file per phase",
+                "no Codex App Server integration",
             ],
         )
         self.assert_contains_all(
             scripts,
             [
-                "`wur_sync_agents_context.py`",
-                "Selectively import new agents/ context files into an active phase",
-                "Do not `git merge` only to import new `agents/` context files",
+                "`wur_contract.py`",
+                "Create or refresh one-file execution contracts",
+                "append returned reports to the same contract file",
+            ],
+        )
+        self.assert_contains_none(
+            skill + readme + scripts,
+            [
+                "wur_codex_delegate.py",
+                "wur_sync_agents_context.py",
+                "Selective context sync",
+                "app-server --listen",
             ],
         )
 
