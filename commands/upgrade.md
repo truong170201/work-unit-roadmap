@@ -360,7 +360,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
 
    ### `agents/SCHEMA.md` (if it already existed)
 
-   Check for each required section. Append any section that is missing:
+   Canonicalize `agents/SCHEMA.md`, not just append missing sections. First check for each required section. Append any section that is missing:
 
    | Required section | Append if absent |
    |---|---|
@@ -371,6 +371,16 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `## Contract Boundary` | `agents/` source-of-truth, `contracts/` execution boundary, sparse worktree rule |
    | `## Graph Conventions` | Wikilink syntax + typed edge list |
    | `## Tag Conventions` | Format rule + predefined vocabulary + lint rules |
+
+   Then compare existing canonical schema lines against the schema-1 template above. Replace stale canonical schema lines when they conflict with the schema-1 template. This is allowed because `SCHEMA.md` is the machine-readable contract for the wiki, not user-authored project knowledge.
+
+   Required canonical replacements:
+   - `agents/roadmap/PHASE_*_FIX.md` must be described as `Legacy fix ledger; readable for old work, not created for new work`.
+   - `agents/roadmap/FIX_*.md` must be described as `Legacy bug fix batch file; readable for old work only`.
+   - `agents/reports/*.md` must be described as `Durable report or summary`.
+   - `## Contract Boundary` must say `contracts/rule.md` stores shared execution rules outside `agents/`, phase contracts store task brief / Allowed Read References / executor report ledger, executor handoff reports stay in the active phase contract, and worktrees exclude `agents/` and `contracts/`.
+
+   Legacy Phase Fix entries may remain only as legacy-readable compatibility. They must not describe Phase Fix as the current/new-work flow. Do not delete legacy page type rows if legacy pages exist; instead canonicalize their descriptions and keep new work in contract rounds.
 
    If `schema_version` frontmatter is present but missing the closing `---`, fix the frontmatter block. Never remove existing content.
 

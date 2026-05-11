@@ -31,7 +31,11 @@ class PluginManifestTestCase(unittest.TestCase):
         manifest = self.read_json(".claude-plugin/plugin.json")
 
         self.assertEqual(manifest["name"], "wur")
-        self.assertEqual(manifest["version"], "2.0.0")
+        self.assertEqual(manifest["version"], "2.0.1")
+
+        marketplace = self.read_json(".claude-plugin/marketplace.json")
+        self.assertEqual(marketplace["metadata"]["version"], "2.0.1")
+        self.assertEqual(marketplace["plugins"][0]["version"], "2.0.1")
 
     def test_command_docs_exist_for_claude_plugin(self) -> None:
         command_files = [
