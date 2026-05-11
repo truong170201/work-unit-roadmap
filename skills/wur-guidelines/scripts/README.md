@@ -73,11 +73,13 @@ work. They must not scan all of `agents/` or modify `agents/`.
 
 `receive` appends a report to `## Execution Rounds And Reports` in the same
 contract file. WUR then validates the report before updating `agents/`.
-Executors may edit only that section of the active phase contract; they must not
-edit the phase header, goal, success criteria, Pending Work table, Allowed Read
-References, other contract files, or `agents/`.
-Reports must include WU lifecycle evidence and may suggest only `active`,
-`ready-for-review`, `blocked`, or `deferred`; WUR applies roadmap state after receive.
+Executors may update only Status and Commit cells for touched WU rows in the
+active contract's Pending Work table, plus the report ledger. They must not edit
+the phase header, goal, success criteria, scope, dependencies, verification text,
+Allowed Read References, other contract files, or `agents/`.
+Reports must include WU lifecycle evidence and matching Pending Work table updates.
+Executor statuses may only become `active`, `ready-for-review`,
+`blocked`, or `deferred`; WUR applies roadmap state after receive.
 
 Executors working from the contract add or update Fix Round sections directly
 inside `## Execution Rounds And Reports` when verification fails. This avoids a

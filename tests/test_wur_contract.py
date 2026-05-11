@@ -99,11 +99,23 @@ Build a dashboard slice.
         self.assertIn("# WUR Contract Rules", rule)
         self.assertIn("Do not modify `agents/`", rule)
         self.assertIn(
-            "You may edit only the active phase contract's `## Execution Rounds And Reports` section.",
+            "You may edit only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus the active contract's `## Execution Rounds And Reports` section.",
             rule,
         )
         self.assertIn(
-            "Do not edit the phase contract header, Goal, Success Criteria, Pending Work table, or Allowed Read References.",
+            "Do not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, or Allowed Read References.",
+            rule,
+        )
+        self.assertIn(
+            "You may update only the Status and Commit cells for touched WU rows in the active contract's Pending Work table.",
+            rule,
+        )
+        self.assertIn(
+            "Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            rule,
+        )
+        self.assertIn(
+            "Never set Pending Work rows to `accepted` or `done`; WUR closeout applies those after client confirmation.",
             rule,
         )
         self.assertIn("Do not edit any other `contracts/` file.", rule)
@@ -149,9 +161,10 @@ Build a dashboard slice.
         self.assertNotIn("| WU004 | Export CSV", text)
         self.assertIn("## Execution Rounds And Reports", text)
         self.assertIn(
-            "Contract Section Edited: `## Execution Rounds And Reports` only",
+            "Allowed Contract Edits Used: Pending Work Status/Commit cells and `## Execution Rounds And Reports` only",
             text,
         )
+        self.assertIn("Pending Work Table Updated: yes | no; rows: {WU ids}", text)
         self.assertIn("Work Unit State Updates:", text)
         self.assertIn(
             "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}",
@@ -198,6 +211,40 @@ Build a dashboard slice.
         self.assertNotIn("| WU002 | Card layout", text)
         self.assertIn("| WU003 | Filter state", text)
         self.assertIn("### Round R1 - WU002\nResult: failed", text)
+
+    def test_create_refreshes_report_template_but_preserves_received_reports(self) -> None:
+        self.assertEqual(
+            self.run_script("create", "--root", str(self.root), "--phase", "1").returncode,
+            0,
+        )
+        contract = self.root / "contracts" / "PHASE_1_CONTRACT.md"
+        old_tail = """## Execution Rounds And Reports
+
+Keep all execution reports in this same contract file.
+
+### Report Template
+
+```markdown
+### Received Report - {round or WU}
+Result: pass | failed | blocked | partial
+Commit: {hash or none}
+Verification: {commands and results}
+```
+
+### Received Report - P1-WU02
+Result: pass
+Suggested After Status: `ready-for-review`
+"""
+        text = contract.read_text(encoding="utf-8")
+        contract.write_text(text[: text.index("## Execution Rounds And Reports")] + old_tail, encoding="utf-8")
+
+        result = self.run_script("create", "--root", str(self.root), "--phase", "1")
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        refreshed = contract.read_text(encoding="utf-8")
+        self.assertIn("Pending Work Table Updated: yes | no; rows: {WU ids}", refreshed)
+        self.assertIn("Worktree Used: yes | no; path/reason: {path or no-code reason}", refreshed)
+        self.assertIn("### Received Report - P1-WU02", refreshed)
+        self.assertIn("Suggested After Status: `ready-for-review`", refreshed)
 
     def test_receive_appends_report_to_same_contract_file(self) -> None:
         self.assertEqual(

@@ -60,8 +60,9 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
 6. The result is `contracts/rule.md` plus `contracts/PHASE_{n}_CONTRACT.md`. Shared rules live in `contracts/rule.md`; the phase file contains the task brief, pending WUs, Allowed Read References, and report area. Do not create `contracts/outbox/` or `contracts/inbox/`.
    - The executor may read only the `agents/` paths listed in the contract's Allowed Read References.
    - The executor must not modify `agents/`.
-   - The executor may edit only the active phase contract's `## Execution Rounds And Reports` section.
-   - The executor must not edit the phase contract header, Goal, Success Criteria, Pending Work table, Allowed Read References, or any other contract file.
+   - The executor may update only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus `## Execution Rounds And Reports`.
+   - Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`; never `accepted` or `done`.
+   - The executor must not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, Allowed Read References, or any other contract file.
    - The executor reports WU lifecycle evidence and may suggest only `active`, `ready-for-review`, `blocked`, or `deferred`; WUR applies roadmap state in `agents/`.
    - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.
 7. Do not create a worktree just because a contract exists. The executor first reads the active contract and decides whether there is executable project work:

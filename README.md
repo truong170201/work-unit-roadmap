@@ -12,7 +12,7 @@ Most AI coding sessions fail because the agent mixes planning, execution, status
 
 `agents/` is the project second brain: roadmap, research, decisions, design, tech stack, specialist registry, reports, and graph state. It is the source of truth.
 
-`contracts/rule.md` stores shared WUR execution rules. `contracts/PHASE_{n}_CONTRACT.md` is one phase contract per phase: task brief, pending Work Units, explicit Allowed Read References, and the report ledger. The executor reads only the listed `agents/` paths when deeper context is needed, follows `contracts/rule.md`, and may edit only the active contract's `## Execution Rounds And Reports` section. WUR receives the report before updating `agents/`.
+`contracts/rule.md` stores shared WUR execution rules. `contracts/PHASE_{n}_CONTRACT.md` is one phase contract per phase: task brief, pending Work Units, explicit Allowed Read References, and the report ledger. The executor reads only the listed `agents/` paths when deeper context is needed, follows `contracts/rule.md`, may update only touched WU Status/Commit cells in the active contract's Pending Work table, and appends evidence under `## Execution Rounds And Reports`. WUR receives the report before updating `agents/`.
 
 There is no Codex App Server integration, no MCP runtime coordinator, and no required subagent platform. WUR is a wiki + contract + receive workflow.
 
@@ -45,7 +45,7 @@ The contract keeps the executor focused. The wiki stays clean.
 1. `/wur:init` creates `agents/` once.
 2. `/wur:wiki:*` enriches and queries the wiki.
 3. `/wur:start {n}` creates or refreshes `contracts/rule.md` and `contracts/PHASE_{n}_CONTRACT.md`.
-4. The executor follows that contract. It must not edit `agents/` and may edit only `## Execution Rounds And Reports` in the active phase contract.
+4. The executor follows that contract. It must not edit `agents/`; it may update touched Pending Work Status/Commit cells and append reports in the active phase contract.
 5. Reports are appended to the same contract file.
 6. `/wur:test` records pass/waive/fail state. Failed work stays in the same contract ledger; the executor may add or update a fix round there, not a Phase Fix file.
 7. `/wur:done` closes a phase only when the current client request explicitly invokes it.
@@ -121,11 +121,11 @@ The contract skips WUs already `accepted` or `done`. Re-running `/wur:start 1` u
 
 ### 5. Execute outside WUR state
 
-Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It first checks whether the contract contains executable project work. If not, it reports blocked/no-op/clarification-needed without creating a worktree. If implementation requires editing project files, it creates or reuses a sparse worktree using `contracts/rule.md` so `agents/` and `contracts/` are not carried into execution. It may implement code, run tests, commit code, and write only to the active contract's `## Execution Rounds And Reports` section.
+Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It first checks whether the contract contains executable project work. If not, it reports blocked/no-op/clarification-needed without creating a worktree. If implementation requires editing project files, it creates or reuses a sparse worktree using `contracts/rule.md` so `agents/` and `contracts/` are not carried into execution. It may implement code, run tests, commit code, update touched Pending Work Status/Commit cells to `active`, `ready-for-review`, `blocked`, or `deferred`, and append evidence under `## Execution Rounds And Reports`.
 
 ### 6. Receive reports and close
 
-The executor writes the result into the contract's `## Execution Rounds And Reports` section, including WU lifecycle evidence and status suggestions such as `ready-for-review`, `blocked`, or `deferred`. WUR validates the report and updates `agents/`; executors do not mark WUs `accepted` or `done`.
+The executor writes the result into the contract's `## Execution Rounds And Reports` section, including WU lifecycle evidence and matching Pending Work table updates. WUR validates the report and updates `agents/`; executors do not mark WUs `accepted` or `done`.
 
 ```text
 /wur:test pass

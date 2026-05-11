@@ -101,28 +101,45 @@ def pending_units(units: list[WorkUnit], work_unit: str | None) -> list[WorkUnit
 
 
 def report_tail(existing: str | None) -> str:
+    template = (
+        f"{REPORT_MARKER}\n\n"
+        "Keep all execution reports in this same contract file. Do not create "
+        "`contracts/inbox/` or `contracts/outbox/` files.\n\n"
+        "Executors update touched Pending Work rows before reporting: Status and Commit cells only. "
+        "Allowed Status values are `active`, `ready-for-review`, `blocked`, or `deferred`; never `accepted` or `done`.\n\n"
+        "### Report Template\n\n"
+        "```markdown\n"
+        "### Received Report - {round or WU}\n"
+        "Result: pass | failed | blocked | partial\n"
+        "Worktree Used: yes | no; path/reason: {path or no-code reason}\n"
+        "Commit: {hash or none}\n"
+        "Verification: {commands and results}\n"
+        "Changed Files:\n"
+        "- {path}\n"
+        "Allowed Contract Edits Used: Pending Work Status/Commit cells and `## Execution Rounds And Reports` only\n"
+        "Pending Work Table Updated: yes | no; rows: {WU ids}\n"
+        "Work Unit State Updates:\n"
+        "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}\n"
+        "Notes For WUR:\n"
+        "- {roadmap/status update suggestion}\n"
+        "```\n"
+    )
     if not existing or REPORT_MARKER not in existing:
-        return (
-            f"{REPORT_MARKER}\n\n"
-            "Keep all execution reports in this same contract file. Do not create "
-            "`contracts/inbox/` or `contracts/outbox/` files.\n\n"
-            "### Report Template\n\n"
-            "```markdown\n"
-            "### Received Report - {round or WU}\n"
-            "Result: pass | failed | blocked | partial\n"
-            "Worktree Used: yes | no; path/reason: {path or no-code reason}\n"
-            "Commit: {hash or none}\n"
-            "Verification: {commands and results}\n"
-            "Changed Files:\n"
-            "- {path}\n"
-            "Contract Section Edited: `## Execution Rounds And Reports` only\n"
-            "Work Unit State Updates:\n"
-            "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}\n"
-            "Notes For WUR:\n"
-            "- {roadmap/status update suggestion}\n"
-            "```\n"
-        )
-    return existing[existing.index(REPORT_MARKER) :].rstrip() + "\n"
+        return template
+
+    tail = existing[existing.index(REPORT_MARKER) :]
+    search_start = 0
+    report_template_index = tail.find("### Report Template")
+    if report_template_index >= 0:
+        first_fence = tail.find("```", report_template_index)
+        second_fence = tail.find("```", first_fence + 3) if first_fence >= 0 else -1
+        if second_fence >= 0:
+            search_start = second_fence + 3
+    match = re.search(r"\n### ", tail[search_start:])
+    if not match:
+        return template
+    preserved = tail[search_start + match.start() :].strip()
+    return template.rstrip() + "\n\n" + preserved + "\n"
 
 
 def coordination_context_paths(root: Path) -> list[str]:
@@ -151,8 +168,11 @@ def render_rule_file() -> str:
             "",
             "- `agents/` is the source-of-truth wiki.",
             "- Do not modify `agents/`.",
-            "- You may edit only the active phase contract's `## Execution Rounds And Reports` section.",
-            "- Do not edit the phase contract header, Goal, Success Criteria, Pending Work table, or Allowed Read References.",
+            "- You may edit only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus the active contract's `## Execution Rounds And Reports` section.",
+            "- Do not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, or Allowed Read References.",
+            "- You may update only the Status and Commit cells for touched WU rows in the active contract's Pending Work table.",
+            "- Pending Work table statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            "- Never set Pending Work rows to `accepted` or `done`; WUR closeout applies those after client confirmation.",
             "- Do not edit any other `contracts/` file.",
             "- Do not create `contracts/inbox/` or `contracts/outbox/`.",
             "- Do not create Phase Fix files for new work.",
