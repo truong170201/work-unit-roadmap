@@ -184,7 +184,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
-   | `report` | `agents/reports/*.md` | Verification or completion report |
+   | `report` | `agents/reports/*.md` | Durable report or summary |
    | `department` | `agents/departments/*.md` | Project-specific capability area |
    | `specialist` | `agents/specialists/**/*.md` | Project-specific expert role card |
 
@@ -303,7 +303,7 @@ If any step would break one of these, abort the migration and surface a `## Manu
    | `work-unit` | Work Unit content or WU-specific page |
    | `fix-round` | Fix ledger or fix-round content |
    | `decision` | Decision content |
-   | `report` | Verification or completion report |
+   | `report` | Durable report or summary |
    | `specialist` | Specialist role content |
    | `design` | Design contract or design-related content |
    | `tech-stack` | Technology stack content |

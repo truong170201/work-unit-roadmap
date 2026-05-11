@@ -195,7 +195,7 @@ work-unit-roadmap/
 - [ ] `contracts/rule.md` exists for shared execution rules
 - [ ] `contracts/PHASE_{n}_CONTRACT.md` exists for active execution
 - [ ] executor handoff reports live in the same phase contract file, not scattered files
-- [ ] durable internal reports, archives, and completion summaries live in `agents/reports/`
+- [ ] `agents/reports/` stores durable WUR reports and summaries: research synthesis, verification, audits, receive summaries, completion reports, archives, and other long-lived project reports
 - [ ] `python skills/wur-guidelines/scripts/wur_meta_consistency.py .` returns OK
 - [ ] `python -m unittest discover -s tests -v` passes locally
 

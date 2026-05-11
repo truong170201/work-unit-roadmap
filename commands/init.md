@@ -110,7 +110,7 @@ Project context is resolved in this order:
      specialists/       ← project-specific role cards (empty unless domain is clear)
      docs/              ← durable notes, ADRs, synthesis (empty)
      research/          ← ingested external sources, analysis (empty)
-     reports/           ← verification reports, completion reports (empty)
+     reports/           ← durable reports and summaries (empty)
      references/        ← external references, API notes, domain material (empty)
      raw/               ← immutable source material for research pages (track in git, empty)
      SCHEMA.md          ← wiki conventions: types, status values, frontmatter schema
@@ -283,7 +283,7 @@ Project context is resolved in this order:
    | `research` | `agents/research/*.md` | Ingested external source or analysis |
    | `decision` | `agents/docs/*.md` | Architectural decision record |
    | `note` | `agents/docs/*.md` | Durable note, synthesis, or concept page |
-   | `report` | `agents/reports/*.md` | Verification or completion report |
+   | `report` | `agents/reports/*.md` | Durable report or summary |
    | `department` | `agents/departments/*.md` | Project-specific capability area |
    | `specialist` | `agents/specialists/**/*.md` | Project-specific expert role card |
 
@@ -426,7 +426,7 @@ Project context is resolved in this order:
    | `work-unit` | Work Unit content or WU-specific page |
    | `fix-round` | Legacy fix ledger or fix-round content |
    | `decision` | Decision content |
-   | `report` | Verification or completion report |
+   | `report` | Durable report or summary |
    | `specialist` | Specialist role content |
    | `design` | Design contract or design-related content |
    | `tech-stack` | Technology stack content |

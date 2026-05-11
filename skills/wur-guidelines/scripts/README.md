@@ -58,7 +58,7 @@ file is the boundary between WUR and an executor.
 - `contracts/rule.md` is the shared execution rule contract.
 - `contracts/PHASE_{n}_CONTRACT.md` is the phase execution contract.
 - Phase contracts contain task instructions, pending Work Units, explicit Allowed Read References, and returned executor reports.
-- Durable WUR/internal reports, archives, and completion summaries live in `agents/reports/`.
+- `agents/reports/` stores durable WUR reports and summaries: research synthesis, verification, audits, receive summaries, completion reports, archives, and other long-lived project reports.
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
 - Do not create Phase Fix ledgers for new work; failed execution becomes another round inside the same contract.
 
