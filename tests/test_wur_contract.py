@@ -87,10 +87,26 @@ Build a dashboard slice.
         self.assertIn("# WUR Contract: PHASE_1", text)
         self.assertIn("Required shared rules: `contracts/rule.md`", text)
         self.assertIn("read before execution", text)
+        self.assertIn(
+            "Task brief: use this file's Goal, Success Criteria, Pending Work, and Allowed Read References.",
+            text,
+        )
+        self.assertIn(
+            "Execution setup: read `contracts/rule.md` before creating a worktree.",
+            text,
+        )
         self.assertNotIn("## WUR Contract Rules", text)
         self.assertIn("# WUR Contract Rules", rule)
         self.assertIn("Do not modify `agents/`", rule)
         self.assertIn("Do not modify `contracts/` except the active phase contract report section.", rule)
+        self.assertIn(
+            "If you create a worktree, you MUST use sparse checkout and exclude `agents/` and `contracts/`.",
+            rule,
+        )
+        self.assertIn(
+            "Do not copy, checkout, or sync `agents/` or `contracts/` into the execution worktree.",
+            rule,
+        )
         self.assertIn("git sparse-checkout init --no-cone", rule)
         self.assertIn("!/agents/", rule)
         self.assertIn("!/contracts/", rule)

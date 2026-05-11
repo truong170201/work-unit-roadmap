@@ -38,7 +38,7 @@ Rules:
 - `/wur:start` creates or refreshes `contracts/rule.md` and the phase contract; it does not execute code by itself.
 - `/wur:done` only runs after explicit client request.
 
-Optional sparse worktree guidance belongs in `contracts/rule.md`. If isolation is needed, create a worktree that excludes `agents/` and `contracts/`; the executor uses the phase contract as the brief and returns a report for WUR to receive.
+Sparse worktree guidance belongs in `contracts/rule.md`. If a worktree is used, it must exclude `agents/` and `contracts/`; keep WUR state in the main project root only. The executor uses the phase contract as the brief and returns a report for WUR to receive.
 
 ## Checklist
 

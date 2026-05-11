@@ -121,7 +121,7 @@ The contract skips WUs already `accepted` or `done`. Re-running `/wur:start 1` u
 
 ### 5. Execute outside WUR state
 
-Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It may implement code, run tests, and commit code. If isolation is needed, use the optional sparse worktree instructions in `contracts/rule.md` so `agents/` and `contracts/` are not carried into the execution worktree.
+Give `contracts/rule.md` and the phase contract file to another agent or human executor. The executor may read only the project docs, departments, and specialists listed under `Allowed Read References` to infer useful specialist lenses, and must not edit `agents/`. It may implement code, run tests, and commit code. If a worktree is used, it must use the sparse-checkout instructions in `contracts/rule.md` so `agents/` and `contracts/` are not carried into the execution worktree.
 
 ### 6. Receive reports and close
 

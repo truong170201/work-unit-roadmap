@@ -85,9 +85,10 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Shared rules live in `contracts/rule.md`",
                 "executor may read only the `agents/` paths listed",
                 "must not modify `agents/`",
+                "If a worktree is used, it must exclude `agents/` and `contracts/`",
                 "skip WUs already `accepted` or `done`",
                 "Do not create a worktree by default",
-                "optional sparse worktree",
+                "sparse-checkout commands",
                 "`agents/` and `contracts/`",
                 "type: phase",
                 "test_status: not-run",
@@ -361,7 +362,8 @@ class WurCommandContractTestCase(unittest.TestCase):
                 "Report which specialist lenses were applied",
                 "Do not create `contracts/outbox/` or `contracts/inbox/`",
                 "Do not create Phase Fix ledgers for new work",
-                "Optional sparse worktree",
+                "Sparse worktree guidance",
+                "If a worktree is used, it must exclude `agents/` and `contracts/`",
             ],
         )
         self.assert_contains_all(

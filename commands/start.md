@@ -61,7 +61,7 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    - The executor may read only the `agents/` paths listed in the contract's Allowed Read References.
    - The executor must not modify `agents/`.
    - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.
-7. Do not create a worktree by default. If the executor needs isolation, `contracts/rule.md` contains optional sparse worktree commands that exclude `agents/` and `contracts/`.
+7. Do not create a worktree by default. If a worktree is used, it must exclude `agents/` and `contracts/`; `contracts/rule.md` contains the sparse-checkout commands. Keep WUR state in the main project root only.
 8. Update `agents/roadmap/ALL.md` only as planning/status state requires. Do not mark WUs `accepted` or `done` from this command.
 9. Append to `agents/roadmap/log.md`:
 
