@@ -110,6 +110,7 @@ def report_tail(existing: str | None) -> str:
             "```markdown\n"
             "### Received Report - {round or WU}\n"
             "Result: pass | failed | blocked | partial\n"
+            "Worktree Used: yes | no; path/reason: {path or no-code reason}\n"
             "Commit: {hash or none}\n"
             "Verification: {commands and results}\n"
             "Changed Files:\n"
@@ -180,7 +181,10 @@ def render_rule_file() -> str:
             "",
             "## Isolated Worktree",
             "",
-            "If you create a worktree, you MUST use sparse checkout and exclude `agents/` and `contracts/`.",
+            "First read the active phase contract and decide whether there is executable project work.",
+            "If there is no executable project work, do not create a worktree; append a blocked, no-op, or clarification-needed report instead.",
+            "If executable project work requires editing project files, create or reuse a sparse execution worktree before modifying those files.",
+            "The sparse worktree MUST exclude `agents/` and `contracts/`.",
             "Do not copy, checkout, or sync `agents/` or `contracts/` into the execution worktree.",
             "Keep WUR state in the main project root only; the worktree is for implementation files.",
             "",

@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "AI Agent workflow skills for roadmap-driven wiki and execution contracts.",
-    "version": "2.0.2"
+    "version": "2.0.3"
   },
   "plugins": [
     {
       "name": "wur",
       "source": "./",
       "description": "Atomic Work Units, phase execution contracts, verification evidence, and client-confirmed closeout.",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "author": {
         "name": "truong170201"
       },

@@ -1,13 +1,13 @@
 ---
 name: using-git-worktrees
-description: Use only when a WUR contract explicitly asks for isolated execution with a sparse worktree that excludes agents/ and contracts/.
+description: Use when a WUR contract has executable project work that requires editing project files in a sparse worktree excluding agents/ and contracts/.
 ---
 
-# Optional Sparse Worktrees
+# Sparse Worktrees For Contract Execution
 
-WUR no longer requires worktrees for normal `/wur:start` flow. The default execution boundary is `contracts/PHASE_{n}_CONTRACT.md`.
+WUR does not create a worktree just because `/wur:start` created a contract. The executor first reads the contract.
 
-Use this skill only when the contract or user explicitly asks for isolation.
+Use this skill only when the active contract contains executable project work and implementing it requires editing project files.
 
 ## Principle
 
@@ -34,7 +34,9 @@ Test-Path contracts
 
 ## Rules
 
-- Do not create phase/fix worktrees by default.
+- Do not create a worktree when the contract has no executable project work.
+- If there is no implementation task, report blocked/no-op/clarification-needed in the contract ledger.
+- If implementation requires editing project files, create or reuse a sparse worktree before editing those files.
 - Do not copy `agents/` into the execution worktree.
 - Do not copy `contracts/` into the execution worktree.
 - Do not use sparse worktree setup as a substitute for WUR receive.
@@ -44,8 +46,8 @@ Test-Path contracts
 
 | Situation | Use sparse worktree? |
 |---|---|
-| Small docs/wiki update | No |
-| Executor can safely work in normal repo without touching `agents/` | Optional |
-| Large/risky code change | Yes |
-| User explicitly asks for isolated execution | Yes |
+| Contract has no executable project work | No; report blocked/no-op/clarification-needed |
+| Report-only or clarification-only round | No |
+| Implementation edits project files | Yes |
+| User explicitly asks for isolated execution | Yes, if there is executable work |
 | Git sparse checkout errors or permission problems | Prefer manual execution from contract |

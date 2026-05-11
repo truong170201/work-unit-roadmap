@@ -64,7 +64,10 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    - The executor must not edit the phase contract header, Goal, Success Criteria, Pending Work table, Allowed Read References, or any other contract file.
    - The executor reports WU lifecycle evidence and may suggest only `active`, `ready-for-review`, `blocked`, or `deferred`; WUR applies roadmap state in `agents/`.
    - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.
-7. Do not create a worktree by default. If a worktree is used, it must exclude `agents/` and `contracts/`; `contracts/rule.md` contains the sparse-checkout commands. Keep WUR state in the main project root only.
+7. Do not create a worktree just because a contract exists. The executor first reads the active contract and decides whether there is executable project work:
+   - If there is no implementation task, do not create a worktree; report blocked/no-op/clarification-needed in the contract ledger.
+   - If implementation requires editing project files, create or reuse a sparse worktree that excludes `agents/` and `contracts/`; `contracts/rule.md` contains the sparse-checkout commands.
+   - Keep WUR state in the main project root only.
 8. Update `agents/roadmap/ALL.md` only as planning/status state requires. Do not mark WUs `accepted` or `done` from this command.
 9. Append to `agents/roadmap/log.md`:
 

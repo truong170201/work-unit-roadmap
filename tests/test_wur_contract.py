@@ -120,13 +120,26 @@ Build a dashboard slice.
             rule,
         )
         self.assertIn(
-            "If you create a worktree, you MUST use sparse checkout and exclude `agents/` and `contracts/`.",
+            "First read the active phase contract and decide whether there is executable project work.",
+            rule,
+        )
+        self.assertIn(
+            "If there is no executable project work, do not create a worktree; append a blocked, no-op, or clarification-needed report instead.",
+            rule,
+        )
+        self.assertIn(
+            "If executable project work requires editing project files, create or reuse a sparse execution worktree before modifying those files.",
+            rule,
+        )
+        self.assertIn(
+            "The sparse worktree MUST exclude `agents/` and `contracts/`.",
             rule,
         )
         self.assertIn(
             "Do not copy, checkout, or sync `agents/` or `contracts/` into the execution worktree.",
             rule,
         )
+        self.assertIn("Worktree Used: yes | no; path/reason: {path or no-code reason}", text)
         self.assertIn("git sparse-checkout init --no-cone", rule)
         self.assertIn("!/agents/", rule)
         self.assertIn("!/contracts/", rule)
