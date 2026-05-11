@@ -114,6 +114,9 @@ def report_tail(existing: str | None) -> str:
             "Verification: {commands and results}\n"
             "Changed Files:\n"
             "- {path}\n"
+            "Contract Section Edited: `## Execution Rounds And Reports` only\n"
+            "Work Unit State Updates:\n"
+            "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}\n"
             "Notes For WUR:\n"
             "- {roadmap/status update suggestion}\n"
             "```\n"
@@ -147,10 +150,12 @@ def render_rule_file() -> str:
             "",
             "- `agents/` is the source-of-truth wiki.",
             "- Do not modify `agents/`.",
-            "- Do not modify `contracts/` except the active phase contract report section.",
+            "- You may edit only the active phase contract's `## Execution Rounds And Reports` section.",
+            "- Do not edit the phase contract header, Goal, Success Criteria, Pending Work table, or Allowed Read References.",
+            "- Do not edit any other `contracts/` file.",
             "- Do not create `contracts/inbox/` or `contracts/outbox/`.",
             "- Do not create Phase Fix files for new work.",
-            "- Do not mark Work Units accepted, done, or close a phase.",
+            "- Never mark Work Units `accepted`, `done`, or close a phase; WUR coordinator applies `accepted` or `done` only after client confirmation.",
             "- Do not merge branches or run `/wur:done`.",
             "- Implement only pending work listed in the active phase contract.",
             "",
@@ -168,6 +173,8 @@ def render_rule_file() -> str:
             "- If verification fails, add or update a `### Fix Round R{n} - {scope}` section in the active phase contract.",
             "- Do not wait for WUR to generate a separate fix file or run another helper command.",
             "- Use one contract ledger for task brief, fix rounds, and reports.",
+            "- Record lifecycle evidence for every touched Work Unit: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.",
+            "- Allowed executor status suggestions: `active`, `ready-for-review`, `blocked`, or `deferred`.",
             "- Report changed files, commit hash, verification evidence, specialist lenses applied, and any material coverage gaps.",
             "- Keep output concise; WUR coordinator performs final acceptance.",
             "",

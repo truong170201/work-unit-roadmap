@@ -30,6 +30,9 @@ Rules:
 - Do not create `contracts/outbox/` or `contracts/inbox/`.
 - Do not create Phase Fix ledgers for new work.
 - Executors add or update fix rounds in the same contract file when verification fails; WUR does not need a separate fail helper.
+- Executors may edit only the active phase contract's `## Execution Rounds And Reports` section; they must not edit the contract header, goal, success criteria, Pending Work table, Allowed Read References, any other contract file, or `agents/`.
+- Executor reports must include lifecycle evidence for every touched WU: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.
+- Executor status suggestions stop at `active`, `ready-for-review`, `blocked`, or `deferred`; WUR receives the report and applies roadmap state in `agents/`.
 - External executors may read only the `agents/` paths listed under Allowed Read References; they must not scan all of `agents/` or edit `agents/`.
 - Allowed Read References list specific project docs, departments, and specialists for role-aware execution.
 - Infer useful specialist lenses from the listed references and WU scope; do not require WUR to assign one person per WU.
@@ -47,7 +50,7 @@ Sparse worktree guidance belongs in `contracts/rule.md`. If a worktree is used, 
 3. **Create or refresh contract** — `python skills/wur-guidelines/scripts/wur_contract.py create --phase {n}`.
 4. **Executor works from contract** — one WU or scoped phase slice, no edits to `agents/`.
 5. **Verify** — run checks scoped to acceptance criteria and changed surface.
-6. **Report** — append evidence under the contract's `## Execution Rounds And Reports`.
+6. **Report** — append evidence under the contract's `## Execution Rounds And Reports`, including WU lifecycle state suggestions.
 7. **Receive** — WUR validates report, then updates roadmap/status/log in `agents/`.
 8. **Close only on request** - only `/wur:done` from the current client request can close a phase. Closeout reads the contract ledger: report-backed and client-approved WUs may move to `done`; unreported work is deferred or blocked; skipped completed WUs stay unchanged.
 

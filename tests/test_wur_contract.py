@@ -98,7 +98,27 @@ Build a dashboard slice.
         self.assertNotIn("## WUR Contract Rules", text)
         self.assertIn("# WUR Contract Rules", rule)
         self.assertIn("Do not modify `agents/`", rule)
-        self.assertIn("Do not modify `contracts/` except the active phase contract report section.", rule)
+        self.assertIn(
+            "You may edit only the active phase contract's `## Execution Rounds And Reports` section.",
+            rule,
+        )
+        self.assertIn(
+            "Do not edit the phase contract header, Goal, Success Criteria, Pending Work table, or Allowed Read References.",
+            rule,
+        )
+        self.assertIn("Do not edit any other `contracts/` file.", rule)
+        self.assertIn(
+            "Record lifecycle evidence for every touched Work Unit: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.",
+            rule,
+        )
+        self.assertIn(
+            "Allowed executor status suggestions: `active`, `ready-for-review`, `blocked`, or `deferred`.",
+            rule,
+        )
+        self.assertIn(
+            "Never mark Work Units `accepted`, `done`, or close a phase; WUR coordinator applies `accepted` or `done` only after client confirmation.",
+            rule,
+        )
         self.assertIn(
             "If you create a worktree, you MUST use sparse checkout and exclude `agents/` and `contracts/`.",
             rule,
@@ -115,6 +135,15 @@ Build a dashboard slice.
         self.assertNotIn("| WU001 | Setup shell", text)
         self.assertNotIn("| WU004 | Export CSV", text)
         self.assertIn("## Execution Rounds And Reports", text)
+        self.assertIn(
+            "Contract Section Edited: `## Execution Rounds And Reports` only",
+            text,
+        )
+        self.assertIn("Work Unit State Updates:", text)
+        self.assertIn(
+            "- {WU id}: {before status} -> {suggested status: active | ready-for-review | blocked | deferred}; reason: {evidence}",
+            text,
+        )
 
     def test_create_wu_contract_filters_to_one_pending_work_unit(self) -> None:
         result = self.run_script(
