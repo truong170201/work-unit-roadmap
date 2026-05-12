@@ -95,9 +95,58 @@ Build a dashboard slice.
             "Execution setup: read `contracts/rule.md` before creating a worktree.",
             text,
         )
+        self.assertIn("## Non-Negotiable Execution Rules", text)
+        self.assertIn(
+            "If `contracts/rule.md` is not available in the execution worktree, this section is still binding.",
+            text,
+        )
+        self.assertIn(
+            "Only reports appended inside this active phase contract are valid WUR receive evidence.",
+            text,
+        )
+        self.assertIn(
+            "Reports outside `contracts/` or outside this active phase contract are invalid for WUR receive until copied here.",
+            text,
+        )
+        self.assertIn(
+            "Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.",
+            text,
+        )
+        self.assertIn(
+            "Do not use a docs, contract-cleanup, or planning commit as implementation evidence.",
+            text,
+        )
+        self.assertIn(
+            "For every touched WU, update its Pending Work Status and Commit cells before appending the report.",
+            text,
+        )
+        self.assertIn(
+            "Accepted/done WU rows require an appended report round quoting the exact current-client authorization.",
+            text,
+        )
         self.assertNotIn("## WUR Contract Rules", text)
         self.assertIn("# WUR Contract Rules", rule)
         self.assertIn("Do not modify `agents/`", rule)
+        self.assertIn(
+            "Only reports appended inside the active phase contract are valid WUR receive evidence.",
+            rule,
+        )
+        self.assertIn(
+            "Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract.",
+            rule,
+        )
+        self.assertIn(
+            "Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.",
+            rule,
+        )
+        self.assertIn(
+            "Do not use a docs, contract-cleanup, or planning commit as implementation evidence.",
+            rule,
+        )
+        self.assertIn(
+            "For every touched WU, update its Pending Work Status and Commit cells before appending the report.",
+            rule,
+        )
         self.assertIn(
             "You may edit only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus the active contract's `## Execution Rounds And Reports` section.",
             rule,
@@ -165,6 +214,10 @@ Build a dashboard slice.
             text,
         )
         self.assertIn("Pending Work Table Updated: yes | no; rows: {WU ids}", text)
+        self.assertIn(
+            "Commit Provenance: implementation | contract-docs | none; explanation: {why this commit matches the WU context}",
+            text,
+        )
         self.assertIn("Work Unit State Updates:", text)
         self.assertIn(
             "- {WU id}: {before status} -> {after status: active | ready-for-review | blocked | deferred | accepted | done}; reason: {evidence or client authorization}",

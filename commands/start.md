@@ -63,6 +63,12 @@ Start Phase $ARGUMENTS using the `wur-guidelines` skill.
    - The executor may update only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus `## Execution Rounds And Reports`.
    - Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.
    - Set `accepted` or `done` only when the current client request explicitly approves those exact WU IDs.
+   - Only reports appended inside the active phase contract are valid WUR receive evidence.
+   - Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract.
+   - Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.
+   - Do not use a docs, contract-cleanup, or planning commit as implementation evidence.
+   - For every touched WU, update its Pending Work Status and Commit cells before appending the report.
+   - Accepted/done WU rows require an appended report round quoting the exact current-client authorization.
    - The executor must not edit the phase contract header, Goal, Success Criteria, Scope, Dependencies, Verification, Allowed Read References, or any other contract file.
    - The executor reports WU lifecycle evidence and may suggest only `active`, `ready-for-review`, `blocked`, or `deferred` unless the client explicitly approved exact WU IDs; WUR applies roadmap state in `agents/`.
    - The contract should let the executor infer specialist lenses from scope; do not require WUR to assign one person per WU.

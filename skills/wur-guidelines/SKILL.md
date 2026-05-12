@@ -33,6 +33,11 @@ Rules:
 - Executors may update only Status and Commit cells for touched WU rows in the active contract's Pending Work table, plus `## Execution Rounds And Reports`; they must not edit the contract header, goal, success criteria, scope, dependencies, verification text, Allowed Read References, any other contract file, or `agents/`.
 - Executor-owned Pending Work statuses may only become `active`, `ready-for-review`, `blocked`, or `deferred`.
 - Accepted/done requires explicit current-client approval for exact WU IDs.
+- Only reports appended inside the active phase contract are valid WUR receive evidence.
+- Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract.
+- Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.
+- Do not use a docs, contract-cleanup, or planning commit as implementation evidence.
+- For every touched WU, update its Pending Work Status and Commit cells before appending the report.
 - Executor reports must include lifecycle evidence for every touched WU: before status, suggested after status, result, commit, verification, blockers, and coverage gaps.
 - Executor status suggestions without explicit client approval stop at `active`, `ready-for-review`, `blocked`, or `deferred`; WUR receives the report and applies roadmap state in `agents/`.
 - External executors may read only the `agents/` paths listed under Allowed Read References; they must not scan all of `agents/` or edit `agents/`.

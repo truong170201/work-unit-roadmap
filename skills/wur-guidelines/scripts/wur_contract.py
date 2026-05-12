@@ -114,6 +114,7 @@ def report_tail(existing: str | None) -> str:
         "Result: pass | failed | blocked | partial\n"
         "Worktree Used: yes | no; path/reason: {path or no-code reason}\n"
         "Commit: {hash or none}\n"
+        "Commit Provenance: implementation | contract-docs | none; explanation: {why this commit matches the WU context}\n"
         "Verification: {commands and results}\n"
         "Changed Files:\n"
         "- {path}\n"
@@ -142,6 +143,22 @@ def report_tail(existing: str | None) -> str:
         return template
     preserved = tail[search_start + match.start() :].strip()
     return template.rstrip() + "\n\n" + preserved + "\n"
+
+
+def non_negotiable_contract_rules() -> list[str]:
+    return [
+        "## Non-Negotiable Execution Rules",
+        "",
+        "- If `contracts/rule.md` is not available in the execution worktree, this section is still binding.",
+        "- Only reports appended inside this active phase contract are valid WUR receive evidence.",
+        "- Reports outside `contracts/` or outside this active phase contract are invalid for WUR receive until copied here.",
+        "- Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.",
+        "- Do not use a docs, contract-cleanup, or planning commit as implementation evidence.",
+        "- For every touched WU, update its Pending Work Status and Commit cells before appending the report.",
+        "- Accepted/done WU rows require an appended report round quoting the exact current-client authorization.",
+        "- Before entering a worktree, remember the main-root active contract path; after implementation, return to the main root and update this contract.",
+        "",
+    ]
 
 
 def coordination_context_paths(root: Path) -> list[str]:
@@ -181,6 +198,16 @@ def render_rule_file() -> str:
             "- Never mark unspecified Work Units `accepted` or `done`, and never close a phase unless the client explicitly invokes closeout.",
             "- Do not merge branches or run `/wur:done`.",
             "- Implement only pending work listed in the active phase contract.",
+            "",
+            "## Report Validity And Provenance",
+            "",
+            "- Only reports appended inside the active phase contract are valid WUR receive evidence.",
+            "- Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract.",
+            "- Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.",
+            "- Do not use a docs, contract-cleanup, or planning commit as implementation evidence.",
+            "- For every touched WU, update its Pending Work Status and Commit cells before appending the report.",
+            "- Accepted/done WU rows require an appended report round quoting the exact current-client authorization.",
+            "- Before entering a worktree, remember the main-root active contract path; after implementation, return to the main root and update the active contract.",
             "",
             "## Allowed Reads",
             "",
@@ -253,14 +280,18 @@ def render_contract(
         f"Required shared rules: `contracts/{RULE_FILE}` — read before execution.",
         "Task brief: use this file's Goal, Success Criteria, Pending Work, and Allowed Read References.",
         "Execution setup: read `contracts/rule.md` before creating a worktree.",
-        "",
-        "## Goal",
-        "",
-        title,
-        "",
-        "## Success Criteria",
-        "",
     ]
+    lines.extend(non_negotiable_contract_rules())
+    lines.extend(
+        [
+            "## Goal",
+            "",
+            title,
+            "",
+            "## Success Criteria",
+            "",
+        ]
+    )
     if criteria:
         lines.extend(f"- {item}" for item in criteria)
     else:

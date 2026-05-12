@@ -127,6 +127,9 @@ Give `contracts/rule.md` and the phase contract file to another agent or human e
 
 The executor writes the result into the contract's `## Execution Rounds And Reports` section, including WU lifecycle evidence and matching Pending Work table updates. WUR validates the report and updates `agents/`; accepted/done requires explicit current-client approval for exact WU IDs.
 
+Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract. Commit provenance must match the WU context: implementation WUs cite implementation commits, contract/docs cleanup WUs cite contract/docs commits, and no-code WUs use `none` with evidence.
+For every touched WU, the executor updates Pending Work Status/Commit cells before appending the report.
+
 ```text
 /wur:test pass
 /wur:done

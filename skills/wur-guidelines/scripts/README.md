@@ -81,6 +81,10 @@ Reports must include WU lifecycle evidence and matching Pending Work table updat
 Executor-owned statuses may only become `active`, `ready-for-review`, `blocked`,
 or `deferred`. Accepted/done requires explicit current-client approval for exact
 WU IDs; WUR applies roadmap state after receive.
+Only reports appended inside the active phase contract are valid WUR receive evidence.
+Reports outside `contracts/` or outside the active phase contract are invalid for WUR receive until copied into the active contract.
+Commit provenance must match the WU context: implementation WUs cite implementation commits; contract/docs cleanup WUs cite contract/docs commits; no-code WUs use `none` with evidence.
+For every touched WU, update its Pending Work Status and Commit cells before appending the report.
 
 Executors working from the contract add or update Fix Round sections directly
 inside `## Execution Rounds And Reports` when verification fails. This avoids a
